@@ -50,23 +50,12 @@
             }
 
                 .character img {
-                    width: 60px; /* 手機圖片縮小 */
-                    height: 60px;
+                    width: 80px; /* 手機圖片縮小 */
+                    height: 80px;
                 }
         }
 
-        /* 超小螢幕 (例如更窄的手機)：小於 480px 時，每行 3 個角色 */
-        @media screen and (max-width: 480px) {
-            .character {
-                flex: 0 0 calc(33.33% - 10px); /* 每行 3 個角色 */
-                max-width: calc(33.33% - 10px);
-            }
-
-                .character img {
-                    width: 50px; /* 更小的圖片 */
-                    height: 50px;
-                }
-        }
+       
     </style>
 </head>
 <body>
