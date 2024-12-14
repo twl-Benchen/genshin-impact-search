@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- 強制正確縮放 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -29,11 +29,13 @@
                 display: block;
                 margin: 0 auto 10px;
                 border: 4px solid transparent; /* 初始無邊框 */
-                transition: border 0.3s ease; /* 邊框過渡效果 */
+                border-radius: 10px; /* 四角圓弧 */
+                transition: border 0.3s ease, transform 0.3s ease; /* 增加邊框和縮放過渡效果 */
             }
 
             .character.selected img {
                 border-color: rgb(255 0 0 / 0.47); /* 被選中後顯示紅色邊框 */
+                transform: scale(1.05); /* 被選中時放大一點點 */
             }
 
             .character:focus,
@@ -43,7 +45,7 @@
                 user-select: none;
             }
 
-        /* 手機模式：小於 768px 時，每行顯示 5 個角色 */
+        /* 手機模式：小於 1000px 時，每行顯示 5 個角色 */
         @media screen and (max-width: 1000px) {
             .character {
                 flex: 0 0 calc(20% - 10px); /* 手機模式：每行 5 個角色 */
@@ -56,7 +58,67 @@
                 }
         }
 
-       
+        /* 美化按鈕 */
+        button {
+            display: inline-block;
+            background-color: #4CAF50; /* 綠色背景 */
+            color: white; /* 按鈕文字顏色 */
+            font-size: 16px;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px; /* 圓角按鈕 */
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease; /* 添加按鈕過渡效果 */
+        }
+
+            button:hover {
+                background-color: #45a049; /* 滑鼠移過時稍微變暗 */
+                transform: scale(1.05); /* 稍微放大 */
+            }
+
+            button:active {
+                transform: scale(0.95); /* 按下時稍微縮小 */
+            }
+
+        #generated-url-container {
+            margin-top: 20px;
+        }
+
+        #view-results-btn {
+            background-color: #007BFF; /* 藍色背景 */
+        }
+
+            #view-results-btn:hover {
+                background-color: #0056b3; /* 藍色變暗 */
+            }
+
+        #clear-selection-btn {
+            background-color: #FF4500; /* 橘紅色背景 */
+        }
+
+            #clear-selection-btn:hover {
+                background-color: #e03c00; /* 橘紅色變暗 */
+            }
+
+        #copy-url-btn {
+            background-color: #FF8C00; /* 橘色背景 */
+        }
+
+            #copy-url-btn:hover {
+                background-color: #E67E00; /* 橘色變暗 */
+            }
+
+        #url-container {
+            display: flex;
+            align-items: center;
+            gap: 10px; /* 按鈕與網址間距 */
+        }
+
+        #generated-url {
+            word-break: break-all; /* 長網址換行 */
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -105,17 +167,18 @@
         </div>
     </div>
 
-    <button onclick="generateURL()">生成網址</button>
-
-    <h3>生成的查詢網址：</h3>
-    <p id="generated-url"></p>
-
-    <a id="generated-url-link" href="#" target="_blank" style="display:none;">點擊這裡查看搜尋結果</a>
+    <div id="generated-url-container">
+        <div id="url-container">
+            <button id="copy-url-btn" style="display: none;" onclick="copyToClipboard()">複製網址</button>
+            <p id="generated-url"></p>
+        </div>
+        <button id="view-results-btn" style="display:none;" onclick="window.open(document.getElementById('generated-url').innerText, '_blank')">查看搜尋結果</button>
+        <button id="clear-selection-btn" onclick="clearSelection()">清空選取</button>
+    </div>
 
     <script>
         var selectedRoles = [];
 
-        // 用來切換圖片選擇狀態
         function toggleSelection(element, role) {
             if (element.classList.contains('selected')) {
                 element.classList.remove('selected');
@@ -124,17 +187,37 @@
                 element.classList.add('selected');
                 selectedRoles.push(role);
             }
+            updateGeneratedURL();
         }
 
-        function generateURL() {
+        function updateGeneratedURL() {
+            var urlElement = document.getElementById('generated-url');
+            var resultsButton = document.getElementById('view-results-btn');
+            var copyButton = document.getElementById('copy-url-btn');
+
             if (selectedRoles.length > 0) {
                 var queryString = selectedRoles.map(role => '%23' + encodeURIComponent(role)).join('+');
                 var url = 'https://x.com/search?q=' + queryString;
-                document.getElementById('generated-url').innerText = url;
-                var linkElement = document.getElementById('generated-url-link');
-                linkElement.href = url;
-                linkElement.style.display = 'inline';  // 顯示連結
+                urlElement.innerText = url;
+                resultsButton.style.display = 'inline-block';
+                copyButton.style.display = 'inline-block';
+            } else {
+                urlElement.innerText = '';
+                resultsButton.style.display = 'none';
+                copyButton.style.display = 'none';
             }
+        }
+
+        function copyToClipboard() {
+            var url = document.getElementById('generated-url').innerText;
+            navigator.clipboard.writeText(url).then(() => alert("網址已複製到剪貼簿！"));
+        }
+
+        function clearSelection() {
+            selectedRoles = [];
+            var characters = document.querySelectorAll('.character');
+            characters.forEach(character => character.classList.remove('selected'));
+            updateGeneratedURL();
         }
     </script>
 </body>
