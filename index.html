@@ -35,10 +35,36 @@
             }
 
             .character.selected img {
-                border-color: rgb(255 0 0 / 0.47); /* 被選中後顯示紅色邊框 */
+                /*border-color: rgb(255 0 0 / 0.47); /* 被選中後顯示紅色邊框 */
                 transform: scale(1.05); /* 被選中時放大一點點 */
             }
+            .character.Pyro.selected img {
+                border-color: rgba(255, 102, 64, 0.5); /* 火 Pyro - 橙色 */
+            }
 
+            .character.Hydro.selected img {
+                border-color: rgba(0, 192, 255, 0.5); /* 水 Hydro - 淺藍色 */
+            }
+
+            .character.Anemo.selected img {
+                border-color: rgba(53, 215, 161, 0.5); /* 風 Anemo - 淺綠色 */
+            }
+
+            .character.Electro.selected img {
+                border-color: rgba(204, 128, 255, 0.5); /* 雷 Electro - 紫色 */
+            }
+
+            .character.Dendro.selected img {
+                border-color: rgba(155, 229, 61, 0.5); /* 草 Dendro - 綠色 */
+            }
+
+            .character.Cryo.selected img {
+                border-color: rgba(123, 242, 242, 0.5); /* 冰 Cryo - 冰藍色 */
+            }
+
+            .character.Geo.selected img {
+                border-color: rgba(255, 182, 30, 0.5); /* 岩 Geo - 金色 */
+            }
             .character:focus,
             .character:active {
                 outline: none; /* 移除焦點的外框 */
@@ -600,11 +626,11 @@
         </div>
     </div>
     <div>
-        <button id="view-results-btn" style="display:none;" onclick="window.open(document.getElementById('generated-url').innerText, '_blank')">前往𝕏</button>
+        <button id="view-results-btn" style="display:none;" onclick="window.open(document.getElementById('generated-url').innerText, '_blank')">前往𝕏頁面</button>
         <button id="clear-selection-btn" onclick="clearSelection()">清空選取</button>
     </div>
 
-    <div id="line-community-icon" style="position: fixed; top: 15px; right: 5px; z-index: 1000;">
+    <div id="line-community-icon" style="position: fixed; bottom: 15px; left: 5px; z-index: 1000;">
         <a href="https://line.me/ti/g2/ws_23JibNNAGaEja-adxJv8q8f-oHEX7Jxl77w?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank">
             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdBmNgZmnl4lPSOnIgbzy4uJXnL_Okl_WDSAtHvbb1d3t58ZZbICa9IMWBuB8as4jIkM4&usqp=CAU"
                  alt="Line 社群圖示"
