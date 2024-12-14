@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      .checkbox-group {
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>選擇角色並生成查詢網址</h2>
+
+    <div class="checkbox-group">
+      <input type="checkbox" id="klee" value="Klee"> 可莉<br>
+      <input type="checkbox" id="amber" value="Amber"> 安柏<br>
+    </div>
+
+    <button onclick="generateURL()">生成網址</button>
+
+    <h3>生成的查詢網址：</h3>
+    <p id="generated-url"></p>
+
+    <!-- 這是顯示生成的網址的按鈕 -->
+    <a id="generated-url-link" href="#" target="_blank" style="display:none;">點擊這裡查看搜尋結果</a>
+
+    <script>
+      function generateURL() {
+        // 收集所有選中的角色
+        var selectedRoles = [];
+        if (document.getElementById('klee').checked) selectedRoles.push('Klee');
+        if (document.getElementById('amber').checked) selectedRoles.push('Amber');
+        
+        // 如果有選中角色，生成 URL
+        if (selectedRoles.length > 0) {
+          // 將選中的角色列表組合成 %23（%23 代表 '#'）
+          var queryString = selectedRoles.map(role => '%23' + encodeURIComponent(role)).join('+');
+          
+          // 構建完整的網址
+          var url = 'https://x.com/search?q=' + queryString;
+          
+          // 顯示生成的網址
+          document.getElementById('generated-url').innerText = url;
+          
+          // 顯示生成的查詢頁面連結
+          var linkElement = document.getElementById('generated-url-link');
+          linkElement.href = url;
+          linkElement.style.display = 'inline';  // 顯示連結
+        }
+      }
+    </script>
+  </body>
+</html>
+ 
