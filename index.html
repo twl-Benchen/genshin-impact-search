@@ -16,17 +16,21 @@
             text-align: center;
             margin-right: 20px;
             margin-bottom: 20px;
+            position: relative;
+            cursor: pointer;
         }
 
             .character img {
-                width: 50px; /* 設定圖片大小 */
+                width: 50px;
                 height: 50px;
                 display: block;
                 margin-bottom: 5px;
+                border: 3px solid transparent; /* 初始無邊框 */
+                transition: border 0.3s ease; /* 邊框過渡效果 */
             }
 
-            .character input {
-                display: block;
+            .character.selected img {
+                border-color: rgb(255 0 0 / 0.47); /* 被選中後顯示藍色邊框 */
             }
     </style>
 </head>
@@ -34,103 +38,47 @@
     <h2>選擇角色並生成查詢網址</h2>
 
     <div class="checkbox-group">
-        <div class="character">
+        <div class="character" onclick="toggleSelection(this, 'Klee')">
             <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Klee_icon.png" alt="可莉">
-            <input type="checkbox" id="klee" value="Klee"> 可莉
+            <span>可莉</span>
         </div>
-        <div class="character">
+        <div class="character" onclick="toggleSelection(this, 'Amber')">
             <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Amber_icon.png" alt="安柏">
-            <input type="checkbox" id="amber" value="Amber"> 安柏
+            <span>安柏</span>
         </div>
-        <div class="character">
+        <div class="character" onclick="toggleSelection(this, 'Yoimiya')">
             <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Yoimiya_icon.png" alt="宵宮">
-            <input type="checkbox" id="yoimiya" value="Yoimiya"> 宵宮
+            <span>宵宮</span>
         </div>
-        <div class="character">
+        <div class="character" onclick="toggleSelection(this, 'Thoma')">
             <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Thoma_icon.png" alt="托馬">
-            <input type="checkbox" id="thoma" value="Thoma"> 托馬
+            <span>托馬</span>
         </div>
-        <div class="character">
+        <div class="character" onclick="toggleSelection(this, 'Yanfei')">
             <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Yanfei_icon.png" alt="煙緋">
-            <input type="checkbox" id="yanfei" value="Yanfei"> 煙緋
+            <span>煙緋</span>
         </div>
-        <div class="character">
+        <div class="character" onclick="toggleSelection(this, 'Bennett')">
             <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Bennett_icon.png" alt="班尼特">
-            <input type="checkbox" id="bennett" value="Bennett"> 班尼特
+            <span>班尼特</span>
         </div>
-        <div class="character">
+        <div class="character" onclick="toggleSelection(this, 'HuTao')">
             <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Hutao_icon.png" alt="胡桃">
-            <input type="checkbox" id="hutao" value="HuTao"> 胡桃
+            <span>胡桃</span>
         </div>
-        <div class="character">
+        <div class="character" onclick="toggleSelection(this, 'Xinyan')">
             <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Xinyan_icon.png" alt="辛焱">
-            <input type="checkbox" id="xinyan" value="Xinyan"> 辛焱
+            <span>辛焱</span>
         </div>
-        <div class="character">
+        <div class="character" onclick="toggleSelection(this, 'Diluc')">
             <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Diluc_icon.png" alt="迪盧克">
-            <input type="checkbox" id="diluc" value="Diluc"> 迪盧克
+            <span>迪盧克</span>
         </div>
-        <div class="character">
+        <div class="character" onclick="toggleSelection(this, 'Xiangling')">
             <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Xiangling_icon.png" alt="香菱">
-            <input type="checkbox" id="xiangling" value="Xiangling"> 香菱
+            <span>香菱</span>
         </div>
-        <div class="character">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Dehya_icon.png" alt="迪希雅">
-            <input type="checkbox" id="dehya" value="Dehya"> 迪希雅
-        </div>
-        <div class="character">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Lyney_icon.png" alt="林尼">
-            <input type="checkbox" id="lyney" value="Lyney"> 林尼
-        </div>
-        <div class="character">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Chevreuse_icon.png" alt="夏沃蕾">
-            <input type="checkbox" id="chevreuse" value="Chevreuse"> 夏沃蕾
-        </div>
-        <div class="character">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Gaming_icon.png" alt="嘉明">
-            <input type="checkbox" id="gaming" value="Gaming"> 嘉明
-        </div>
-        <div class="character">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Arlecchino_icon.png" alt="阿蕾奇諾">
-            <input type="checkbox" id="arlecchino" value="Arlecchino"> 阿蕾奇諾
-        </div>
-        <div class="character">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Sayu_icon.png" alt="早柚">
-            <input type="checkbox" id="sayu" value="Sayu"> 早柚
-        </div>
-        <div class="character">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Kazuha_icon.png" alt="楓原萬葉">
-            <input type="checkbox" id="kazuha" value="Kazuha"> 楓原萬葉
-        </div>
-        <div class="character">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Venti_icon.png" alt="溫迪">
-            <input type="checkbox" id="venti" value="Venti"> 溫迪
-        </div>
-        <div class="character">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Jean_icon.png" alt="琴">
-            <input type="checkbox" id="jean" value="Jean"> 琴
-        </div>
-        <div class="character">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Sucrose_icon.png" alt="砂糖">
-            <input type="checkbox" id="sucrose" value="Sucrose"> 砂糖
-        </div>
-        <div class="character">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Xiao_icon.png" alt="魈">
-            <input type="checkbox" id="xiao" value="Xiao"> 魈
-        </div>
-        <div class="character">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/ShikanoinHeizou_icon.png" alt="鹿野院平藏">
-            <input type="checkbox" id="shikanoinheizou" value="ShikanoinHeizou"> 鹿野院平藏
-        </div>
-        <div class="character">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Faruzan_icon.png" alt="琺露珊">
-            <input type="checkbox" id="faruzan" value="Faruzan"> 琺露珊
-        </div>
-        <div class="character">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Wanderer_icon.png" alt="流浪者">
-            <input type="checkbox" id="wanderer" value="Wanderer"> 流浪者
-        </div>
-        <!-- 在這裡添加更多角色 -->
+        <!-- 你可以在這裡繼續添加其他角色 -->
     </div>
 
     <button onclick="generateURL()">生成網址</button>
@@ -138,39 +86,23 @@
     <h3>生成的查詢網址：</h3>
     <p id="generated-url"></p>
 
-    <!-- 這是顯示生成的網址的按鈕 -->
     <a id="generated-url-link" href="#" target="_blank" style="display:none;">點擊這裡查看搜尋結果</a>
 
     <script>
-        function generateURL() {
-            // 收集所有選中的角色
-            var selectedRoles = [];
-            if (document.getElementById('klee').checked) selectedRoles.push('Klee');
-            if (document.getElementById('amber').checked) selectedRoles.push('Amber');
-            if (document.getElementById('yoimiya').checked) selectedRoles.push('Yoimiya');
-            if (document.getElementById('thoma').checked) selectedRoles.push('Thoma');
-            if (document.getElementById('yanfei').checked) selectedRoles.push('Yanfei');
-            if (document.getElementById('bennett').checked) selectedRoles.push('Bennett');
-            if (document.getElementById('hutao').checked) selectedRoles.push('HuTao');
-            if (document.getElementById('xinyan').checked) selectedRoles.push('Xinyan');
-            if (document.getElementById('diluc').checked) selectedRoles.push('Diluc');
-            if (document.getElementById('xiangling').checked) selectedRoles.push('Xiangling');
-            if (document.getElementById('dehya').checked) selectedRoles.push('Dehya');
-            if (document.getElementById('lyney').checked) selectedRoles.push('Lyney');
-            if (document.getElementById('chevreuse').checked) selectedRoles.push('Chevreuse');
-            if (document.getElementById('gaming').checked) selectedRoles.push('Gaming');
-            if (document.getElementById('arlecchino').checked) selectedRoles.push('Arlecchino');
-            if (document.getElementById('sayu').checked) selectedRoles.push('Sayu');
-            if (document.getElementById('kazuha').checked) selectedRoles.push('Kazuha');
-            if (document.getElementById('venti').checked) selectedRoles.push('Venti');
-            if (document.getElementById('jean').checked) selectedRoles.push('Jean');
-            if (document.getElementById('sucrose').checked) selectedRoles.push('Sucrose');
-            if (document.getElementById('xiao').checked) selectedRoles.push('Xiao');
-            if (document.getElementById('shikanoinheizou').checked) selectedRoles.push('ShikanoinHeizou');
-            if (document.getElementById('faruzan').checked) selectedRoles.push('Faruzan');
-            if (document.getElementById('wanderer').checked) selectedRoles.push('Wanderer');
+        var selectedRoles = [];
 
-            // 確保有選中的角色，生成 URL
+        // 用來切換圖片選擇狀態
+        function toggleSelection(element, role) {
+            if (element.classList.contains('selected')) {
+                element.classList.remove('selected');
+                selectedRoles = selectedRoles.filter(item => item !== role);
+            } else {
+                element.classList.add('selected');
+                selectedRoles.push(role);
+            }
+        }
+
+        function generateURL() {
             if (selectedRoles.length > 0) {
                 var queryString = selectedRoles.map(role => '%23' + encodeURIComponent(role)).join('+');
                 var url = 'https://x.com/search?q=' + queryString;
