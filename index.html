@@ -179,10 +179,11 @@
             height: 20px; /* 設定分隔區的高度，例如 20px */
         }
 
+
     </style>
 </head>
 <body>
-    <h2>選擇角色並生成查詢網址</h2>
+    <h2 style="text-align: center;">選擇要尋找的角色 (建議登入𝕏帳號)</h2>
     <div style="display: flex; justify-content: center; gap: 10px;">
         <!-- Fire Icon -->
         <div id="Pyro" onclick="filterByTag('Pyro')" class="element-icon" style="cursor: pointer;">
@@ -284,54 +285,7 @@
             <img src="https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2024/04/22/35428890/672e65470bfd14b664596c2a7f7eaaf8_7046130387894981792.png?x-oss-process=image%2Fformat%2Cwebp" alt="阿蕾奇諾">
             <span>阿蕾奇諾</span>
         </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'Sayu')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Sayu_icon.png" alt="早柚">
-            <span>早柚</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'Kazuha')">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Kaedehara%2520Kazuha_icon.png" alt="楓原萬葉">
-            <span>楓原萬葉</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'Venti')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Venti_icon.png" alt="溫迪">
-            <span>溫迪</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'Jean')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Jean_icon.png" alt="琴">
-            <span>琴</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'Sucrose')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Sucrose_icon.png" alt="砂糖">
-            <span>砂糖</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'Xiao')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Xiao_icon.png" alt="魈">
-            <span>魈</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'ShikanoinHeizou')">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Shikanoin%2520Heizou_icon.png" alt="鹿野院平藏">
-            <span>平藏</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'Faruzan')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2022/12/05/35428890/38c12ab46678a4008f83a0e46c900ef5_528211919348170763.png?x-oss-process=image%2Fformat%2Cwebp" alt="琺露珊">
-            <span>琺露珊</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'Wanderer')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2022/12/05/35428890/24d97a22be742fb732ea96f625d1faac_2495743636540582085.png?x-oss-process=image%2Fformat%2Cwebp" alt="流浪者">
-            <span>流浪者</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'Lynette')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/08/14/35428890/436e6f2b9b9006bfe511a98093259daf_7192025380861185061.png?x-oss-process=image%2Fformat%2Cwebp" alt="琳妮特">
-            <span>琳妮特</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'Xianyun')">
-            <img src="https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2024/01/29/35428890/2c2be27f8876e9435ab8c8b933b8408c_7973851751945394462.png?x-oss-process=image%2Fformat%2Cwebp" alt="閒雲">
-            <span>閒雲</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'Chasca')">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/11/18/abe1192cc7aad45f6b273478dd5fa88a_4799372826012752249.png?x-oss-process=image%2Fformat%2Cwebp" alt="恰斯卡">
-            <span>恰斯卡</span>
-        </div>
+
         <div class="character Hydro" onclick="toggleSelection(this, 'SangonomiyaKokomi')">
             <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Sangonomiya%2520Kokomi_icon.png" alt="珊瑚宮心海">
             <span>心海</span>
@@ -384,6 +338,152 @@
             <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/08/26/f4c75caad42923eb91ee760aa2eb473a_7439123622315070718.png?x-oss-process=image%2Fformat%2Cwebp" alt="瑪拉妮">
             <span>瑪拉妮</span>
         </div>
+
+        <div class="character Anemo" onclick="toggleSelection(this, 'Sayu')">
+            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Sayu_icon.png" alt="早柚">
+            <span>早柚</span>
+        </div>
+        <div class="character Anemo" onclick="toggleSelection(this, 'Kazuha')">
+            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Kaedehara%2520Kazuha_icon.png" alt="楓原萬葉">
+            <span>楓原萬葉</span>
+        </div>
+        <div class="character Anemo" onclick="toggleSelection(this, 'Venti')">
+            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Venti_icon.png" alt="溫迪">
+            <span>溫迪</span>
+        </div>
+        <div class="character Anemo" onclick="toggleSelection(this, 'Jean')">
+            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Jean_icon.png" alt="琴">
+            <span>琴</span>
+        </div>
+        <div class="character Anemo" onclick="toggleSelection(this, 'Sucrose')">
+            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Sucrose_icon.png" alt="砂糖">
+            <span>砂糖</span>
+        </div>
+        <div class="character Anemo" onclick="toggleSelection(this, 'Xiao')">
+            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Xiao_icon.png" alt="魈">
+            <span>魈</span>
+        </div>
+        <div class="character Anemo" onclick="toggleSelection(this, 'ShikanoinHeizou')">
+            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Shikanoin%2520Heizou_icon.png" alt="鹿野院平藏">
+            <span>平藏</span>
+        </div>
+        <div class="character Anemo" onclick="toggleSelection(this, 'Faruzan')">
+            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2022/12/05/35428890/38c12ab46678a4008f83a0e46c900ef5_528211919348170763.png?x-oss-process=image%2Fformat%2Cwebp" alt="琺露珊">
+            <span>琺露珊</span>
+        </div>
+        <div class="character Anemo" onclick="toggleSelection(this, 'Wanderer')">
+            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2022/12/05/35428890/24d97a22be742fb732ea96f625d1faac_2495743636540582085.png?x-oss-process=image%2Fformat%2Cwebp" alt="流浪者">
+            <span>流浪者</span>
+        </div>
+        <div class="character Anemo" onclick="toggleSelection(this, 'Lynette')">
+            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/08/14/35428890/436e6f2b9b9006bfe511a98093259daf_7192025380861185061.png?x-oss-process=image%2Fformat%2Cwebp" alt="琳妮特">
+            <span>琳妮特</span>
+        </div>
+        <div class="character Anemo" onclick="toggleSelection(this, 'Xianyun')">
+            <img src="https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2024/01/29/35428890/2c2be27f8876e9435ab8c8b933b8408c_7973851751945394462.png?x-oss-process=image%2Fformat%2Cwebp" alt="閒雲">
+            <span>閒雲</span>
+        </div>
+        <div class="character Anemo" onclick="toggleSelection(this, 'Chasca')">
+            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/11/18/abe1192cc7aad45f6b273478dd5fa88a_4799372826012752249.png?x-oss-process=image%2Fformat%2Cwebp" alt="恰斯卡">
+            <span>恰斯卡</span>
+        </div>
+        <div class="character Electro" onclick="toggleSelection(this, 'Lisa')">
+            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Lisa_icon.png" alt="麗莎">
+            <span>麗莎</span>
+        </div>
+        <div class="character Electro" onclick="toggleSelection(this, 'KujouSara')">
+            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Kujou%2520Sara_icon.png" alt="九條裟羅">
+            <span>九條裟羅</span>
+        </div>
+        <div class="character Electro" onclick="toggleSelection(this, 'YaeMiko')">
+            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Yae%2520Miko_icon.png" alt="八重神子">
+            <span>八重神子</span>
+        </div>
+        <div class="character Electro" onclick="toggleSelection(this, 'Keqing')">
+            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Keqing_icon.png" alt="刻晴">
+            <span>刻晴</span>
+        </div>
+        <div class="character Electro" onclick="toggleSelection(this, 'Beidou')">
+            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Beidou_icon.png" alt="北斗">
+            <span>北斗</span>
+        </div>
+        <div class="character Electro" onclick="toggleSelection(this, 'Fischl')">
+            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Fischl_icon.png" alt="菲謝爾">
+            <span>菲謝爾</span>
+        </div>
+        <div class="character Electro" onclick="toggleSelection(this, 'Razor')">
+            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Razor_icon.png" alt="雷澤">
+            <span>雷澤</span>
+        </div>
+        <div class="character Electro" onclick="toggleSelection(this, 'RaidenShogun')">
+            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Raiden%2520Shogun_icon.png" alt="雷電將軍">
+            <span>雷電將軍</span>
+        </div>
+        <div class="character Electro" onclick="toggleSelection(this, 'KukiShinobu')">
+            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Kuki%2520Shinobu_icon.png" alt="久岐忍">
+            <span>久岐忍</span>
+        </div>
+        <div class="character Electro" onclick="toggleSelection(this, 'Dori')">
+            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2022/09/08/35428890/6539bea71efd0f839db897cfc4094362_3469125131800075941.png?x-oss-process=image%2Fformat%2Cwebp" alt="多莉">
+            <span>多莉</span>
+        </div>
+        <div class="character Electro" onclick="toggleSelection(this, 'Cyno')">
+            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2022/09/28/77454259/e09e2bda5e022611fad0dea1bb6518bb_6757667565719577204.png?x-oss-process=image%2Fformat%2Cwebp" alt="賽諾">
+            <span>賽諾</span>
+        </div>
+        <div class="character Electro" onclick="toggleSelection(this, 'Clorinde')">
+            <img src="https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2024/06/04/35428890/770a66030815971c697ab81bc5436329_1296341861352728851.png?x-oss-process=image%2Fformat%2Cwebp" alt="克洛琳德">
+            <span>克洛琳德</span>
+        </div>
+        <div class="character Electro" onclick="toggleSelection(this, 'Sethos')">
+            <img src="https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2024/06/04/35428890/cdb7abfcb86138e5b618946a5466d442_6414132746291261116.png?x-oss-process=image%2Fformat%2Cwebp" alt="賽索斯">
+            <span>賽索斯</span>
+        </div>
+        <div class="character Electro" onclick="toggleSelection(this, 'Ororon')">
+            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/11/18/e4830690f8b6a1ebb02cfbc8ce955671_8091252479018770784.png?x-oss-process=image%2Fformat%2Cwebp" alt="歐洛倫">
+            <span>歐洛倫</span>
+        </div>
+        <div class="character Dendro" onclick="toggleSelection(this, 'Tighnari')">
+            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2022/08/22/35428890/497dd6fac3d3c652a367c67428550747_306268558608889633.png?x-oss-process=image%2Fformat%2Cwebp" alt="提納里">
+            <span>提納里</span>
+        </div>
+        <div class="character Dendro" onclick="toggleSelection(this, 'Collei')">
+            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2022/08/24/194600931/37a18b6b6865c59063003a9380f08225_7758071773430345954.png?x-oss-process=image%2Fformat%2Cwebp" alt="柯萊">
+            <span>柯萊</span>
+        </div>
+        <div class="character Dendro" onclick="toggleSelection(this, 'Nahida')">
+            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2022/10/29/35428890/f29490bddc56b4a6773b6c5003bbb853_9091170755650648414.png?x-oss-process=image%2Fformat%2Cwebp" alt="納西妲">
+            <span>納西妲</span>
+        </div>
+        <div class="character Dendro" onclick="toggleSelection(this, 'Yaoyao')">
+            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/01/15/35428890/5bc9df1fb67391e4c8080da3d855de53_8974356791001371659.png?x-oss-process=image%2Fformat%2Cwebp" alt="瑤瑤">
+            <span>瑤瑤</span>
+        </div>
+        <div class="character Dendro" onclick="toggleSelection(this, 'Alhaitham')">
+            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/01/15/35428890/25249dd20b86c775fb35bdbbd805d9ec_8879881358376735994.png?x-oss-process=image%2Fformat%2Cwebp" alt="艾爾海森">
+            <span>艾爾海森</span>
+        </div>
+        <div class="character Dendro" onclick="toggleSelection(this, 'Kaveh')">
+            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/05/02/35428890/2270aba02b92034d7d76b4426be8f53b_7062168821433378650.png?x-oss-process=image%2Fformat%2Cwebp" alt="卡維">
+            <span>卡維</span>
+        </div>
+        <div class="character Dendro" onclick="toggleSelection(this, 'Baizhu')">
+            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/05/02/35428890/05599650d7f42e1c4adde373de6b297d_8001303176243726128.png?x-oss-process=image%2Fformat%2Cwebp" alt="白朮">
+            <span>白朮</span>
+        </div>
+        <div class="character Dendro" onclick="toggleSelection(this, 'Kirara')">
+            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/05/23/35428890/d1699810632f8c3bc8c1e8c8beb8250f_3141235252861584883.png?x-oss-process=image%2Fformat%2Cwebp" alt="綺良良">
+            <span>綺良良</span>
+        </div>
+        <div class="character Dendro" onclick="toggleSelection(this, 'Emilie')">
+            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/07/31/87ad30965e0c1b45364fdccc51b3429d_6108610286145583716.png?x-oss-process=image%2Fformat%2Cwebp" alt="艾梅莉埃">
+            <span>艾梅莉埃</span>
+        </div>
+        <div class="character Dendro" onclick="toggleSelection(this, 'Kinich')">
+            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/09/12/0099e74b4d0c919f6feab4bade3ab748_5795733017114624391.png?x-oss-process=image%2Fformat%2Cwebp" alt="基尼奇">
+            <span>基尼奇</span>
+        </div>
+
         <div class="character Cryo" onclick="toggleSelection(this, 'Qiqi')">
             <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Qiqi_icon.png" alt="七七">
             <span>七七</span>
@@ -444,46 +544,6 @@
             <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/11/06/35428890/7bbbff3f35661a93b5091b1f17fae6c0_6927814687713967999.png?x-oss-process=image%2Fformat%2Cwebp" alt="夏洛蒂">
             <span>夏洛蒂</span>
         </div>
-        <div class="character Dendro" onclick="toggleSelection(this, 'Tighnari')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2022/08/22/35428890/497dd6fac3d3c652a367c67428550747_306268558608889633.png?x-oss-process=image%2Fformat%2Cwebp" alt="提納里">
-            <span>提納里</span>
-        </div>
-        <div class="character Dendro" onclick="toggleSelection(this, 'Collei')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2022/08/24/194600931/37a18b6b6865c59063003a9380f08225_7758071773430345954.png?x-oss-process=image%2Fformat%2Cwebp" alt="柯萊">
-            <span>柯萊</span>
-        </div>
-        <div class="character Dendro" onclick="toggleSelection(this, 'Nahida')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2022/10/29/35428890/f29490bddc56b4a6773b6c5003bbb853_9091170755650648414.png?x-oss-process=image%2Fformat%2Cwebp" alt="納西妲">
-            <span>納西妲</span>
-        </div>
-        <div class="character Dendro" onclick="toggleSelection(this, 'Yaoyao')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/01/15/35428890/5bc9df1fb67391e4c8080da3d855de53_8974356791001371659.png?x-oss-process=image%2Fformat%2Cwebp" alt="瑤瑤">
-            <span>瑤瑤</span>
-        </div>
-        <div class="character Dendro" onclick="toggleSelection(this, 'Alhaitham')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/01/15/35428890/25249dd20b86c775fb35bdbbd805d9ec_8879881358376735994.png?x-oss-process=image%2Fformat%2Cwebp" alt="艾爾海森">
-            <span>艾爾海森</span>
-        </div>
-        <div class="character Dendro" onclick="toggleSelection(this, 'Kaveh')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/05/02/35428890/2270aba02b92034d7d76b4426be8f53b_7062168821433378650.png?x-oss-process=image%2Fformat%2Cwebp" alt="卡維">
-            <span>卡維</span>
-        </div>
-        <div class="character Dendro" onclick="toggleSelection(this, 'Baizhu')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/05/02/35428890/05599650d7f42e1c4adde373de6b297d_8001303176243726128.png?x-oss-process=image%2Fformat%2Cwebp" alt="白朮">
-            <span>白朮</span>
-        </div>
-        <div class="character Dendro" onclick="toggleSelection(this, 'Kirara')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/05/23/35428890/d1699810632f8c3bc8c1e8c8beb8250f_3141235252861584883.png?x-oss-process=image%2Fformat%2Cwebp" alt="綺良良">
-            <span>綺良良</span>
-        </div>
-        <div class="character Dendro" onclick="toggleSelection(this, 'Emilie')">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/07/31/87ad30965e0c1b45364fdccc51b3429d_6108610286145583716.png?x-oss-process=image%2Fformat%2Cwebp" alt="艾梅莉埃">
-            <span>艾梅莉埃</span>
-        </div>
-        <div class="character Dendro" onclick="toggleSelection(this, 'Kinich')">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/09/12/0099e74b4d0c919f6feab4bade3ab748_5795733017114624391.png?x-oss-process=image%2Fformat%2Cwebp" alt="基尼奇">
-            <span>基尼奇</span>
-        </div>
 
         <div class="character Geo" onclick="toggleSelection(this, 'YunJin')">
             <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Yun%2520Jin_icon.png" alt="雲堇">
@@ -529,62 +589,7 @@
             <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/09/25/b07074c2b9040516fd240b6b8d65c011_2487211347344319683.png?x-oss-process=image%2Fformat%2Cwebp" alt="希諾寧">
             <span>希諾寧</span>
         </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'Lisa')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Lisa_icon.png" alt="麗莎">
-            <span>麗莎</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'KujouSara')">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Kujou%2520Sara_icon.png" alt="九條裟羅">
-            <span>九條裟羅</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'YaeMiko')">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Yae%2520Miko_icon.png" alt="八重神子">
-            <span>八重神子</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'Keqing')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Keqing_icon.png" alt="刻晴">
-            <span>刻晴</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'Beidou')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Beidou_icon.png" alt="北斗">
-            <span>北斗</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'Fischl')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Fischl_icon.png" alt="菲謝爾">
-            <span>菲謝爾</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'Razor')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Razor_icon.png" alt="雷澤">
-            <span>雷澤</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'RaidenShogun')">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Raiden%2520Shogun_icon.png" alt="雷電將軍">
-            <span>雷電將軍</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'KukiShinobu')">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Kuki%2520Shinobu_icon.png" alt="久岐忍">
-            <span>久岐忍</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'Dori')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2022/09/08/35428890/6539bea71efd0f839db897cfc4094362_3469125131800075941.png?x-oss-process=image%2Fformat%2Cwebp" alt="多莉">
-            <span>多莉</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'Cyno')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2022/09/28/77454259/e09e2bda5e022611fad0dea1bb6518bb_6757667565719577204.png?x-oss-process=image%2Fformat%2Cwebp" alt="賽諾">
-            <span>賽諾</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'Clorinde')">
-            <img src="https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2024/06/04/35428890/770a66030815971c697ab81bc5436329_1296341861352728851.png?x-oss-process=image%2Fformat%2Cwebp" alt="克洛琳德">
-            <span>克洛琳德</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'Sethos')">
-            <img src="https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2024/06/04/35428890/cdb7abfcb86138e5b618946a5466d442_6414132746291261116.png?x-oss-process=image%2Fformat%2Cwebp" alt="賽索斯">
-            <span>賽索斯</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'Ororon')">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/11/18/e4830690f8b6a1ebb02cfbc8ce955671_8091252479018770784.png?x-oss-process=image%2Fformat%2Cwebp" alt="歐洛倫">
-            <span>歐洛倫</span>
-        </div>
+
     </div>
 
     <div id="generated-url-container">
@@ -594,10 +599,18 @@
 
         </div>
     </div>
-        <div>
-            <button id="view-results-btn" style="display:none;" onclick="window.open(document.getElementById('generated-url').innerText, '_blank')">查看搜尋結果</button>
-            <button id="clear-selection-btn" onclick="clearSelection()">清空選取</button>
-        </div>
+    <div>
+        <button id="view-results-btn" style="display:none;" onclick="window.open(document.getElementById('generated-url').innerText, '_blank')">前往𝕏</button>
+        <button id="clear-selection-btn" onclick="clearSelection()">清空選取</button>
+    </div>
+
+    <div id="line-community-icon" style="position: fixed; top: 15px; right: 5px; z-index: 1000;">
+        <a href="https://line.me/ti/g2/ws_23JibNNAGaEja-adxJv8q8f-oHEX7Jxl77w?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdBmNgZmnl4lPSOnIgbzy4uJXnL_Okl_WDSAtHvbb1d3t58ZZbICa9IMWBuB8as4jIkM4&usqp=CAU"
+                 alt="Line 社群圖示"
+                 style="width: 40px; height: 40px; border-radius: 15px; border: 3px solid #ffffff; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        </a>
+    </div>
 
 
     <script>
