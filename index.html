@@ -593,11 +593,12 @@
             <button id="copy-url-btn" style="display: none; white-space: nowrap;" onclick="copyToClipboard()">複製</button>
 
         </div>
+    </div>
         <div>
             <button id="view-results-btn" style="display:none;" onclick="window.open(document.getElementById('generated-url').innerText, '_blank')">查看搜尋結果</button>
             <button id="clear-selection-btn" onclick="clearSelection()">清空選取</button>
         </div>
-    </div>
+
 
     <script>
         var selectedRoles = [];
@@ -671,10 +672,6 @@
             const selectedIcon = document.getElementById(tag);
             selectedIcon.classList.add('selected');
         }
-
-
-
-
 
         function clearSelection() {
             selectedRoles = [];
