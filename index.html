@@ -8,23 +8,25 @@
         }
 
         .checkbox-group {
-            margin-bottom: 10px;
+            display: flex;
+            flex-wrap: wrap; /* 自動換行 */
+            justify-content: space-between; /* 每行角色平均分布 */
+            gap: 10px; /* 每個角色間的間距 */
         }
 
         .character {
             display: inline-block;
             text-align: center;
-            margin-right: 20px;
-            margin-bottom: 20px;
-            position: relative;
+            flex: 1 1 calc(20% - 10px); /* 每行最多 5 個角色，20%寬度減去間距 */
+            max-width: calc(20% - 10px); /* 防止超出容器 */
             cursor: pointer;
         }
 
             .character img {
-                width: 50px;
-                height: 50px;
+                width: 70px; /* 增加圖片大小 */
+                height: 70px;
                 display: block;
-                margin-bottom: 5px;
+                margin: 0 auto 5px;
                 border: 3px solid transparent; /* 初始無邊框 */
                 transition: border 0.3s ease; /* 邊框過渡效果 */
             }
@@ -38,6 +40,13 @@
                 outline: none; /* 移除焦點的外框 */
                 background: none; /* 移除點擊時的藍色背景 */
             }
+
+        @media screen and (max-width: 600px) {
+            .character img {
+                width: 60px; /* 手機螢幕上的圖片略小 */
+                height: 60px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -85,7 +94,7 @@
             <span>香菱</span>
         </div>
     </div>
-
+    <p></p>
     <button onclick="generateURL()">生成網址</button>
 
     <h3>生成的查詢網址：</h3>
