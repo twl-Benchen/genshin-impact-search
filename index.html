@@ -30,7 +30,13 @@
             }
 
             .character.selected img {
-                border-color: rgb(255 0 0 / 0.47); /* 被選中後顯示藍色邊框 */
+                border-color: rgb(255 0 0 / 0.47); /* 被選中後顯示紅色邊框 */
+            }
+
+            .character:focus,
+            .character:active {
+                outline: none; /* 移除焦點的外框 */
+                background: none; /* 移除點擊時的藍色背景 */
             }
     </style>
 </head>
@@ -78,7 +84,6 @@
             <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Xiangling_icon.png" alt="香菱">
             <span>香菱</span>
         </div>
-        <!-- 你可以在這裡繼續添加其他角色 -->
     </div>
 
     <button onclick="generateURL()">生成網址</button>
