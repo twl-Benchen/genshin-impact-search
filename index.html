@@ -6,6 +6,7 @@
         body {
             font-family: Arial, sans-serif;
             padding: 10px;
+            -webkit-tap-highlight-color: transparent; /* 去除手機點擊時的藍色區塊 */
         }
 
         .checkbox-group {
@@ -53,8 +54,8 @@
             }
 
                 .character img {
-                    width: 65px; /* 手機圖片縮小 */
-                    height: 65px;
+                    width: 60px; /* 手機圖片縮小 */
+                    height: 60px;
                 }
         }
 
@@ -168,9 +169,9 @@
     </div>
 
     <div id="generated-url-container">
-        <div id="url-container">
-            <button id="copy-url-btn" style="display: none;" onclick="copyToClipboard()">複製網址</button>
-            <p id="generated-url"></p>
+        <div id="url-container" style="display: flex; align-items: center; gap: 10px;">
+            <p id="generated-url" style="flex: 1; word-break: break-all; margin: 0;"></p>
+            <button id="copy-url-btn" style="display: none; white-space: nowrap;" onclick="copyToClipboard()">複製</button>
         </div>
         <button id="view-results-btn" style="display:none;" onclick="window.open(document.getElementById('generated-url').innerText, '_blank')">查看搜尋結果</button>
         <button id="clear-selection-btn" onclick="clearSelection()">清空選取</button>
