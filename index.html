@@ -10,21 +10,21 @@
         .checkbox-group {
             display: flex;
             flex-wrap: wrap; /* 自動換行 */
-            justify-content: space-between; /* 每行角色平均分布 */
-            gap: 10px; /* 每個角色間的間距 */
+            justify-content: flex-start; /* 從左側開始排列 */
+            gap: 5px; /* 每個角色之間的間距縮小 */
         }
 
         .character {
             display: inline-block;
             text-align: center;
-            flex: 1 1 calc(20% - 10px); /* 每行最多 5 個角色，20%寬度減去間距 */
-            max-width: calc(20% - 10px); /* 防止超出容器 */
+            flex: 0 0 calc(20% - 5px); /* 每行最多 5 個角色，保持緊湊排列 */
+            max-width: calc(20% - 5px); /* 防止超出容器 */
             cursor: pointer;
         }
 
             .character img {
-                width: 70px; /* 增加圖片大小 */
-                height: 70px;
+                width: 150px; /* 增加圖片大小 */
+                height: 150px;
                 display: block;
                 margin: 0 auto 5px;
                 border: 3px solid transparent; /* 初始無邊框 */
@@ -94,7 +94,7 @@
             <span>香菱</span>
         </div>
     </div>
-    <p></p>
+
     <button onclick="generateURL()">生成網址</button>
 
     <h3>生成的查詢網址：</h3>
