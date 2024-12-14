@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- 強制正確縮放 -->
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,7 +18,7 @@
         .character {
             display: inline-block;
             text-align: center;
-            flex: 0 0 calc(10% - 10px); /* 電腦模式下，每行 10 個角色 */
+            flex: 0 0 calc(10% - 10px); /* 預設桌面模式：每行 10 個角色 */
             max-width: calc(10% - 10px); /* 防止超出容器 */
             cursor: pointer;
         }
@@ -41,16 +42,29 @@
                 background: none; /* 移除點擊時的藍色背景 */
             }
 
-        /* 手機模式 */
-        @media screen and (max-width: 600px) {
+        /* 手機模式：小於 768px 時，每行顯示 5 個角色 */
+        @media screen and (max-width: 768px) {
             .character {
-                flex: 0 0 calc(20% - 10px); /* 手機模式下，每行 5 個角色 */
+                flex: 0 0 calc(20% - 10px); /* 手機模式：每行 5 個角色 */
                 max-width: calc(20% - 10px);
             }
 
                 .character img {
-                    width: 70px; /* 手機螢幕上的圖片大小 */
-                    height: 70px;
+                    width: 60px; /* 手機圖片縮小 */
+                    height: 60px;
+                }
+        }
+
+        /* 超小螢幕 (例如更窄的手機)：小於 480px 時，每行 3 個角色 */
+        @media screen and (max-width: 480px) {
+            .character {
+                flex: 0 0 calc(33.33% - 10px); /* 每行 3 個角色 */
+                max-width: calc(33.33% - 10px);
+            }
+
+                .character img {
+                    width: 50px; /* 更小的圖片 */
+                    height: 50px;
                 }
         }
     </style>
