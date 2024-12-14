@@ -120,6 +120,21 @@
             word-break: break-all; /* 長網址換行 */
             font-size: 14px;
         }
+        #generated-url-container {
+            margin-top: 20px;
+            text-align: center; /* 使內部元素居中 */
+        }
+
+        #view-results-btn,
+        #clear-selection-btn {
+            display: inline-block; /* 使按鈕並排顯示 */
+            margin: 10px; /* 按鈕之間的間隔 */
+        }
+
+        #copy-url-btn {
+            display: inline-block; /* 使複製按鈕顯示為行內塊 */
+            margin: 10px;
+        }
     </style>
 </head>
 <body>
@@ -172,6 +187,7 @@
         <div id="url-container" style="display: flex; align-items: center; gap: 10px;">
             <p id="generated-url" style="flex: 1; word-break: break-all; margin: 0;"></p>
             <button id="copy-url-btn" style="display: none; white-space: nowrap;" onclick="copyToClipboard()">複製</button>
+            
         </div>
         <button id="view-results-btn" style="display:none;" onclick="window.open(document.getElementById('generated-url').innerText, '_blank')">查看搜尋結果</button>
         <button id="clear-selection-btn" onclick="clearSelection()">清空選取</button>
@@ -211,8 +227,25 @@
 
         function copyToClipboard() {
             var url = document.getElementById('generated-url').innerText;
-            navigator.clipboard.writeText(url).then(() => alert("網址已複製到剪貼簿！"));
+            var button = document.getElementById('copy-url-btn');
+
+            navigator.clipboard.writeText(url).then(() => {
+                // 改變按鈕文字
+                button.innerText = '已複製';
+
+                // 調整字體大小
+                button.style.fontSize = '12px';  // 字體變小
+
+                // 兩秒後恢復原狀
+                setTimeout(() => {
+                    button.innerText = '複製';
+                    button.style.fontSize = '16px';  // 恢復原來字體大小
+                }, 2000);
+            });
         }
+
+
+
 
         function clearSelection() {
             selectedRoles = [];
