@@ -190,7 +190,7 @@
             }
 
         /* 控制圖片的大小，保持在圓形內 */
-        #Pyro img, #Hydro img, #Anemo img, #Electro img, #Dendro img, #Cryo img, #Geo img {
+        #Pyro img, #Hydro img, #Anemo img, #Electro img, #Dendro img, #Cryo img, #Geo img, #Other img {
             width: 30px; /* 圖示寬度 */
             height: 30px; /* 圖示高度 */
         }
@@ -244,6 +244,11 @@
         <!-- Geo Icon -->
         <div id="Geo" onclick="filterByTag('Geo')" class="element-icon" style="cursor: pointer;">
             <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/03/27/9c4cd6e14b87fc262cca36e6d0e9bdb0_1526899214861833594.png" alt="Geo Icon">
+        </div>
+
+        <!-- Other Icon -->
+        <div id="Other" onclick="filterByTag('Other')" class="element-icon" style="cursor: pointer;">
+            <img src="https://i.imgur.com/EKrk37M.png" alt="Other Icon">
         </div>
     </div>
     <div class="spacer"></div>
@@ -611,9 +616,23 @@
             <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/08/23/26925adb1092d29c8afdf46d92fad8bd_343637410022641529.png?x-oss-process=image%2Fformat%2Cwebp" alt="卡齊娜">
             <span>卡齊娜</span>
         </div>
-        <div class="character" onclick="toggleSelection(this, 'Xilonen')">
+        <div class="character Geo" onclick="toggleSelection(this, 'Xilonen')">
             <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/09/25/b07074c2b9040516fd240b6b8d65c011_2487211347344319683.png?x-oss-process=image%2Fformat%2Cwebp" alt="希諾寧">
             <span>希諾寧</span>
+        </div>
+
+        <div class="character Other" onclick="toggleSelection(this, 'Aether')">
+            <img src="https://i.imgur.com/6FqOBHn.png" alt="空">
+            <span>空</span>
+        </div>
+
+        <div class="character Other" onclick="toggleSelection(this, 'Lumine')">
+            <img src="https://i.imgur.com/p0BAXCB.png" alt="熒">
+            <span>熒</span>
+        </div>
+        <div class="character Other" onclick="toggleSelection(this, 'Paimon')">
+            <img src="https://i.imgur.com/L1pU4VY.png" alt="派蒙">
+            <span>派蒙</span>
         </div>
 
     </div>
