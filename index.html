@@ -65,6 +65,10 @@
             .character.Geo.selected img {
                 border-color: rgba(255, 182, 30, 0.5); /* 岩 Geo - 金色 */
             }
+
+            .character.Other.selected img {
+                border-color: rgba(255, 255, 102, 0.5); /* 其他 - 金色 */
+            }
             .character:focus,
             .character:active {
                 outline: none; /* 移除焦點的外框 */
@@ -634,7 +638,26 @@
             <img src="https://i.imgur.com/L1pU4VY.png" alt="派蒙">
             <span>派蒙</span>
         </div>
-
+        <div class="character Other" onclick="toggleSelection(this, 'Dainsleif')">
+            <img src="https://i.imgur.com/0ewKR44.png" alt="戴因斯雷布">
+            <span>戴因</span>
+        </div>
+        <div class="character Other" onclick="toggleSelection(this, 'Mavuika')">
+            <img src="https://i.imgur.com/rt6RONR.png" alt="瑪薇卡">
+            <span>瑪薇卡</span>
+        </div>
+        <div class="character Other" onclick="toggleSelection(this, 'Citlali')">
+            <img src="https://i.imgur.com/ewkKAQu.png" alt="茜特菈莉">
+            <span>茜特菈莉</span>
+        </div>
+        <div class="character Other" onclick="toggleSelection(this, 'Capitano')">
+            <img src="https://i.imgur.com/hwY31ru.png" alt="隊長">
+            <span>隊長</span>
+        </div>
+        <div class="character Other" onclick="toggleSelection(this, 'Iansan')">
+            <img src="https://i.imgur.com/MKuFTVE.png" alt="伊安珊">
+            <span>伊安珊</span>
+        </div>
     </div>
 
     <div id="generated-url-container">
