@@ -1000,10 +1000,14 @@
     <script src="img/manifest.js"></script>
     <script>
         var STORAGE_KEY = 'genshin-search-state';
-        var SETTINGS_KEY = 'genshin-search-settings';
         var TAG_ORDER = ['en', 'ja', 'tw', 'cn'];
         var DEFAULT_SETTINGS = { logic: 'and', langs: ['tw', 'cn', 'en', 'ja'], advanced: false };
-        var settings = loadSettings();
+        // 設定不會被記住：每次開啟網頁都從預設值開始（AND、四種語言全選、不開進階搜尋）
+        var settings = {
+            logic: DEFAULT_SETTINGS.logic,
+            langs: DEFAULT_SETTINGS.langs.slice(),
+            advanced: DEFAULT_SETTINGS.advanced,
+        };
         var LOCAL_ICONS = window.LOCAL_ICONS || {};
         var charactersById = {};
         CHARACTERS.forEach(function (c) { charactersById[c.id] = c; });
@@ -1235,28 +1239,7 @@
             });
         }
 
-        // ===== 設定：搜尋邏輯與語言，存在 localStorage =====
-        function loadSettings() {
-            var saved = {};
-            try {
-                saved = JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {};
-            } catch (e) { /* 無痕模式或資料損壞時使用預設值 */ }
-            var langs = Array.isArray(saved.langs) ? saved.langs.filter(function (l) {
-                return DEFAULT_SETTINGS.langs.indexOf(l) >= 0;
-            }) : [];
-            return {
-                logic: saved.logic === 'or' ? 'or' : 'and',
-                langs: langs.length > 0 ? langs : DEFAULT_SETTINGS.langs.slice(),
-                advanced: saved.advanced === true,
-            };
-        }
-
-        function saveSettings() {
-            try {
-                localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-            } catch (e) { /* 同上 */ }
-        }
-
+        // ===== 設定：搜尋邏輯、語言與進階搜尋 =====
         function initSettingsPanel() {
             var panel = document.getElementById('settings-panel');
             var gear = document.getElementById('settings-btn');
@@ -1266,7 +1249,6 @@
                 input.checked = input.value === settings.logic;
                 input.addEventListener('change', function () {
                     settings.logic = input.value;
-                    saveSettings();
                     update();
                 });
             });
@@ -1286,7 +1268,6 @@
                         return;
                     }
                     settings.langs = checked.map(function (i) { return i.value; });
-                    saveSettings();
                     update();
                 });
             });
@@ -1295,7 +1276,6 @@
             advanced.checked = settings.advanced;
             advanced.addEventListener('change', function () {
                 settings.advanced = advanced.checked;
-                saveSettings();
                 update();
             });
 
