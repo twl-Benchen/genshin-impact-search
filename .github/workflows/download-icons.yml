@@ -1,0 +1,34 @@
+# characters.js 有變動時，自動下載角色圖片到 img/ 並提交。
+# 也可以在 GitHub 的 Actions 分頁手動執行。
+name: 下載角色圖片
+
+on:
+  push:
+    branches: [main]
+    paths: [characters.js]
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 全部重新下載
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/download-icons.mjs ${{ inputs.force && '--force' || '' }}
+      - name: 提交圖片
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898299+github-actions[bot]@users.noreply.github.com"
+          git add img
+          git diff --cached --quiet || git commit -m "更新角色圖片"
+          git push

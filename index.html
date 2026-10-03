@@ -1,7 +1,21 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-Hant">
 <head>
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>原神角色 𝕏 圖片搜尋</title>
+    <meta name="description" content="點選原神角色，一鍵產生 𝕏（Twitter）hashtag 搜尋網址，快速找到角色圖片與同人圖。">
+    <meta name="theme-color" content="#4CAF50">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✨</text></svg>">
+
+    <!-- 分享連結時的預覽（Discord、LINE、𝕏 等） -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="原神角色 𝕏 圖片搜尋">
+    <meta property="og:description" content="點選原神角色，一鍵產生 𝕏 hashtag 搜尋網址，快速找到角色圖片。">
+    <meta property="og:url" content="https://twl-benchen.github.io/genshin-impact-search/">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary">
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -9,796 +23,414 @@
             -webkit-tap-highlight-color: transparent; /* 去除手機點擊時的藍色區塊 */
         }
 
-        .checkbox-group {
+        h1 {
+            font-size: 1.5em;
+            text-align: center;
+        }
+
+            h1 small {
+                font-size: 16px;
+                font-weight: normal;
+            }
+
+        /* 鍵盤操作時的焦點框（滑鼠點擊不會出現） */
+        button:focus-visible,
+        a:focus-visible {
+            outline: 3px solid #007BFF;
+            outline-offset: 2px;
+        }
+
+        /* ===== 元素篩選列 ===== */
+        .element-filter {
             display: flex;
-            flex-wrap: wrap; /* 自動換行 */
-            justify-content: flex-start; /* 從左側開始排列 */
-            gap: 10px; /* 每個角色之間的間距 */
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .element-icon {
+            width: 39px;
+            height: 39px;
+            padding: 0;
+            border-radius: 50%;
+            border: 2px solid rgb(153, 153, 153);
+            background: none;
+            overflow: hidden;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+            .element-icon img {
+                width: 28px;
+                height: 28px;
+            }
+
+            .element-icon:hover,
+            .element-icon[aria-pressed="true"] {
+                transform: scale(1.1);
+                box-shadow: 0 0 10px 4px rgb(191, 191, 191);
+            }
+
+        /* ===== 角色列表 ===== */
+        .character-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            gap: 10px;
         }
 
         .character {
-            display: inline-block;
+            flex: 0 0 calc(10% - 10px); /* 桌面：每行 10 個角色 */
+            max-width: calc(10% - 10px);
+            padding: 0;
+            border: none;
+            background: none;
+            font: inherit;
+            color: inherit;
             text-align: center;
-            flex: 0 0 calc(10% - 10px); /* 預設桌面模式：每行 10 個角色 */
-            max-width: calc(10% - 10px); /* 防止超出容器 */
             cursor: pointer;
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* 名稱換行時圖片仍對齊頂端 */
         }
 
-            .character img {
-                width: 100px; /* 電腦螢幕上的圖片大小 */
+            .character[hidden] {
+                display: none;
+            }
+
+            .character img,
+            .character .placeholder {
+                width: 100px;
                 height: 100px;
                 display: block;
                 margin: 0 auto 10px;
-                border: 4px solid transparent; /* 初始無邊框 */
-                border-radius: 10px; /* 四角圓弧 */
-                transition: border 0.3s ease, transform 0.3s ease; /* 增加邊框和縮放過渡效果 */
+                border: 4px solid transparent;
+                border-radius: 10px;
+                box-sizing: content-box;
+                transition: border 0.3s ease, transform 0.3s ease;
             }
 
-            .character.selected img {
-                /*border-color: rgb(255 0 0 / 0.47); /* 被選中後顯示紅色邊框 */
-                transform: scale(1.05); /* 被選中時放大一點點 */
-            }
-            .character.Pyro.selected img {
-                border-color: rgba(255, 102, 64, 0.5); /* 火 Pyro - 橙色 */
-            }
-
-            .character.Hydro.selected img {
-                border-color: rgba(0, 192, 255, 0.5); /* 水 Hydro - 淺藍色 */
+            /* 圖片載入失敗時的替代方塊 */
+            .character .placeholder {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #eee;
+                color: #666;
+                font-size: 28px;
             }
 
-            .character.Anemo.selected img {
-                border-color: rgba(53, 215, 161, 0.5); /* 風 Anemo - 淺綠色 */
+            .character[aria-pressed="true"] img,
+            .character[aria-pressed="true"] .placeholder {
+                transform: scale(1.05);
+                border-color: var(--element-color);
             }
 
-            .character.Electro.selected img {
-                border-color: rgba(204, 128, 255, 0.5); /* 雷 Electro - 紫色 */
-            }
+            .character.Pyro { --element-color: rgba(255, 102, 64, 0.5); }
+            .character.Hydro { --element-color: rgba(0, 192, 255, 0.5); }
+            .character.Anemo { --element-color: rgba(53, 215, 161, 0.5); }
+            .character.Electro { --element-color: rgba(204, 128, 255, 0.5); }
+            .character.Dendro { --element-color: rgba(155, 229, 61, 0.5); }
+            .character.Cryo { --element-color: rgba(123, 242, 242, 0.5); }
+            .character.Geo { --element-color: rgba(255, 182, 30, 0.5); }
+            .character.Other { --element-color: rgba(255, 255, 102, 0.5); }
 
-            .character.Dendro.selected img {
-                border-color: rgba(155, 229, 61, 0.5); /* 草 Dendro - 綠色 */
-            }
-
-            .character.Cryo.selected img {
-                border-color: rgba(123, 242, 242, 0.5); /* 冰 Cryo - 冰藍色 */
-            }
-
-            .character.Geo.selected img {
-                border-color: rgba(255, 182, 30, 0.5); /* 岩 Geo - 金色 */
-            }
-
-            .character.Other.selected img {
-                border-color: rgba(255, 255, 102, 0.5); /* 其他 - 金色 */
-            }
-            .character:focus,
-            .character:active {
-                outline: none; /* 移除焦點的外框 */
-                background: none; /* 移除點擊時的藍色背景 */
-                user-select: none;
-            }
-
-        /* 手機模式：小於 1000px 時，每行顯示 5 個角色 */
+        /* 手機：小於 1000px 時每行 5 個角色 */
         @media screen and (max-width: 1000px) {
             .character {
-                flex: 0 0 calc(20% - 10px); /* 手機模式：每行 5 個角色 */
+                flex: 0 0 calc(20% - 10px);
                 max-width: calc(20% - 10px);
             }
 
-                .character img {
-                    width: 60px; /* 手機圖片縮小 */
+            .element-filter {
+                gap: 6px;
+            }
+
+                .character img,
+                .character .placeholder {
+                    width: 60px;
                     height: 60px;
+                    font-size: 20px;
                 }
         }
 
-        /* 美化按鈕 */
-        button {
+        /* ===== 按鈕 ===== */
+        .btn {
             display: inline-block;
-            background-color: #4CAF50; /* 綠色背景 */
-            color: white; /* 按鈕文字顏色 */
+            background-color: #4CAF50;
+            color: white;
             font-size: 16px;
             font-weight: bold;
             padding: 10px 20px;
             border: none;
-            border-radius: 5px; /* 圓角按鈕 */
+            border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease; /* 添加按鈕過渡效果 */
+            text-decoration: none;
+            white-space: nowrap;
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
-            button:hover {
-                background-color: #45a049; /* 滑鼠移過時稍微變暗 */
-                transform: scale(1.05); /* 稍微放大 */
+            .btn:hover {
+                transform: scale(1.05);
             }
 
-            button:active {
-                transform: scale(0.95); /* 按下時稍微縮小 */
+            .btn:active {
+                transform: scale(0.95);
             }
 
-        #generated-url-container {
-            margin-top: 20px;
-        }
-
-        #view-results-btn {
-            background-color: #007BFF; /* 藍色背景 */
-        }
-
-            #view-results-btn:hover {
-                background-color: #0056b3; /* 藍色變暗 */
+            .btn[hidden] {
+                display: none;
             }
 
-        #clear-selection-btn {
-            background-color: #FF4500; /* 橘紅色背景 */
-        }
-
-            #clear-selection-btn:hover {
-                background-color: #e03c00; /* 橘紅色變暗 */
-            }
-
-        #copy-url-btn {
-            background-color: #FF8C00; /* 橘色背景 */
-        }
-
-            #copy-url-btn:hover {
-                background-color: #E67E00; /* 橘色變暗 */
-            }
+        #view-results-btn { background-color: #007BFF; }
+        #view-results-btn:hover { background-color: #0056b3; }
+        #clear-selection-btn { background-color: #FF4500; }
+        #clear-selection-btn:hover { background-color: #e03c00; }
+        #copy-url-btn { background-color: #FF8C00; }
+        #copy-url-btn:hover { background-color: #E67E00; }
 
         #url-container {
             display: flex;
             align-items: center;
-            gap: 10px; /* 按鈕與網址間距 */
+            gap: 10px;
+            margin-top: 20px;
         }
 
         #generated-url {
-            word-break: break-all; /* 長網址換行 */
+            flex: 1;
+            margin: 0;
+            word-break: break-all;
             font-size: 14px;
         }
-        #generated-url-container {
-            margin-top: 20px;
-            text-align: center; /* 使內部元素居中 */
-        }
 
-        #view-results-btn,
-        #clear-selection-btn {
-            display: inline-block; /* 使按鈕並排顯示 */
-            margin: 10px; /* 按鈕之間的間隔 */
-        }
-
-        #copy-url-btn {
-            display: inline-block; /* 使複製按鈕顯示為行內塊 */
-            margin: 10px;
-        }
-
-        /* 使用 Flexbox 讓所有圖示置中並排放 */
-        div {
-            display: flex;
-            justify-content: center; /* 置中對齊 */
-            gap: 20px; /* 圖示之間的間距 */
-        }
-
-        /* 使每個標籤圖示變為圓形並加上黑框 */
-        .element-icon {
-            position: relative;
-            width: 35px; /* 圓形圖示的寬度 */
-            height: 35px; /* 圓形圖示的高度 */
-            border-radius: 50%; /* 使容器變圓形 */
-            border: 2px solid rgb(153, 153, 153);
-            overflow: hidden; /* 保證圖片不會超出圓形範圍 */
-            transition: transform 0.3s ease, box-shadow 0.3s ease; /* 加入變化過渡效果 */
+        .actions {
             display: flex;
             justify-content: center;
-            align-items: center;
+            gap: 20px;
+            margin: 10px 0 70px;
         }
 
-            /* 選中狀態的樣式 */
-            .element-icon.selected {
-                transform: scale(1.1); /* 放大圖示 */
-                box-shadow: 0 0 10px 4px rgb(191, 191, 191); /* 外圍框線（灰色陰影效果） */
+        #line-community-icon {
+            position: fixed;
+            bottom: 15px;
+            left: 5px;
+            z-index: 1000;
+        }
+
+            #line-community-icon img {
+                width: 40px;
+                height: 40px;
+                border-radius: 15px;
+                border: 3px solid #ffffff;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             }
-
-        /* 控制圖片的大小，保持在圓形內 */
-        #Pyro img, #Hydro img, #Anemo img, #Electro img, #Dendro img, #Cryo img, #Geo img, #Other img {
-            width: 28px; /* 圖示寬度 */
-            height: 28px; /* 圖示高度 */
-        }
-
-        /* 鼠標懸停時的放大效果 */
-        .element-icon:hover {
-            transform: scale(1.1); /* 鼠標懸停時稍微放大 */
-            box-shadow: 0 0 10px 2px rgb(191, 191, 191); /* 增加陰影 */
-        }
-        /*包在div的空格*/
-        .spacer {
-            height: 20px; /* 設定分隔區的高度，例如 20px */
-        }
-
-
     </style>
 </head>
 <body>
-    <h2 style="text-align: center;">
+    <h1>
         選擇要尋找的角色
-        <span style="font-size: 16px; display: inline;">(建議登入𝕏帳號)</span>
-    </h2>
+        <small>(建議登入𝕏帳號)</small>
+    </h1>
 
-    <div style="display: flex; justify-content: center; gap: 10px;">
-        <!-- Fire Icon -->
-        <div id="Pyro" onclick="filterByTag('Pyro')" class="element-icon" style="cursor: pointer;">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/03/27/ac3123b42bf631685287e76c8c834a6c_564491877314389852.png" alt="Fire Icon">
-        </div>
+    <div class="element-filter" id="element-filter" role="group" aria-label="依元素篩選"></div>
 
-        <!-- Hydro Icon -->
-        <div id="Hydro" onclick="filterByTag('Hydro')" class="element-icon" style="cursor: pointer;">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/03/27/f54c8f0dae23fced358c28126f220a11_8997562060019157249.png" alt="Hydro Icon">
-        </div>
+    <div class="character-list" id="character-list" role="group" aria-label="角色"></div>
 
-        <!-- Anemo Icon -->
-        <div id="Anemo" onclick="filterByTag('Anemo')" class="element-icon" style="cursor: pointer;">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/03/27/6b5c0d861fd1b4791bd602d3e7296598_8700657350379813969.png" alt="Anemo Icon">
-        </div>
-
-        <!-- Electro Icon -->
-        <div id="Electro" onclick="filterByTag('Electro')" class="element-icon" style="cursor: pointer;">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/03/27/16d344b6abbc369a2db9d46d6f31305b_7144738962629629573.png" alt="Electro Icon">
-        </div>
-
-        <!-- Dendro Icon -->
-        <div id="Dendro" onclick="filterByTag('Dendro')" class="element-icon" style="cursor: pointer;">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/03/27/bda7c6cf71ea059c6abc086405a7cdd5_1717146848708050949.png" alt="Dendro Icon">
-        </div>
-
-        <!-- Cryo Icon -->
-        <div id="Cryo" onclick="filterByTag('Cryo')" class="element-icon" style="cursor: pointer;">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/03/27/157c22f5fd473d3c1684c6ee981540b6_1601711336893201442.png" alt="Cryo Icon">
-        </div>
-
-        <!-- Geo Icon -->
-        <div id="Geo" onclick="filterByTag('Geo')" class="element-icon" style="cursor: pointer;">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/03/27/9c4cd6e14b87fc262cca36e6d0e9bdb0_1526899214861833594.png" alt="Geo Icon">
-        </div>
-
-        <!-- Other Icon -->
-        <div id="Other" onclick="filterByTag('Other')" class="element-icon" style="cursor: pointer;">
-            <img src="https://i.imgur.com/EKrk37M.png" alt="Other Icon">
-        </div>
+    <div id="url-container" aria-live="polite">
+        <p id="generated-url"></p>
+        <button type="button" class="btn" id="copy-url-btn" hidden>複製</button>
     </div>
-    <div class="spacer"></div>
-
-
-
-    <div class="checkbox-group">
-        <div class="character Pyro" onclick="toggleSelection(this, 'Klee')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Klee_icon.png" alt="可莉">
-            <span>可莉</span>
-        </div>
-        <div class="character Pyro" onclick="toggleSelection(this, 'Amber')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Amber_icon.png" alt="安柏">
-            <span>安柏</span>
-        </div>
-        <div class="character Pyro" onclick="toggleSelection(this, 'Yoimiya')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Yoimiya_icon.png" alt="宵宮">
-            <span>宵宮</span>
-        </div>
-        <div class="character Pyro" onclick="toggleSelection(this, 'Thoma')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Thoma_icon.png" alt="托馬">
-            <span>托馬</span>
-        </div>
-        <div class="character Pyro" onclick="toggleSelection(this, 'Yanfei')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Yanfei_icon.png" alt="煙緋">
-            <span>煙緋</span>
-        </div>
-        <div class="character Pyro" onclick="toggleSelection(this, 'Bennett')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Bennett_icon.png" alt="班尼特">
-            <span>班尼特</span>
-        </div>
-        <div class="character Pyro" onclick="toggleSelection(this, 'HuTao')">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Hu%2520Tao_icon.png" alt="胡桃">
-            <span>胡桃</span>
-        </div>
-        <div class="character Pyro" onclick="toggleSelection(this, 'Xinyan')">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Xinyan_icon.png" alt="辛焱">
-            <span>辛焱</span>
-        </div>
-        <div class="character Pyro" onclick="toggleSelection(this, 'Diluc')">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Diluc_icon.png" alt="迪盧克">
-            <span>迪盧克</span>
-        </div>
-        <div class="character Pyro" onclick="toggleSelection(this, 'Xiangling')">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Xiangling_icon.png" alt="香菱">
-            <span>香菱</span>
-        </div>
-        <div class="character Pyro" onclick="toggleSelection(this, 'Dehya')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/02/24/35428890/65b22311e1e38ffa45a4928d4005ecee_7076295870986871517.png?x-oss-process=image%2Fformat%2Cwebp" alt="迪希雅">
-            <span>迪希雅</span>
-        </div>
-        <div class="character Pyro" onclick="toggleSelection(this, 'Lyney')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/08/11/35428890/e343d4442cc3b8e243f0d528bb715f75_1232011243947476013.png?x-oss-process=image%2Fformat%2Cwebp" alt="林尼">
-            <span>林尼</span>
-        </div>
-        <div class="character Pyro" onclick="toggleSelection(this, 'Chevreuse')">
-            <img src="https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2024/01/09/35428890/a846729f31f16a987a8696466ebabcc0_6857330048220230431.png?x-oss-process=image%2Fformat%2Cwebp" alt="夏沃蕾">
-            <span>夏沃蕾</span>
-        </div>
-        <div class="character Pyro" onclick="toggleSelection(this, 'Gaming')">
-            <img src="https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2024/01/29/35428890/b041ad23a9d6245efac952a9379c5114_8939761424130236195.png?x-oss-process=image%2Fformat%2Cwebp" alt="嘉明">
-            <span>嘉明</span>
-        </div>
-        <div class="character Pyro" onclick="toggleSelection(this, 'Arlecchino')">
-            <img src="https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2024/04/22/35428890/672e65470bfd14b664596c2a7f7eaaf8_7046130387894981792.png?x-oss-process=image%2Fformat%2Cwebp" alt="阿蕾奇諾">
-            <span>阿蕾奇諾</span>
-        </div>
-        <div class="character Pyro" onclick="toggleSelection(this, 'Mavuika')">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/12/30/2f098b1f15854fd9dafc54998795a59e_864981592196815761.png?x-oss-process=image%2Fformat%2Cwebp" alt="瑪薇卡">
-            <span>瑪薇卡</span>
-        </div>
-
-        <div class="character Hydro" onclick="toggleSelection(this, 'SangonomiyaKokomi')">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Sangonomiya%2520Kokomi_icon.png" alt="珊瑚宮心海">
-            <span>心海</span>
-        </div>
-        <div class="character Hydro" onclick="toggleSelection(this, 'KamisatoAyato')">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Kamisato%2520Ayato_icon.png" alt="神里綾人">
-            <span>神里綾人</span>
-        </div>
-        <div class="character Hydro" onclick="toggleSelection(this, 'Barbara')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Barbara_icon.png" alt="芭芭拉">
-            <span>芭芭拉</span>
-        </div>
-        <div class="character Hydro" onclick="toggleSelection(this, 'Mona')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Mona_icon.png" alt="莫娜">
-            <span>莫娜</span>
-        </div>
-        <div class="character Hydro" onclick="toggleSelection(this, 'Xingqiu')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Xingqiu_icon.png" alt="行秋">
-            <span>行秋</span>
-        </div>
-        <div class="character Hydro" onclick="toggleSelection(this, 'Tartaglia')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Tartaglia_icon.png" alt="達達利亞">
-            <span>達達利亞</span>
-        </div>
-        <div class="character Hydro" onclick="toggleSelection(this, 'Yelan')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Yelan_icon.png" alt="夜蘭">
-            <span>夜蘭</span>
-        </div>
-        <div class="character Hydro" onclick="toggleSelection(this, 'Nilou')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2022/10/10/35428890/586d726f9ebda3506c78beaaa41f13b6_5916447718992361520.png?x-oss-process=image%2Fformat%2Cwebp" alt="妮露">
-            <span>妮露</span>
-        </div>
-        <div class="character Hydro" onclick="toggleSelection(this, 'Candace')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2022/09/28/77454259/2f43da4ece9eabfbde6ec2fcc81b3bff_6412967003441390014.png?x-oss-process=image%2Fformat%2Cwebp" alt="坎蒂絲">
-            <span>坎蒂絲</span>
-        </div>
-        <div class="character Hydro" onclick="toggleSelection(this, 'Neuvillette')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/09/26/35428890/0513aa7f482dbb4778545d02f94956fe_7540616405773975535.png?x-oss-process=image%2Fformat%2Cwebp" alt="那維萊特">
-            <span>那維萊特</span>
-        </div>
-        <div class="character Hydro" onclick="toggleSelection(this, 'Furina')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/11/06/35428890/263e5ea0784d182b393f67a7e24146a5_2961704185113948066.png?x-oss-process=image%2Fformat%2Cwebp" alt="芙寧娜">
-            <span>芙寧娜</span>
-        </div>
-        <div class="character Hydro" onclick="toggleSelection(this, 'Sigewinne')">
-            <img src="https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2024/06/26/35428890/2d607aa4d729030ea04f79919257e311_1172370997840232141.png?x-oss-process=image%2Fformat%2Cwebp" alt="希格雯">
-            <span>希格雯</span>
-        </div>
-        <div class="character Hydro" onclick="toggleSelection(this, 'Mualani')">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/08/26/f4c75caad42923eb91ee760aa2eb473a_7439123622315070718.png?x-oss-process=image%2Fformat%2Cwebp" alt="瑪拉妮">
-            <span>瑪拉妮</span>
-        </div>
-        <div class="character Hydro" onclick="toggleSelection(this, 'Dahlia')">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2025/06/16/255dedc5048565aec2c5af510c6f74a5_7726536808309970424.png?x-oss-process=image%2Fformat%2Cwebp" alt="塔利雅">
-            <span>塔利雅</span>
-        </div>     
-
-        <div class="character Anemo" onclick="toggleSelection(this, 'Sayu')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Sayu_icon.png" alt="早柚">
-            <span>早柚</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'Kazuha')">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Kaedehara%2520Kazuha_icon.png" alt="楓原萬葉">
-            <span>楓原萬葉</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'Venti')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Venti_icon.png" alt="溫迪">
-            <span>溫迪</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'Jean')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Jean_icon.png" alt="琴">
-            <span>琴</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'Sucrose')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Sucrose_icon.png" alt="砂糖">
-            <span>砂糖</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'Xiao')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Xiao_icon.png" alt="魈">
-            <span>魈</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'ShikanoinHeizou')">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Shikanoin%2520Heizou_icon.png" alt="鹿野院平藏">
-            <span>平藏</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'Faruzan')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2022/12/05/35428890/38c12ab46678a4008f83a0e46c900ef5_528211919348170763.png?x-oss-process=image%2Fformat%2Cwebp" alt="琺露珊">
-            <span>琺露珊</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'Wanderer')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2022/12/05/35428890/24d97a22be742fb732ea96f625d1faac_2495743636540582085.png?x-oss-process=image%2Fformat%2Cwebp" alt="流浪者">
-            <span>流浪者</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'Lynette')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/08/14/35428890/436e6f2b9b9006bfe511a98093259daf_7192025380861185061.png?x-oss-process=image%2Fformat%2Cwebp" alt="琳妮特">
-            <span>琳妮特</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'Xianyun')">
-            <img src="https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2024/01/29/35428890/2c2be27f8876e9435ab8c8b933b8408c_7973851751945394462.png?x-oss-process=image%2Fformat%2Cwebp" alt="閒雲">
-            <span>閒雲</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'Chasca')">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/11/18/abe1192cc7aad45f6b273478dd5fa88a_4799372826012752249.png?x-oss-process=image%2Fformat%2Cwebp" alt="恰斯卡">
-            <span>恰斯卡</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'LanYan')">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2025/01/17/02a299cec38b4ef4f21952c37a624258_5744396397316809821.png?x-oss-process=image%2Fformat%2Cwebp" alt="藍硯">
-            <span>藍硯</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'YumemizukiMizuki')">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2025/02/08/11662c12fb353d88bd2b20a2726c9f1c_8013472600677983943.png?x-oss-process=image%2Fformat%2Cwebp" alt="夢見月瑞希">
-            <span>夢見月瑞希</span>
-        </div>
-        <div class="character Anemo" onclick="toggleSelection(this, 'Ifa')">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2025/04/30/ce693d1e36aef5936b2d2db006605fc4_9036718103340803450.png?x-oss-process=image%2Fformat%2Cwebp" alt="伊法">
-            <span>伊法</span>
-        </div>
-
-        
-        <div class="character Electro" onclick="toggleSelection(this, 'Lisa')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Lisa_icon.png" alt="麗莎">
-            <span>麗莎</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'KujouSara')">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Kujou%2520Sara_icon.png" alt="九條裟羅">
-            <span>九條裟羅</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'YaeMiko')">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Yae%2520Miko_icon.png" alt="八重神子">
-            <span>八重神子</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'Keqing')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Keqing_icon.png" alt="刻晴">
-            <span>刻晴</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'Beidou')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Beidou_icon.png" alt="北斗">
-            <span>北斗</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'Fischl')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Fischl_icon.png" alt="菲謝爾">
-            <span>菲謝爾</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'Razor')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Razor_icon.png" alt="雷澤">
-            <span>雷澤</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'RaidenShogun')">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Raiden%2520Shogun_icon.png" alt="雷電將軍">
-            <span>雷電將軍</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'KukiShinobu')">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Kuki%2520Shinobu_icon.png" alt="久岐忍">
-            <span>久岐忍</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'Dori')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2022/09/08/35428890/6539bea71efd0f839db897cfc4094362_3469125131800075941.png?x-oss-process=image%2Fformat%2Cwebp" alt="多莉">
-            <span>多莉</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'Cyno')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2022/09/28/77454259/e09e2bda5e022611fad0dea1bb6518bb_6757667565719577204.png?x-oss-process=image%2Fformat%2Cwebp" alt="賽諾">
-            <span>賽諾</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'Clorinde')">
-            <img src="https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2024/06/04/35428890/770a66030815971c697ab81bc5436329_1296341861352728851.png?x-oss-process=image%2Fformat%2Cwebp" alt="克洛琳德">
-            <span>克洛琳德</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'Sethos')">
-            <img src="https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2024/06/04/35428890/cdb7abfcb86138e5b618946a5466d442_6414132746291261116.png?x-oss-process=image%2Fformat%2Cwebp" alt="賽索斯">
-            <span>賽索斯</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'Ororon')">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/11/18/e4830690f8b6a1ebb02cfbc8ce955671_8091252479018770784.png?x-oss-process=image%2Fformat%2Cwebp" alt="歐洛倫">
-            <span>歐洛倫</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'Iansan')">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2025/03/25/dd9a200a86b792fb1b73ef1ee7de0911_2097378734184941134.png?x-oss-process=image%2Fformat%2Cwebp" alt="伊安珊">
-            <span>伊安珊</span>
-        </div>
-        <div class="character Electro" onclick="toggleSelection(this, 'Varesa')">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2025/03/25/a54efe1bb7e82a589b9af44683a696ca_8635138146175164187.png?x-oss-process=image%2Fformat%2Cwebp" alt="瓦雷莎">
-            <span>瓦雷莎</span>
-        </div>
-        
-        
-        
-        <div class="character Dendro" onclick="toggleSelection(this, 'Tighnari')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2022/08/22/35428890/497dd6fac3d3c652a367c67428550747_306268558608889633.png?x-oss-process=image%2Fformat%2Cwebp" alt="提納里">
-            <span>提納里</span>
-        </div>
-        <div class="character Dendro" onclick="toggleSelection(this, 'Collei')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2022/08/24/194600931/37a18b6b6865c59063003a9380f08225_7758071773430345954.png?x-oss-process=image%2Fformat%2Cwebp" alt="柯萊">
-            <span>柯萊</span>
-        </div>
-        <div class="character Dendro" onclick="toggleSelection(this, 'Nahida')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2022/10/29/35428890/f29490bddc56b4a6773b6c5003bbb853_9091170755650648414.png?x-oss-process=image%2Fformat%2Cwebp" alt="納西妲">
-            <span>納西妲</span>
-        </div>
-        <div class="character Dendro" onclick="toggleSelection(this, 'Yaoyao')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/01/15/35428890/5bc9df1fb67391e4c8080da3d855de53_8974356791001371659.png?x-oss-process=image%2Fformat%2Cwebp" alt="瑤瑤">
-            <span>瑤瑤</span>
-        </div>
-        <div class="character Dendro" onclick="toggleSelection(this, 'Alhaitham')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/01/15/35428890/25249dd20b86c775fb35bdbbd805d9ec_8879881358376735994.png?x-oss-process=image%2Fformat%2Cwebp" alt="艾爾海森">
-            <span>艾爾海森</span>
-        </div>
-        <div class="character Dendro" onclick="toggleSelection(this, 'Kaveh')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/05/02/35428890/2270aba02b92034d7d76b4426be8f53b_7062168821433378650.png?x-oss-process=image%2Fformat%2Cwebp" alt="卡維">
-            <span>卡維</span>
-        </div>
-        <div class="character Dendro" onclick="toggleSelection(this, 'Baizhu')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/05/02/35428890/05599650d7f42e1c4adde373de6b297d_8001303176243726128.png?x-oss-process=image%2Fformat%2Cwebp" alt="白朮">
-            <span>白朮</span>
-        </div>
-        <div class="character Dendro" onclick="toggleSelection(this, 'Kirara')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/05/23/35428890/d1699810632f8c3bc8c1e8c8beb8250f_3141235252861584883.png?x-oss-process=image%2Fformat%2Cwebp" alt="綺良良">
-            <span>綺良良</span>
-        </div>
-        <div class="character Dendro" onclick="toggleSelection(this, 'Emilie')">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/07/31/87ad30965e0c1b45364fdccc51b3429d_6108610286145583716.png?x-oss-process=image%2Fformat%2Cwebp" alt="艾梅莉埃">
-            <span>艾梅莉埃</span>
-        </div>
-        <div class="character Dendro" onclick="toggleSelection(this, 'Kinich')">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/09/12/0099e74b4d0c919f6feab4bade3ab748_5795733017114624391.png?x-oss-process=image%2Fformat%2Cwebp" alt="基尼奇">
-            <span>基尼奇</span>
-        </div>
-
-        <div class="character Cryo" onclick="toggleSelection(this, 'Qiqi')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Qiqi_icon.png" alt="七七">
-            <span>七七</span>
-        </div>
-        <div class="character Cryo" onclick="toggleSelection(this, 'Eula')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Eula_icon.png" alt="優菈">
-            <span>優菈</span>
-        </div>
-        <div class="character Cryo" onclick="toggleSelection(this, 'Kaeya')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Kaeya_icon.png" alt="凱亞">
-            <span>凱亞</span>
-        </div>
-        <div class="character Cryo" onclick="toggleSelection(this, 'Aloy')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Aloy_icon.png" alt="亞蘿伊">
-            <span>亞蘿伊</span>
-        </div>
-        <div class="character Cryo" onclick="toggleSelection(this, 'Ganyu')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Ganyu_icon.png" alt="甘雨">
-            <span>甘雨</span>
-        </div>
-        <div class="character Cryo" onclick="toggleSelection(this, 'Shenhe')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Shenhe_icon.png" alt="申鶴">
-            <span>申鶴</span>
-        </div>
-        <div class="character Cryo" onclick="toggleSelection(this, 'KamisatoAyaka')">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Kamisato%2520Ayaka_icon.png" alt="神里綾華">
-            <span>神里綾華</span>
-        </div>
-        <div class="character Cryo" onclick="toggleSelection(this, 'Rosaria')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Rosaria_icon.png" alt="蘿莎莉亞">
-            <span>蘿莎莉亞</span>
-        </div>
-        <div class="character Cryo" onclick="toggleSelection(this, 'Diona')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Diona_icon.png" alt="迪奧娜">
-            <span>迪奧娜</span>
-        </div>
-        <div class="character Cryo" onclick="toggleSelection(this, 'Chongyun')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Chongyun_icon.png" alt="重雲">
-            <span>重雲</span>
-        </div>
-        <div class="character Cryo" onclick="toggleSelection(this, 'Layla')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2022/11/15/35428890/48a495acadaf37f12d0a7f653d85bd83_7085430198590697354.png?x-oss-process=image%2Fformat%2Cwebp" alt="萊依拉">
-            <span>萊依拉</span>
-        </div>
-        <div class="character Cryo" onclick="toggleSelection(this, 'Mika')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/03/21/35428890/da13e3b1a2c6c0e5892b201cec735f9b_6392765476968311284.png?x-oss-process=image%2Fformat%2Cwebp" alt="米卡">
-            <span>米卡</span>
-        </div>
-        <div class="character Cryo" onclick="toggleSelection(this, 'Freminet')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/09/03/35428890/8e44111a378f4e5379b8e7444e8c2daa_4713775899437074849.png?x-oss-process=image%2Fformat%2Cwebp" alt="菲米尼">
-            <span>菲米尼</span>
-        </div>
-        <div class="character Cryo" onclick="toggleSelection(this, 'Wriothesley')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/10/15/35428890/31a0eb2dec5d69ca8dd7616572136b8b_8886987124386670150.png?x-oss-process=image%2Fformat%2Cwebp" alt="萊歐斯利">
-            <span>萊歐斯利</span>
-        </div>
-        <div class="character Cryo" onclick="toggleSelection(this, 'Charlotte')">
-            <img src="https://upload-static.hoyoverse.com/hoyolab-wiki/2023/11/06/35428890/7bbbff3f35661a93b5091b1f17fae6c0_6927814687713967999.png?x-oss-process=image%2Fformat%2Cwebp" alt="夏洛蒂">
-            <span>夏洛蒂</span>
-        </div>
-        <div class="character Cryo" onclick="toggleSelection(this, 'Citlali')">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/12/27/c4ab2530bb8bbe3c0e811684f97ec124_6688582217610741079.png?x-oss-process=image%2Fformat%2Cwebp" alt="茜特菈莉">
-            <span>茜特菈莉</span>
-        </div>
-        <div class="character Cryo" onclick="toggleSelection(this, 'Escoffier')">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2025/04/30/ddbc128157d69479f61747f0918f9e72_2470321636402108639.png?x-oss-process=image%2Fformat%2Cwebp" alt="愛可菲">
-            <span>愛可菲</span>
-        </div>
-        <div class="character Cryo" onclick="toggleSelection(this, 'Skirk')">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2025/06/16/48dba0c10560a3ef573f17d97408b5a0_2527001828446746987.png?x-oss-process=image%2Fformat%2Cwebp" alt="絲柯克">
-            <span>絲柯克</span>
-        </div>
-        
-        
-        <div class="character Geo" onclick="toggleSelection(this, 'YunJin')">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Yun%2520Jin_icon.png" alt="雲堇">
-            <span>雲堇</span>
-        </div>
-        <div class="character Geo" onclick="toggleSelection(this, 'Gorou')">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Gorou_icon.png" alt="五郎">
-            <span>五郎</span>
-        </div>
-        <div class="character Geo" onclick="toggleSelection(this, 'Ningguang')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Ningguang_icon.png" alt="凝光">
-            <span>凝光</span>
-        </div>
-        <div class="character Geo" onclick="toggleSelection(this, 'AratakiItto')">
-            <img src="https://wiki.hoyolab.com/_ipx/f_webp/https://bbs.hoyolab.com/hoyowiki/picture/character/Arataki%2520Itto_icon.png" alt="荒瀧一斗">
-            <span>荒瀧一斗</span>
-        </div>
-        <div class="character Geo" onclick="toggleSelection(this, 'Noelle')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Noelle_icon.png" alt="諾艾爾">
-            <span>諾艾爾</span>
-        </div>
-        <div class="character Geo" onclick="toggleSelection(this, 'Zhongli')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Zhongli_icon.png" alt="鍾離">
-            <span>鍾離</span>
-        </div>
-        <div class="character Geo" onclick="toggleSelection(this, 'Albedo')">
-            <img src="https://bbs.hoyolab.com/hoyowiki/picture/character/Albedo_icon.png" alt="阿貝多">
-            <span>阿貝多</span>
-        </div>
-        <div class="character Geo" onclick="toggleSelection(this, 'Navia')">
-            <img src="https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2023/12/18/35428890/3fc7580c01a9e622692402889706c4db_8301615651200775487.png?x-oss-process=image%2Fformat%2Cwebp" alt="娜維婭">
-            <span>娜維婭</span>
-        </div>
-        <div class="character Geo" onclick="toggleSelection(this, 'Chiori')">
-            <img src="https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2024/03/11/35428890/5470f90694af13476e49be7b8346e2b1_5366587928381003654.png?x-oss-process=image%2Fformat%2Cwebp" alt="千織">
-            <span>千織</span>
-        </div>
-        <div class="character Geo" onclick="toggleSelection(this, 'Kachina')">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/08/23/26925adb1092d29c8afdf46d92fad8bd_343637410022641529.png?x-oss-process=image%2Fformat%2Cwebp" alt="卡齊娜">
-            <span>卡齊娜</span>
-        </div>
-        <div class="character Geo" onclick="toggleSelection(this, 'Xilonen')">
-            <img src="https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/09/25/b07074c2b9040516fd240b6b8d65c011_2487211347344319683.png?x-oss-process=image%2Fformat%2Cwebp" alt="希諾寧">
-            <span>希諾寧</span>
-        </div>
-
-        <div class="character Other" onclick="toggleSelection(this, 'Aether')">
-            <img src="https://i.imgur.com/6FqOBHn.png" alt="空">
-            <span>空</span>
-        </div>
-
-        <div class="character Other" onclick="toggleSelection(this, 'Lumine')">
-            <img src="https://i.imgur.com/p0BAXCB.png" alt="熒">
-            <span>熒</span>
-        </div>
-        <div class="character Other" onclick="toggleSelection(this, 'Paimon')">
-            <img src="https://i.imgur.com/L1pU4VY.png" alt="派蒙">
-            <span>派蒙</span>
-        </div>
-        <div class="character Other" onclick="toggleSelection(this, 'Dainsleif')">
-            <img src="https://i.imgur.com/0ewKR44.png" alt="戴因斯雷布">
-            <span>戴因</span>
-        </div>
-        <div class="character Other" onclick="toggleSelection(this, 'Capitano')">
-            <img src="https://i.imgur.com/hwY31ru.png" alt="隊長">
-            <span>隊長</span>
-        </div>
-
+    <div class="actions">
+        <a class="btn" id="view-results-btn" href="#" target="_blank" rel="noopener" hidden>前往𝕏頁面</a>
+        <button type="button" class="btn" id="clear-selection-btn">清空選取</button>
     </div>
 
-    <div id="generated-url-container">
-        <div id="url-container" style="display: flex; align-items: center; gap: 10px;">
-            <p id="generated-url" style="flex: 1; word-break: break-all; margin: 0;"></p>
-            <button id="copy-url-btn" style="display: none; white-space: nowrap;" onclick="copyToClipboard()">複製</button>
-
-        </div>
-    </div>
-    <div>
-        <button id="view-results-btn" style="display:none;" onclick="window.open(document.getElementById('generated-url').innerText, '_blank')">前往𝕏頁面</button>
-        <button id="clear-selection-btn" onclick="clearSelection()">清空選取</button>
-    </div>
-
-    <div id="line-community-icon" style="position: fixed; bottom: 15px; left: 5px; z-index: 1000;">
-        <a href="https://line.me/ti/g2/ws_23JibNNAGaEja-adxJv8q8f-oHEX7Jxl77w?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank">
+    <div id="line-community-icon">
+        <a href="https://line.me/ti/g2/ws_23JibNNAGaEja-adxJv8q8f-oHEX7Jxl77w?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener">
             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdBmNgZmnl4lPSOnIgbzy4uJXnL_Okl_WDSAtHvbb1d3t58ZZbICa9IMWBuB8as4jIkM4&usqp=CAU"
-                 alt="Line 社群圖示"
-                 style="width: 40px; height: 40px; border-radius: 15px; border: 3px solid #ffffff; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                 alt="加入 LINE 社群">
         </a>
     </div>
 
-
+    <script src="characters.js"></script>
+    <!-- 本地圖片清單，由 scripts/download-icons.mjs 產生 -->
+    <script src="img/manifest.js"></script>
     <script>
+        var STORAGE_KEY = 'genshin-search-state';
+        var LOCAL_ICONS = window.LOCAL_ICONS || {};
+        var charactersById = {};
+        CHARACTERS.forEach(function (c) { charactersById[c.id] = c; });
+
         var selectedRoles = [];
+        var activeElement = null;
 
-        function toggleSelection(element, role) {
-            if (element.classList.contains('selected')) {
-                element.classList.remove('selected');
-                selectedRoles = selectedRoles.filter(item => item !== role);
-            } else {
-                element.classList.add('selected');
-                selectedRoles.push(role);
-            }
-            updateGeneratedURL();
-        }
-
-        function updateGeneratedURL() {
-            var urlElement = document.getElementById('generated-url');
-            var resultsButton = document.getElementById('view-results-btn');
-            var copyButton = document.getElementById('copy-url-btn');
-
-            if (selectedRoles.length > 0) {
-                var queryString = selectedRoles.map(role => '%23' + encodeURIComponent(role)).join('+');
-                var url = 'https://x.com/search?q=' + queryString;
-                urlElement.innerText = url;
-                resultsButton.style.display = 'inline-block';
-                copyButton.style.display = 'inline-block';
-            } else {
-                urlElement.innerText = '';
-                resultsButton.style.display = 'none';
-                copyButton.style.display = 'none';
-            }
-        }
-
-        function copyToClipboard() {
-            var url = document.getElementById('generated-url').innerText;
-            var button = document.getElementById('copy-url-btn');
-
-            navigator.clipboard.writeText(url).then(() => {
-                // 改變按鈕文字
-                button.innerText = '已複製';
-
-                // 調整字體大小
-                button.style.fontSize = '14px';  // 字體變小
-
-                // 兩秒後恢復原狀
-                setTimeout(() => {
-                    button.innerText = '複製';
-                    button.style.fontSize = '16px';  // 恢復原來字體大小
-                }, 2000);
-            });
-        }
-
-        // 根據所選標籤過濾角色顯示並放大選取的圖示
-        function filterByTag(tag) {
-            const characters = document.querySelectorAll('.character');
-            const icons = document.querySelectorAll('.element-icon');
-
-            // 移除所有圖示的選擇狀態
-            icons.forEach(icon => icon.classList.remove('selected'));
-
-            // 顯示所選標籤的角色
-            characters.forEach(character => {
-                if (character.classList.contains(tag)) {
-                    character.style.display = 'block'; // 顯示具有該標籤的角色
-                } else {
-                    character.style.display = 'none'; // 隱藏不具有該標籤的角色
+        // 優先用本地圖片，失敗時改用原網址，再失敗就顯示名稱首字
+        function createIcon(localKey, remoteUrl, alt, fallbackText) {
+            var img = document.createElement('img');
+            var sources = [LOCAL_ICONS[localKey], remoteUrl].filter(Boolean);
+            img.alt = alt;
+            img.loading = 'lazy';
+            img.decoding = 'async';
+            img.onerror = function () {
+                sources.shift();
+                if (sources.length > 0) {
+                    img.src = sources[0];
+                } else if (fallbackText) {
+                    var box = document.createElement('span');
+                    box.className = 'placeholder';
+                    box.setAttribute('aria-hidden', 'true');
+                    box.textContent = fallbackText;
+                    img.replaceWith(box);
                 }
-            });
+            };
+            if (sources.length > 0) img.src = sources[0];
+            else setTimeout(img.onerror);
+            return img;
+        }
 
-            // 添加選中狀態到被點擊的圖示
-            const selectedIcon = document.getElementById(tag);
-            selectedIcon.classList.add('selected');
+        function renderElements() {
+            var container = document.getElementById('element-filter');
+            ELEMENTS.forEach(function (el) {
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'element-icon';
+                btn.dataset.element = el.id;
+                btn.title = el.name;
+                btn.setAttribute('aria-label', el.name);
+                btn.setAttribute('aria-pressed', 'false');
+                btn.appendChild(createIcon('element:' + el.id, el.img, ''));
+                btn.addEventListener('click', function () { filterByTag(el.id); });
+                container.appendChild(btn);
+            });
+        }
+
+        function renderCharacters() {
+            var container = document.getElementById('character-list');
+            CHARACTERS.forEach(function (c) {
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'character ' + c.element;
+                btn.dataset.id = c.id;
+                btn.setAttribute('aria-pressed', 'false');
+                btn.appendChild(createIcon(c.id, c.img, '', c.name.charAt(0)));
+                var label = document.createElement('span');
+                label.textContent = c.name;
+                btn.appendChild(label);
+                btn.addEventListener('click', function () { toggleSelection(c.id); });
+                container.appendChild(btn);
+            });
+        }
+
+        function toggleSelection(id) {
+            if (selectedRoles.indexOf(id) >= 0) {
+                selectedRoles = selectedRoles.filter(function (item) { return item !== id; });
+            } else {
+                selectedRoles.push(id);
+            }
+            update();
+        }
+
+        // 點元素只顯示該元素的角色，再點一次同一個元素則顯示全部
+        function filterByTag(element) {
+            activeElement = activeElement === element ? null : element;
+            update();
         }
 
         function clearSelection() {
             selectedRoles = [];
-            var characters = document.querySelectorAll('.character');
-            characters.forEach(character => character.classList.remove('selected'));
-            updateGeneratedURL();
+            update();
         }
+
+        // 每個角色的多個 hashtag 用 OR 組成一組，不同角色之間維持原本的「同時包含」
+        function buildQuery(ids) {
+            return ids.map(function (id) {
+                var tags = charactersById[id].tags.map(function (t) { return '#' + t; });
+                return tags.length > 1 ? '(' + tags.join(' OR ') + ')' : tags[0];
+            }).join(' ');
+        }
+
+        function update() {
+            document.querySelectorAll('.character').forEach(function (btn) {
+                var id = btn.dataset.id;
+                btn.setAttribute('aria-pressed', String(selectedRoles.indexOf(id) >= 0));
+                btn.hidden = activeElement !== null && charactersById[id].element !== activeElement;
+            });
+            document.querySelectorAll('.element-icon').forEach(function (btn) {
+                btn.setAttribute('aria-pressed', String(btn.dataset.element === activeElement));
+            });
+
+            var urlElement = document.getElementById('generated-url');
+            var resultsLink = document.getElementById('view-results-btn');
+            var copyButton = document.getElementById('copy-url-btn');
+            if (selectedRoles.length > 0) {
+                var url = 'https://x.com/search?q=' + encodeURIComponent(buildQuery(selectedRoles));
+                urlElement.textContent = url;
+                resultsLink.href = url;
+            } else {
+                urlElement.textContent = '';
+            }
+            resultsLink.hidden = copyButton.hidden = selectedRoles.length === 0;
+
+            saveState();
+        }
+
+        // ===== 選取狀態：存在網址 (#c=Klee,Nahida&e=Pyro) 與 localStorage =====
+        function saveState() {
+            // id 都是英數字，不需編碼，逗號保留原樣比較好讀
+            var parts = [];
+            if (selectedRoles.length > 0) parts.push('c=' + selectedRoles.join(','));
+            if (activeElement) parts.push('e=' + activeElement);
+            var hash = parts.join('&');
+            history.replaceState(null, '', hash ? '#' + hash : location.pathname + location.search);
+            try {
+                localStorage.setItem(STORAGE_KEY, hash);
+            } catch (e) { /* 無痕模式等情況下 localStorage 可能不能用 */ }
+        }
+
+        function loadState() {
+            var hash = location.hash.slice(1);
+            if (!hash) {
+                try {
+                    hash = localStorage.getItem(STORAGE_KEY) || '';
+                } catch (e) { /* 同上 */ }
+            }
+            var params = new URLSearchParams(hash);
+            selectedRoles = (params.get('c') || '').split(',').filter(function (id, i, arr) {
+                return charactersById[id] && arr.indexOf(id) === i;
+            });
+            var element = params.get('e');
+            activeElement = ELEMENTS.some(function (el) { return el.id === element; }) ? element : null;
+        }
+
+        function copyToClipboard() {
+            var url = document.getElementById('generated-url').textContent;
+            var button = document.getElementById('copy-url-btn');
+            navigator.clipboard.writeText(url).then(function () {
+                button.textContent = '已複製';
+                button.style.fontSize = '14px';
+                setTimeout(function () {
+                    button.textContent = '複製';
+                    button.style.fontSize = '';
+                }, 2000);
+            });
+        }
+
+        renderElements();
+        renderCharacters();
+        document.getElementById('copy-url-btn').addEventListener('click', copyToClipboard);
+        document.getElementById('clear-selection-btn').addEventListener('click', clearSelection);
+        window.addEventListener('hashchange', function () {
+            loadState();
+            update();
+        });
+        loadState();
+        update();
     </script>
 </body>
 </html>
