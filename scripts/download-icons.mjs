@@ -3,7 +3,8 @@
 //       node scripts/download-icons.mjs --force（全部重新下載）
 // 需要 Node.js 18 以上。
 import { createRequire } from 'node:module';
-import { mkdir, readdir, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -60,3 +61,15 @@ const body = Object.entries(manifest).map(([k, v]) => `    ${JSON.stringify(k)}:
 await writeFile(path.join(root, 'img/manifest.js'),
     `// 由 scripts/download-icons.mjs 自動產生，請勿手動編輯\nwindow.LOCAL_ICONS = {\n${body}\n};\n`);
 console.log(`完成：${Object.keys(manifest).length} 張本地圖片，${failed} 張失敗`);
+
+// 依資料內容產生版本號，寫進 index.html 的 ?v=，讓瀏覽器在資料更新後重新下載而不是用舊快取
+const hash = createHash('sha256');
+for (const f of ['characters.js', 'img/manifest.js']) hash.update(await readFile(path.join(root, f)));
+const version = hash.digest('hex').slice(0, 8);
+const indexPath = path.join(root, 'index.html');
+const html = await readFile(indexPath, 'utf8');
+const updated = html.replace(/(src="(?:characters\.js|img\/manifest\.js))(?:\?v=[^"]*)?"/g, `$1?v=${version}"`);
+if (updated !== html) {
+    await writeFile(indexPath, updated);
+    console.log(`index.html 資料版本號更新為 ${version}`);
+}
