@@ -383,25 +383,37 @@
 
         .selected-chips {
             display: flex;
-            gap: 8px;
+            gap: 12px;
             overflow-x: auto;
             padding: 3px 3px 5px;
             scrollbar-width: thin;
         }
 
+        /* 已選角色：頭像在上、tag 在下，兩者置中對齊 */
         .chip {
             --el: var(--other);
-            position: relative;
             flex: 0 0 auto;
-            width: 40px;
-            height: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            min-width: 44px;
             padding: 0;
-            border: 2px solid var(--el);
-            border-radius: 50%;
-            overflow: hidden;
-            background: var(--cream-light);
+            border: none;
+            background: none;
+            font: inherit;
             cursor: pointer;
         }
+
+            .chip-face {
+                position: relative;
+                width: 40px;
+                height: 40px;
+                border: 2px solid var(--el);
+                border-radius: 50%;
+                overflow: hidden;
+                background: var(--cream-light);
+            }
 
             .chip .avatar {
                 width: 100%;
@@ -411,7 +423,7 @@
             }
 
             /* 滑過顯示 × 表示可移除 */
-            .chip::after {
+            .chip-face::after {
                 content: '×';
                 position: absolute;
                 inset: 0;
@@ -425,22 +437,17 @@
                 transition: opacity 0.2s ease;
             }
 
-            .chip:hover::after,
-            .chip:focus-visible::after {
+            .chip:hover .chip-face::after,
+            .chip:focus-visible .chip-face::after {
                 opacity: 1;
             }
 
-        .search-query {
-            margin: 2px 0 0;
-            font-size: 12px;
-            line-height: 1.4;
-            color: var(--gold);
-            word-break: break-all;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
+            .chip-label {
+                font-size: 12px;
+                line-height: 1.2;
+                color: var(--gold);
+                white-space: nowrap;
+            }
 
         .actions {
             display: flex;
@@ -501,10 +508,6 @@
                 padding: 8px 12px 10px;
             }
 
-            .search-query {
-                -webkit-line-clamp: 1;
-            }
-
             .actions {
                 justify-content: center;
             }
@@ -542,8 +545,7 @@
     <div class="action-bar" id="action-bar" aria-hidden="true">
         <div class="action-bar-inner">
             <div class="selection-info">
-                <div class="selected-chips" id="selected-chips" role="group" aria-label="已選角色（點擊移除）"></div>
-                <p class="search-query" id="search-query" aria-live="polite"></p>
+                <div class="selected-chips" id="selected-chips" role="group" aria-label="已選角色（點擊移除）" aria-live="polite"></div>
             </div>
             <div class="actions">
                 <a class="gbtn primary" id="view-results-btn" href="#" target="_blank" rel="noopener"><span class="icon" aria-hidden="true">𝕏</span><span>前往𝕏<span class="long-label">頁面</span></span></a>
@@ -651,7 +653,14 @@
                 chip.style.setProperty('--el', 'var(--' + c.element.toLowerCase() + ')');
                 chip.title = '移除 ' + c.name;
                 chip.setAttribute('aria-label', '移除 ' + c.name);
-                chip.appendChild(createAvatar(c));
+                var face = document.createElement('span');
+                face.className = 'chip-face';
+                face.appendChild(createAvatar(c));
+                chip.appendChild(face);
+                var label = document.createElement('span');
+                label.className = 'chip-label';
+                label.textContent = displayTag(c);
+                chip.appendChild(label);
                 chip.addEventListener('click', function () { toggleSelection(id); });
                 container.appendChild(chip);
             });
@@ -711,7 +720,6 @@
 
             var query = hasSelection ? buildQuery(selectedRoles) : '';
             currentUrl = hasSelection ? 'https://x.com/search?q=' + encodeURIComponent(query) : '';
-            document.getElementById('search-query').textContent = selectedRoles.map(function (id) { return displayTag(charactersById[id]); }).join(' ');
             document.getElementById('view-results-btn').href = currentUrl || '#';
             renderChips();
 
