@@ -262,7 +262,7 @@
 
         /* 被選取：元素色的細光暈（範圍小，不會影響隔壁角色） */
         .character[aria-pressed="true"] .avatar {
-            box-shadow: 0 0 0 2px var(--el), 0 0 6px 1px var(--el);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--el) 75%, transparent), 0 0 6px 1px var(--el);
         }
 
         .character[aria-pressed="true"] .name {
@@ -531,7 +531,7 @@
 <body>
     <h1>
         選擇要尋找的角色
-        <small>(建議登入𝕏帳號)</small>
+        <small>(需要登入𝕏帳號)</small>
     </h1>
     <div class="title-ornament" aria-hidden="true">✦</div>
 
@@ -685,6 +685,15 @@
             }).join(' ');
         }
 
+        // 底部顯示用：只列出繁體中文 tag（例如 #林尼），實際搜尋仍用全部 tag。
+        // 找不到繁中 tag 的角色（如琴、砂糖這類太常見而沒放中文的）就顯示英文 tag。
+        function displayTag(c) {
+            var zh = c.tags.filter(function (t) {
+                return t.indexOf(c.name) >= 0 || c.name.indexOf(t) >= 0;
+            });
+            return '#' + (zh[0] || c.tags[0]);
+        }
+
         function update() {
             var hasSelection = selectedRoles.length > 0;
 
@@ -702,7 +711,7 @@
 
             var query = hasSelection ? buildQuery(selectedRoles) : '';
             currentUrl = hasSelection ? 'https://x.com/search?q=' + encodeURIComponent(query) : '';
-            document.getElementById('search-query').textContent = query;
+            document.getElementById('search-query').textContent = selectedRoles.map(function (id) { return displayTag(charactersById[id]); }).join(' ');
             document.getElementById('view-results-btn').href = currentUrl || '#';
             renderChips();
 
