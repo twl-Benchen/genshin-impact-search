@@ -18,7 +18,6 @@
 | `img/manifest.js` | 自動產生的本地圖片清單 `window.LOCAL_ICONS`，勿手動編輯 |
 | `scripts/download-icons.mjs` | 下載 `characters.js` 裡的圖片到 `img/`、產生 manifest、更新 `index.html` 的資料版本號 |
 | `.github/workflows/download-icons.yml` | `main` 上 `characters.js` 有變動時自動執行上面的腳本並提交（也可手動執行） |
-| `2` | 早期只有兩個角色的雛形，已無用途，可刪 |
 
 資料用 `<script>` 載入而不是 `fetch` JSON，這樣直接雙擊 `index.html`（`file://`）也能用。
 
@@ -114,5 +113,5 @@ const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-119
 - 卡片角落加小元素圖示。
 - 深色模式。
 - `og:image`（現在圖片已在 repo，可以指定分享預覽圖）。
-- 刪除無用的 `2` 檔案、補充 README。
+- 補充 README。
 - 已選角色很多時，𝕏 搜尋語法可能超過長度上限，可考慮提示或限制。
