@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>原神角色 𝕏 圖片搜尋</title>
     <meta name="description" content="點選原神角色，一鍵產生 𝕏（Twitter）hashtag 搜尋網址，快速找到角色圖片與同人圖。">
-    <meta name="theme-color" content="#4CAF50">
+    <meta name="theme-color" content="#3B4255">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✨</text></svg>">
 
     <!-- 分享連結時的預覽（Discord、LINE、𝕏 等） -->
@@ -16,27 +16,117 @@
     <meta property="og:locale" content="zh_TW">
     <meta name="twitter:card" content="summary">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&display=swap">
+
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 10px;
-            -webkit-tap-highlight-color: transparent; /* 去除手機點擊時的藍色區塊 */
+        /* ===== 原神介面配色 ===== */
+        :root {
+            --cream: #ECE5D8;
+            --cream-light: #F6F2EA;
+            --navy: #3B4255;
+            --navy-dark: #2B3142;
+            --gold: #D3BC8E;
+            --gold-light: #FFE6B2;
+
+            --pyro: #FF6640;
+            --hydro: #00B4F0;
+            --anemo: #35D7A1;
+            --electro: #B57BFF;
+            --dendro: #8FD43D;
+            --cryo: #6FDCE8;
+            --geo: #F0AA1E;
+            --other: #E8C760;
+
+            --bar-h: 0px; /* 底部操作列高度，由 JS 更新 */
         }
 
+        /* 背景色調可以平滑轉換 */
+        @property --tint {
+            syntax: '<color>';
+            inherits: true;
+            initial-value: rgba(211, 188, 142, 0.22);
+        }
+
+        body {
+            --tint: rgba(211, 188, 142, 0.22);
+            margin: 0;
+            padding: 10px 10px calc(var(--bar-h) + 20px);
+            font-family: 'Noto Sans TC', 'Microsoft JhengHei', 'PingFang TC', sans-serif;
+            color: var(--navy);
+            background-color: var(--cream-light);
+            -webkit-tap-highlight-color: transparent; /* 去除手機點擊時的藍色區塊 */
+            transition: --tint 0.6s ease, padding-bottom 0.3s ease;
+        }
+
+            /* 選元素篩選時，背景會帶一點該元素的顏色 */
+            body[data-element="Pyro"] { --tint: rgba(255, 102, 64, 0.20); }
+            body[data-element="Hydro"] { --tint: rgba(0, 180, 240, 0.18); }
+            body[data-element="Anemo"] { --tint: rgba(53, 215, 161, 0.20); }
+            body[data-element="Electro"] { --tint: rgba(181, 123, 255, 0.18); }
+            body[data-element="Dendro"] { --tint: rgba(143, 212, 61, 0.20); }
+            body[data-element="Cryo"] { --tint: rgba(111, 220, 232, 0.22); }
+            body[data-element="Geo"] { --tint: rgba(240, 170, 30, 0.20); }
+            body[data-element="Other"] { --tint: rgba(232, 199, 96, 0.22); }
+
+            body::before {
+                content: '';
+                position: fixed;
+                inset: 0;
+                z-index: -1;
+                pointer-events: none;
+                background:
+                    radial-gradient(ellipse 90% 60% at 50% 0%, var(--tint), transparent 70%),
+                    radial-gradient(ellipse 70% 50% at 100% 100%, var(--tint), transparent 70%),
+                    linear-gradient(180deg, #FBF8F2 0%, var(--cream-light) 50%, #EFE9DD 100%);
+            }
+
+        /* ===== 標題 ===== */
         h1 {
-            font-size: 1.5em;
+            margin: 14px 0 6px;
+            padding: 0 52px; /* 留空間給右上角齒輪 */
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.6em;
             text-align: center;
+            letter-spacing: 0.06em;
         }
 
             h1 small {
-                font-size: 16px;
-                font-weight: normal;
+                display: inline-block;
+                font-family: 'Noto Sans TC', sans-serif;
+                font-size: 14px;
+                font-weight: 400;
+                letter-spacing: 0;
+                opacity: 0.7;
+            }
+
+        .title-ornament {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 18px;
+            color: var(--gold);
+            font-size: 12px;
+        }
+
+            .title-ornament::before,
+            .title-ornament::after {
+                content: '';
+                width: min(160px, 25vw);
+                height: 1px;
+                background: linear-gradient(90deg, transparent, var(--gold));
+            }
+
+            .title-ornament::after {
+                transform: scaleX(-1);
             }
 
         /* 鍵盤操作時的焦點框（滑鼠點擊不會出現） */
         button:focus-visible,
         a:focus-visible {
-            outline: 3px solid #007BFF;
+            outline: 3px solid var(--gold);
             outline-offset: 2px;
         }
 
@@ -46,22 +136,22 @@
             flex-wrap: wrap;
             justify-content: center;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 22px;
         }
 
         .element-icon {
-            width: 39px;
-            height: 39px;
+            width: 40px;
+            height: 40px;
             padding: 0;
             border-radius: 50%;
-            border: 2px solid rgb(153, 153, 153);
-            background: none;
+            border: 2px solid rgba(59, 66, 85, 0.25);
+            background: rgba(255, 255, 255, 0.6);
             overflow: hidden;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
         }
 
             .element-icon img {
@@ -69,10 +159,16 @@
                 height: 28px;
             }
 
-            .element-icon:hover,
+            .element-icon:hover {
+                transform: scale(1.08);
+                border-color: var(--gold);
+            }
+
             .element-icon[aria-pressed="true"] {
                 transform: scale(1.1);
-                box-shadow: 0 0 10px 4px rgb(191, 191, 191);
+                border-color: var(--gold);
+                background: #fff;
+                box-shadow: 0 0 0 2px var(--gold-light), 0 2px 10px rgba(211, 188, 142, 0.8);
             }
 
         /* ===== 角色列表 ===== */
@@ -81,9 +177,12 @@
             flex-wrap: wrap;
             justify-content: flex-start;
             gap: 10px;
+            max-width: 1240px;
+            margin: 0 auto;
         }
 
         .character {
+            --el: var(--other);
             flex: 0 0 calc(10% - 10px); /* 桌面：每行 10 個角色 */
             max-width: calc(10% - 10px);
             padding: 0;
@@ -104,151 +203,739 @@
                 display: none;
             }
 
-            .character img,
-            .character .placeholder {
-                width: 100px;
-                height: 100px;
+            .character.Pyro { --el: var(--pyro); }
+            .character.Hydro { --el: var(--hydro); }
+            .character.Anemo { --el: var(--anemo); }
+            .character.Electro { --el: var(--electro); }
+            .character.Dendro { --el: var(--dendro); }
+            .character.Cryo { --el: var(--cryo); }
+            .character.Geo { --el: var(--geo); }
+            .character.Other { --el: var(--other); }
+
+        /* 頭像框：淡淡的星級底色（五星金、四星紫） */
+        .avatar {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin-bottom: 8px;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: box-shadow 0.25s ease, transform 0.25s ease, opacity 0.25s ease, filter 0.25s ease;
+        }
+
+            .rarity-5 .avatar,
+            .avatar.rarity-5 {
+                background: linear-gradient(160deg, rgba(236, 178, 96, 0.30), rgba(196, 128, 64, 0.14));
+            }
+
+            .rarity-4 .avatar,
+            .avatar.rarity-4 {
+                background: linear-gradient(160deg, rgba(168, 128, 212, 0.28), rgba(108, 96, 160, 0.12));
+            }
+
+            .avatar img,
+            .avatar .placeholder {
+                width: 100%;
+                height: 100%;
                 display: block;
-                margin: 0 auto 10px;
-                border: 4px solid transparent;
-                border-radius: 10px;
-                box-sizing: content-box;
-                transition: border 0.3s ease, transform 0.3s ease;
+                object-fit: cover;
+                border-radius: inherit; /* 圖片本身也裁圓角，避免蓋住外框光暈 */
             }
 
             /* 圖片載入失敗時的替代方塊 */
-            .character .placeholder {
+            .avatar .placeholder {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                background: #eee;
-                color: #666;
                 font-size: 28px;
+                opacity: 0.6;
             }
 
-            .character[aria-pressed="true"] img,
-            .character[aria-pressed="true"] .placeholder {
-                transform: scale(1.05);
-                border-color: var(--element-color);
-            }
-
-            .character.Pyro { --element-color: rgba(255, 102, 64, 0.5); }
-            .character.Hydro { --element-color: rgba(0, 192, 255, 0.5); }
-            .character.Anemo { --element-color: rgba(53, 215, 161, 0.5); }
-            .character.Electro { --element-color: rgba(204, 128, 255, 0.5); }
-            .character.Dendro { --element-color: rgba(155, 229, 61, 0.5); }
-            .character.Cryo { --element-color: rgba(123, 242, 242, 0.5); }
-            .character.Geo { --element-color: rgba(255, 182, 30, 0.5); }
-            .character.Other { --element-color: rgba(255, 255, 102, 0.5); }
-
-        /* 手機：小於 1000px 時每行 5 個角色 */
-        @media screen and (max-width: 1000px) {
-            .character {
-                flex: 0 0 calc(20% - 10px);
-                max-width: calc(20% - 10px);
-            }
-
-            .element-filter {
-                gap: 6px;
-            }
-
-                .character img,
-                .character .placeholder {
-                    width: 60px;
-                    height: 60px;
-                    font-size: 20px;
-                }
+        .character .name {
+            font-size: 15px;
+            line-height: 1.3;
+            transition: opacity 0.25s ease;
         }
 
-        /* ===== 按鈕 ===== */
-        .btn {
-            display: inline-block;
-            background-color: #4CAF50;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        .character:hover .avatar {
+            transform: translateY(-2px);
+        }
+
+        /* 被選取：元素色的細光暈（範圍小，不會影響隔壁角色） */
+        .character[aria-pressed="true"] .avatar {
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--el) 55%, transparent), 0 0 6px 1px color-mix(in srgb, var(--el) 70%, transparent);
+        }
+
+        .character[aria-pressed="true"] .name {
+            font-weight: 700;
+        }
+
+        /* 有角色被選取時，其他角色稍微變淡 */
+        .has-selection .character[aria-pressed="false"] .avatar {
+            opacity: 0.6;
+            filter: saturate(0.75);
+        }
+
+        .has-selection .character[aria-pressed="false"] .name {
+            opacity: 0.65;
+        }
+
+        .has-selection .character[aria-pressed="false"]:hover .avatar,
+        .has-selection .character[aria-pressed="false"]:focus-visible .avatar {
+            opacity: 0.85;
+            filter: none;
+        }
+
+        /* ===== 原神風格按鈕 ===== */
+        .gbtn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px 22px 5px 5px;
+            border: 2px solid transparent;
+            border-radius: 999px;
+            background: var(--cream);
+            color: var(--navy);
+            font: inherit;
+            font-size: 15px;
+            font-weight: 500;
             text-decoration: none;
             white-space: nowrap;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            cursor: pointer;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, transform 0.1s ease;
         }
 
-            .btn:hover {
-                transform: scale(1.05);
+            .gbtn:hover {
+                border-color: #fff;
+                box-shadow: 0 0 0 2px var(--gold-light), 0 0 12px rgba(255, 230, 178, 0.6);
             }
 
-            .btn:active {
-                transform: scale(0.95);
+            .gbtn:active {
+                transform: scale(0.97);
+                background: #D9D0BE;
             }
 
-            .btn[hidden] {
+            .gbtn[hidden] {
                 display: none;
             }
 
-        #view-results-btn { background-color: #007BFF; }
-        #view-results-btn:hover { background-color: #0056b3; }
-        #clear-selection-btn { background-color: #FF4500; }
-        #clear-selection-btn:hover { background-color: #e03c00; }
-        #copy-url-btn { background-color: #FF8C00; }
-        #copy-url-btn:hover { background-color: #E67E00; }
+            /* 按鈕左邊的圓形圖示 */
+            .gbtn .icon {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 26px;
+                height: 26px;
+                border-radius: 50%;
+                background: var(--navy);
+                color: var(--cream);
+                font-size: 13px;
+                font-weight: 700;
+                line-height: 1;
+            }
 
-        #url-container {
+            .gbtn.primary {
+                background: var(--gold-light);
+            }
+
+                .gbtn.primary .icon {
+                    background: var(--navy-dark);
+                    color: var(--gold-light);
+                }
+
+                .gbtn.primary:active {
+                    background: #EED3A0;
+                }
+
+        /* ===== 底部固定操作列 ===== */
+        .action-bar {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 900;
+            background: rgba(43, 49, 66, 0.94);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+            color: var(--cream);
+            border-top: 1px solid rgba(211, 188, 142, 0.6);
+            box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.15);
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+
+            .action-bar[aria-hidden="true"] {
+                transform: translateY(110%);
+            }
+
+        .action-bar-inner {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-top: 20px;
+            gap: 16px;
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 10px 16px;
         }
 
-        #generated-url {
+        .selection-info {
             flex: 1;
-            margin: 0;
-            word-break: break-all;
-            font-size: 14px;
+            min-width: 0;
         }
+
+        .selected-chips {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 3px 3px 5px;
+            scrollbar-width: thin;
+        }
+
+        /* 已選角色：頭像在上、tag 在下，兩者置中對齊 */
+        .chip {
+            --el: var(--other);
+            flex: 0 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            min-width: 44px;
+            padding: 0;
+            border: none;
+            background: none;
+            font: inherit;
+            cursor: pointer;
+        }
+
+            .chip-face {
+                position: relative;
+                width: 40px;
+                height: 40px;
+                border: 2px solid var(--el);
+                border-radius: 50%;
+                overflow: hidden;
+                background: var(--cream-light);
+            }
+
+            .chip .avatar {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                border-radius: 0;
+            }
+
+            /* 滑過顯示 × 表示可移除 */
+            .chip-face::after {
+                content: '×';
+                position: absolute;
+                inset: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: rgba(43, 49, 66, 0.6);
+                color: #fff;
+                font-size: 22px;
+                opacity: 0;
+                transition: opacity 0.2s ease;
+            }
+
+            .chip:hover .chip-face::after,
+            .chip:focus-visible .chip-face::after {
+                opacity: 1;
+            }
+
+            .chip-label {
+                font-size: 12px;
+                line-height: 1.2;
+                color: var(--gold);
+                white-space: nowrap;
+            }
 
         .actions {
             display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin: 10px 0 70px;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
         }
 
+        /* ===== LINE 社群 ===== */
         #line-community-icon {
             position: fixed;
-            bottom: 15px;
+            bottom: calc(var(--bar-h) + 15px);
             left: 5px;
             z-index: 1000;
+            transition: bottom 0.3s ease;
         }
 
             #line-community-icon img {
+                display: block;
                 width: 40px;
                 height: 40px;
                 border-radius: 15px;
                 border: 3px solid #ffffff;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             }
+
+        /* ===== 右上角設定齒輪 ===== */
+        .settings-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 46px;
+            height: 46px;
+            padding: 0;
+            border: none;
+            border-radius: 50%;
+            background: none;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+            .settings-btn svg {
+                display: block;
+                width: 100%;
+                height: 100%;
+                filter: drop-shadow(0 2px 4px rgba(43, 49, 66, 0.35));
+                transition: filter 0.25s ease;
+            }
+
+            .settings-btn .gear {
+                transform-origin: 24px 24px;
+                transition: transform 0.6s ease;
+            }
+
+            .settings-btn:hover svg {
+                filter: drop-shadow(0 0 6px rgba(255, 230, 178, 0.9));
+            }
+
+            .settings-btn:hover .gear,
+            .settings-btn[aria-expanded="true"] .gear {
+                transform: rotate(60deg);
+            }
+
+        /* ===== 設定面板（從右側滑出） ===== */
+        .settings-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1100;
+            background: rgba(20, 24, 34, 0.45);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+            .settings-open .settings-overlay {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1200;
+            width: min(380px, 88vw);
+            overflow-y: auto;
+            box-sizing: border-box;
+            padding: 20px 22px 28px;
+            background:
+                radial-gradient(ellipse 120% 40% at 100% 0%, rgba(211, 188, 142, 0.10), transparent 70%),
+                #3A4357;
+            color: var(--cream);
+            border-left: 1px solid rgba(211, 188, 142, 0.35);
+            box-shadow: -8px 0 24px rgba(0, 0, 0, 0.3);
+            transform: translateX(105%);
+            visibility: hidden;
+            transition: transform 0.35s cubic-bezier(0.22, 0.8, 0.3, 1), visibility 0s linear 0.35s;
+        }
+
+            .settings-open .settings-panel {
+                transform: translateX(0);
+                visibility: visible;
+                transition: transform 0.35s cubic-bezier(0.22, 0.8, 0.3, 1);
+            }
+
+            .settings-panel h2 {
+                margin: 0;
+                font-family: 'Noto Serif TC', serif;
+                font-size: 20px;
+                color: var(--gold);
+                letter-spacing: 0.1em;
+            }
+
+            .settings-panel h3 {
+                margin: 0;
+                font-size: 16px;
+                font-weight: 700;
+                color: var(--cream);
+            }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .panel-close {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            border: 2px solid rgba(236, 229, 216, 0.5);
+            border-radius: 50%;
+            background: none;
+            color: var(--cream);
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+            .panel-close:hover {
+                border-color: var(--gold-light);
+                box-shadow: 0 0 8px rgba(255, 230, 178, 0.5);
+            }
+
+        /* 兩端帶小菱形的分隔線（參考 HoYoWiki） */
+        .panel-divider {
+            position: relative;
+            height: 1px;
+            margin: 16px 4px 20px;
+            background: rgba(236, 229, 216, 0.18);
+        }
+
+            .panel-divider::before,
+            .panel-divider::after {
+                content: '';
+                position: absolute;
+                top: -3px;
+                width: 6px;
+                height: 6px;
+                background: rgba(236, 229, 216, 0.35);
+                transform: rotate(45deg);
+            }
+
+            .panel-divider::before { left: -4px; }
+            .panel-divider::after { right: -4px; }
+
+        .setting-section + .setting-section {
+            margin-top: 26px;
+        }
+
+        .setting-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        /* 圓形驚嘆號說明按鈕 */
+        .info-btn {
+            width: 20px;
+            height: 20px;
+            padding: 0;
+            border: 1.5px solid var(--gold);
+            border-radius: 50%;
+            background: none;
+            color: var(--gold);
+            font: inherit;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+            .info-btn:hover,
+            .info-btn[aria-expanded="true"] {
+                background: var(--gold);
+                color: var(--navy-dark);
+            }
+
+        .help-box {
+            margin: -4px 0 14px;
+            padding: 12px 14px;
+            border: 1px solid rgba(211, 188, 142, 0.4);
+            border-radius: 8px;
+            background: rgba(20, 24, 34, 0.35);
+            font-size: 13px;
+            line-height: 1.7;
+            color: rgba(236, 229, 216, 0.9);
+        }
+
+            .help-box p {
+                margin: 0;
+            }
+
+                .help-box p + p {
+                    margin-top: 6px;
+                }
+
+            .help-box strong {
+                color: var(--gold-light);
+                white-space: nowrap; /* tag 不要從 # 後面斷行 */
+            }
+
+            .help-box .note {
+                opacity: 0.7;
+            }
+
+        /* 搜尋邏輯：膠囊切換鈕 */
+        .segmented {
+            position: relative;
+            display: flex;
+            padding: 4px;
+            border-radius: 999px;
+            background: rgba(20, 24, 34, 0.35);
+            border: 1px solid rgba(236, 229, 216, 0.15);
+        }
+
+            /* 會滑動的米白膠囊 */
+            .segmented::before {
+                content: '';
+                position: absolute;
+                top: 4px;
+                bottom: 4px;
+                left: 4px;
+                width: calc(50% - 4px);
+                border-radius: 999px;
+                background: var(--cream);
+                box-shadow: 0 0 0 1px var(--gold-light), 0 0 8px rgba(255, 230, 178, 0.35);
+                transition: transform 0.3s cubic-bezier(0.22, 0.8, 0.3, 1);
+            }
+
+            .segmented:has(input[value="or"]:checked)::before {
+                transform: translateX(100%);
+            }
+
+            .segmented label {
+                position: relative; /* 文字在膠囊上方 */
+                flex: 1;
+                cursor: pointer;
+            }
+
+            .segmented span {
+                display: block;
+                padding: 8px 0;
+                border-radius: 999px;
+                text-align: center;
+                font-weight: 700;
+                letter-spacing: 0.08em;
+                color: rgba(236, 229, 216, 0.75);
+                transition: color 0.3s ease;
+            }
+
+            .segmented label:hover span {
+                color: var(--cream);
+            }
+
+            .segmented input:checked + span {
+                color: var(--navy);
+            }
+
+        /* 視覺上隱藏，但保留鍵盤與螢幕閱讀器操作 */
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            margin: -1px;
+            padding: 0;
+            border: 0;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            white-space: nowrap;
+        }
+
+        .segmented input:focus-visible + span,
+        .check-row input:focus-visible ~ .check-text {
+            outline: 3px solid var(--gold);
+            outline-offset: 2px;
+        }
+
+        /* 搜尋語言：整行文字都是核取方塊 */
+        .lang-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .check-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            border: 1px solid rgba(236, 229, 216, 0.14);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+            .check-row:hover {
+                border-color: rgba(255, 230, 178, 0.5);
+            }
+
+            .check-row:has(input:checked) {
+                background: rgba(236, 229, 216, 0.12);
+                border-color: rgba(211, 188, 142, 0.7);
+            }
+
+            .check-box {
+                position: relative;
+                flex: 0 0 auto;
+                width: 18px;
+                height: 18px;
+                box-sizing: border-box;
+                border: 1.5px solid var(--gold);
+                border-radius: 4px;
+                transition: background-color 0.2s ease;
+            }
+
+            .check-row input:checked ~ .check-box {
+                background: var(--gold);
+            }
+
+                .check-row input:checked ~ .check-box::after {
+                    content: '';
+                    position: absolute;
+                    left: 5px;
+                    top: 1px;
+                    width: 4px;
+                    height: 9px;
+                    border: solid var(--navy-dark);
+                    border-width: 0 2px 2px 0;
+                    transform: rotate(45deg);
+                }
+
+            .check-text {
+                font-size: 15px;
+            }
+
+        .check-with-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+            .check-with-info .check-row {
+                flex: 1;
+            }
+
+            .check-with-info + .help-box {
+                margin: 10px 0 0;
+            }
+
+        .setting-hint {
+            min-height: 1.4em;
+            margin: 8px 0 0;
+            font-size: 12px;
+            color: var(--gold-light);
+        }
+
+        /* ===== 手機 ===== */
+        @media screen and (max-width: 1000px) {
+            .character {
+                flex: 0 0 calc(20% - 10px); /* 每行 5 個角色 */
+                max-width: calc(20% - 10px);
+            }
+
+            .avatar {
+                width: 60px;
+                height: 60px;
+                border-radius: 10px;
+            }
+
+                .avatar .placeholder {
+                    font-size: 20px;
+                }
+
+            .character .name {
+                font-size: 13px;
+            }
+
+            .element-filter {
+                gap: 6px;
+            }
+        }
+
+        @media screen and (max-width: 640px) {
+            .action-bar-inner {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+                padding: 8px 12px 10px;
+            }
+
+            .actions {
+                justify-content: center;
+            }
+
+            .gbtn {
+                font-size: 14px;
+                padding-right: 16px;
+                gap: 8px;
+            }
+
+            /* 手機上按鈕只留短標籤，三顆排成一行 */
+            .long-label {
+                display: none;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                transition: none !important;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- 右上角設定（原神風格齒輪） -->
+    <button type="button" class="settings-btn" id="settings-btn" aria-label="設定" aria-haspopup="dialog" aria-controls="settings-panel" aria-expanded="false">
+        <svg viewBox="0 0 48 48" aria-hidden="true">
+            <defs>
+                <linearGradient id="gear-bg" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#4A5366" />
+                    <stop offset="1" stop-color="#2B3142" />
+                </linearGradient>
+            </defs>
+            <circle cx="24" cy="24" r="21" fill="url(#gear-bg)" stroke="#D3BC8E" stroke-width="1.5" />
+            <circle cx="24" cy="24" r="17.5" fill="none" stroke="#D3BC8E" stroke-opacity="0.35" stroke-width="0.8" />
+            <!-- 上下左右的小菱形裝飾 -->
+            <g fill="#D3BC8E">
+                <path d="M24 0.8 L25.6 3 L24 5.2 L22.4 3 Z" />
+                <path d="M24 42.8 L25.6 45 L24 47.2 L22.4 45 Z" />
+                <path d="M0.8 24 L3 22.4 L5.2 24 L3 25.6 Z" />
+                <path d="M42.8 24 L45 22.4 L47.2 24 L45 25.6 Z" />
+            </g>
+            <g class="gear">
+                <path fill="#D3BC8E" fill-rule="evenodd" d="M22.2 11.5h3.6l.6 3.1a9.6 9.6 0 0 1 2.6 1.1l2.6-1.8 2.5 2.5-1.8 2.6a9.6 9.6 0 0 1 1.1 2.6l3.1.6v3.6l-3.1.6a9.6 9.6 0 0 1-1.1 2.6l1.8 2.6-2.5 2.5-2.6-1.8a9.6 9.6 0 0 1-2.6 1.1l-.6 3.1h-3.6l-.6-3.1a9.6 9.6 0 0 1-2.6-1.1l-2.6 1.8-2.5-2.5 1.8-2.6a9.6 9.6 0 0 1-1.1-2.6l-3.1-.6v-3.6l3.1-.6a9.6 9.6 0 0 1 1.1-2.6l-1.8-2.6 2.5-2.5 2.6 1.8a9.6 9.6 0 0 1 2.6-1.1zM24 18.6a5.4 5.4 0 1 0 0 10.8 5.4 5.4 0 0 0 0-10.8z" />
+                <!-- 中心四角星 -->
+                <path fill="#FFE6B2" d="M24 20.2 L25 23 L27.8 24 L25 25 L24 27.8 L23 25 L20.2 24 L23 23 Z" />
+            </g>
+        </svg>
+    </button>
+
     <h1>
         選擇要尋找的角色
-        <small>(建議登入𝕏帳號)</small>
+        <small>(需要登入𝕏帳號)</small>
     </h1>
+    <div class="title-ornament" aria-hidden="true">✦</div>
 
     <div class="element-filter" id="element-filter" role="group" aria-label="依元素篩選"></div>
 
     <div class="character-list" id="character-list" role="group" aria-label="角色"></div>
 
-    <div id="url-container" aria-live="polite">
-        <p id="generated-url"></p>
-        <button type="button" class="btn" id="copy-url-btn" hidden>複製</button>
-    </div>
-    <div class="actions">
-        <a class="btn" id="view-results-btn" href="#" target="_blank" rel="noopener" hidden>前往𝕏頁面</a>
-        <button type="button" class="btn" id="clear-selection-btn">清空選取</button>
+    <div class="action-bar" id="action-bar" aria-hidden="true">
+        <div class="action-bar-inner">
+            <div class="selection-info">
+                <div class="selected-chips" id="selected-chips" role="group" aria-label="已選角色（點擊移除）" aria-live="polite"></div>
+            </div>
+            <div class="actions">
+                <a class="gbtn primary" id="view-results-btn" href="#" target="_blank" rel="noopener"><span class="icon" aria-hidden="true">𝕏</span><span>前往𝕏<span class="long-label">頁面</span></span></a>
+                <button type="button" class="gbtn" id="copy-url-btn"><span class="icon" aria-hidden="true">⧉</span><span class="label">複製<span class="long-label">網址</span></span></button>
+                <button type="button" class="gbtn" id="clear-selection-btn"><span class="icon" aria-hidden="true">✕</span><span>清空<span class="long-label">選取</span></span></button>
+            </div>
+        </div>
     </div>
 
     <div id="line-community-icon">
@@ -258,17 +945,76 @@
         </a>
     </div>
 
+    <div class="settings-overlay" id="settings-overlay"></div>
+    <aside class="settings-panel" id="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title" inert>
+        <div class="panel-header">
+            <h2 id="settings-title">設定</h2>
+            <button type="button" class="panel-close" id="settings-close" aria-label="關閉設定">×</button>
+        </div>
+        <div class="panel-divider" aria-hidden="true"></div>
+
+        <section class="setting-section">
+            <div class="setting-head">
+                <h3 id="logic-title">搜尋邏輯</h3>
+                <button type="button" class="info-btn" id="logic-info" aria-label="搜尋邏輯說明" aria-expanded="false" aria-controls="logic-help">!</button>
+            </div>
+            <div class="help-box" id="logic-help" hidden>
+                <p><strong>AND（同時出現）</strong>：貼文要同時標了每一位已選角色才會出現。適合找合照或 CP 圖，結果較少、較精準。</p>
+                <p><strong>OR（任一出現）</strong>：只要標了其中任何一位角色就會出現。適合一次瀏覽多位角色的圖，結果較多。</p>
+                <p class="note">※ 只選一位角色時，兩者結果相同。</p>
+            </div>
+            <div class="segmented" role="radiogroup" aria-labelledby="logic-title">
+                <label><input type="radio" class="visually-hidden" name="logic" value="and"><span>AND</span></label>
+                <label><input type="radio" class="visually-hidden" name="logic" value="or"><span>OR</span></label>
+            </div>
+        </section>
+
+        <section class="setting-section">
+            <div class="setting-head">
+                <h3 id="lang-title">搜尋語言</h3>
+            </div>
+            <div class="lang-list" role="group" aria-labelledby="lang-title">
+                <label class="check-row"><input type="checkbox" class="visually-hidden" name="lang" value="tw"><span class="check-box" aria-hidden="true"></span><span class="check-text">繁體中文</span></label>
+                <label class="check-row"><input type="checkbox" class="visually-hidden" name="lang" value="cn"><span class="check-box" aria-hidden="true"></span><span class="check-text">簡體中文</span></label>
+                <label class="check-row"><input type="checkbox" class="visually-hidden" name="lang" value="en"><span class="check-box" aria-hidden="true"></span><span class="check-text">英文</span></label>
+                <label class="check-row"><input type="checkbox" class="visually-hidden" name="lang" value="ja"><span class="check-box" aria-hidden="true"></span><span class="check-text">日文</span></label>
+            </div>
+            <p class="setting-hint" id="lang-hint" aria-live="polite"></p>
+        </section>
+
+        <section class="setting-section">
+            <div class="check-with-info">
+                <label class="check-row"><input type="checkbox" class="visually-hidden" id="advanced-search"><span class="check-box" aria-hidden="true"></span><span class="check-text">進階搜尋</span></label>
+                <button type="button" class="info-btn" id="advanced-info" aria-label="進階搜尋說明" aria-expanded="false" aria-controls="advanced-help">!</button>
+            </div>
+            <div class="help-box" id="advanced-help" hidden>
+                <p>有些角色的名字剛好是常見字，例如 <strong>#琴</strong>、<strong>#砂糖</strong>、<strong>#北斗</strong>、<strong>#甘雨</strong>，或日文的 <strong>#ガイア</strong>（凱亞）、<strong>#モナ</strong>（莫娜）。直接搜尋會混進大量和原神無關的貼文，所以預設不會用這些 tag。</p>
+                <p>開啟後會加入這些 tag，並自動限定要同時標有 <strong>#原神</strong>，例如 <strong>(#琴 #原神)</strong>，能多找到一些只用中、日文名字標記的圖。</p>
+                <p class="note">※ 結果會變多，但仍可能混入少量無關內容；搜尋語言的設定一樣適用。</p>
+            </div>
+        </section>
+    </aside>
+
     <script src="characters.js"></script>
     <!-- 本地圖片清單，由 scripts/download-icons.mjs 產生 -->
     <script src="img/manifest.js"></script>
     <script>
         var STORAGE_KEY = 'genshin-search-state';
+        var TAG_ORDER = ['en', 'ja', 'tw', 'cn'];
+        var DEFAULT_SETTINGS = { logic: 'and', langs: ['tw', 'cn', 'en', 'ja'], advanced: false };
+        // 設定不會被記住：每次開啟網頁都從預設值開始（AND、四種語言全選、不開進階搜尋）
+        var settings = {
+            logic: DEFAULT_SETTINGS.logic,
+            langs: DEFAULT_SETTINGS.langs.slice(),
+            advanced: DEFAULT_SETTINGS.advanced,
+        };
         var LOCAL_ICONS = window.LOCAL_ICONS || {};
         var charactersById = {};
         CHARACTERS.forEach(function (c) { charactersById[c.id] = c; });
 
         var selectedRoles = [];
         var activeElement = null;
+        var currentUrl = '';
 
         // 優先用本地圖片，失敗時改用原網址，再失敗就顯示名稱首字
         function createIcon(localKey, remoteUrl, alt, fallbackText) {
@@ -292,6 +1038,14 @@
             if (sources.length > 0) img.src = sources[0];
             else setTimeout(img.onerror);
             return img;
+        }
+
+        // 帶星級底色的頭像框
+        function createAvatar(c) {
+            var box = document.createElement('span');
+            box.className = 'avatar rarity-' + (c.rarity || 5);
+            box.appendChild(createIcon(c.id, c.img, '', c.name.charAt(0)));
+            return box;
         }
 
         function renderElements() {
@@ -318,12 +1072,38 @@
                 btn.className = 'character ' + c.element;
                 btn.dataset.id = c.id;
                 btn.setAttribute('aria-pressed', 'false');
-                btn.appendChild(createIcon(c.id, c.img, '', c.name.charAt(0)));
+                btn.appendChild(createAvatar(c));
                 var label = document.createElement('span');
+                label.className = 'name';
                 label.textContent = c.name;
                 btn.appendChild(label);
                 btn.addEventListener('click', function () { toggleSelection(c.id); });
                 container.appendChild(btn);
+            });
+        }
+
+        // 底部操作列裡的已選角色小頭像，點一下移除
+        function renderChips() {
+            var container = document.getElementById('selected-chips');
+            container.textContent = '';
+            selectedRoles.forEach(function (id) {
+                var c = charactersById[id];
+                var chip = document.createElement('button');
+                chip.type = 'button';
+                chip.className = 'chip character-chip ' + c.element;
+                chip.style.setProperty('--el', 'var(--' + c.element.toLowerCase() + ')');
+                chip.title = '移除 ' + c.name;
+                chip.setAttribute('aria-label', '移除 ' + c.name);
+                var face = document.createElement('span');
+                face.className = 'chip-face';
+                face.appendChild(createAvatar(c));
+                chip.appendChild(face);
+                var label = document.createElement('span');
+                label.className = 'chip-label';
+                label.textContent = displayTag(c);
+                chip.appendChild(label);
+                chip.addEventListener('click', function () { toggleSelection(id); });
+                container.appendChild(chip);
             });
         }
 
@@ -347,37 +1127,79 @@
             update();
         }
 
-        // 每個角色的多個 hashtag 用 OR 組成一組，不同角色之間維持原本的「同時包含」
+        // 依設定的語言取出角色的搜尋詞（去除重複，例如「胡桃」日繁簡都一樣）。
+        // 開啟進階搜尋時，常見字 tag 會加上 #原神 限定，例如 (#琴 #原神)。
+        // 所選語言都沒有 tag 時（例如只選繁中，但「琴」沒有一般中文 tag），改用英文 tag。
+        function termsFor(c) {
+            var seen = [], terms = [];
+            function add(t, term) {
+                if (seen.indexOf(t) >= 0) return;
+                seen.push(t);
+                terms.push(term);
+            }
+            TAG_ORDER.forEach(function (lang) {
+                if (settings.langs.indexOf(lang) < 0) return;
+                if (c.tags[lang]) add(c.tags[lang], '#' + c.tags[lang]);
+            });
+            if (settings.advanced && c.common) {
+                TAG_ORDER.forEach(function (lang) {
+                    var t = c.common[lang];
+                    if (t && settings.langs.indexOf(lang) >= 0) add(t, '(#' + t + ' #原神)');
+                });
+            }
+            return terms.length > 0 ? terms : ['#' + c.tags.en];
+        }
+
+        // AND：每個角色的 tag 用 OR 組成一組，各組之間要同時出現
+        // OR ：所有角色的 tag 全部用 OR 串起來，任一出現即可
         function buildQuery(ids) {
-            return ids.map(function (id) {
-                var tags = charactersById[id].tags.map(function (t) { return '#' + t; });
+            var groups = ids.map(function (id) { return termsFor(charactersById[id]); });
+            if (settings.logic === 'or') {
+                return [].concat.apply([], groups).join(' OR ');
+            }
+            return groups.map(function (tags) {
                 return tags.length > 1 ? '(' + tags.join(' OR ') + ')' : tags[0];
             }).join(' ');
         }
 
+        // 底部顯示用：一律顯示繁體中文（例如 #林尼、#琴），與實際搜尋用哪些 tag 無關
+        function displayTag(c) {
+            return '#' + (c.tags.tw || (c.common && c.common.tw) || c.name.replace(/[·\s]/g, ''));
+        }
+
         function update() {
+            var hasSelection = selectedRoles.length > 0;
+
             document.querySelectorAll('.character').forEach(function (btn) {
                 var id = btn.dataset.id;
                 btn.setAttribute('aria-pressed', String(selectedRoles.indexOf(id) >= 0));
                 btn.hidden = activeElement !== null && charactersById[id].element !== activeElement;
             });
+            document.getElementById('character-list').classList.toggle('has-selection', hasSelection);
             document.querySelectorAll('.element-icon').forEach(function (btn) {
                 btn.setAttribute('aria-pressed', String(btn.dataset.element === activeElement));
             });
+            if (activeElement) document.body.dataset.element = activeElement;
+            else delete document.body.dataset.element;
 
-            var urlElement = document.getElementById('generated-url');
-            var resultsLink = document.getElementById('view-results-btn');
-            var copyButton = document.getElementById('copy-url-btn');
-            if (selectedRoles.length > 0) {
-                var url = 'https://x.com/search?q=' + encodeURIComponent(buildQuery(selectedRoles));
-                urlElement.textContent = url;
-                resultsLink.href = url;
-            } else {
-                urlElement.textContent = '';
-            }
-            resultsLink.hidden = copyButton.hidden = selectedRoles.length === 0;
+            var query = hasSelection ? buildQuery(selectedRoles) : '';
+            currentUrl = hasSelection ? 'https://x.com/search?q=' + encodeURIComponent(query) : '';
+            document.getElementById('view-results-btn').href = currentUrl || '#';
+            renderChips();
+
+            var bar = document.getElementById('action-bar');
+            bar.setAttribute('aria-hidden', String(!hasSelection));
+            bar.inert = !hasSelection;
+            updateBarHeight();
 
             saveState();
+        }
+
+        // 讓頁面底部留出操作列的空間，LINE 圖示也跟著往上移
+        function updateBarHeight() {
+            var bar = document.getElementById('action-bar');
+            var h = bar.getAttribute('aria-hidden') === 'true' ? 0 : bar.offsetHeight;
+            document.documentElement.style.setProperty('--bar-h', h + 'px');
         }
 
         // ===== 選取狀態：存在網址 (#c=Klee,Nahida&e=Pyro) 與 localStorage =====
@@ -409,26 +1231,112 @@
         }
 
         function copyToClipboard() {
-            var url = document.getElementById('generated-url').textContent;
-            var button = document.getElementById('copy-url-btn');
-            navigator.clipboard.writeText(url).then(function () {
-                button.textContent = '已複製';
-                button.style.fontSize = '14px';
-                setTimeout(function () {
-                    button.textContent = '複製';
-                    button.style.fontSize = '';
-                }, 2000);
+            var label = document.querySelector('#copy-url-btn .label');
+            navigator.clipboard.writeText(currentUrl).then(function () {
+                label.textContent = '已複製！';
+                clearTimeout(copyTimer);
+                copyTimer = setTimeout(function () { label.innerHTML = COPY_LABEL_HTML; }, 2000);
             });
         }
 
+        // ===== 設定：搜尋邏輯、語言與進階搜尋 =====
+        function initSettingsPanel() {
+            var panel = document.getElementById('settings-panel');
+            var gear = document.getElementById('settings-btn');
+            var hintTimer;
+
+            document.querySelectorAll('input[name="logic"]').forEach(function (input) {
+                input.checked = input.value === settings.logic;
+                input.addEventListener('change', function () {
+                    settings.logic = input.value;
+                    update();
+                });
+            });
+
+            var langInputs = document.querySelectorAll('input[name="lang"]');
+            langInputs.forEach(function (input) {
+                input.checked = settings.langs.indexOf(input.value) >= 0;
+                input.addEventListener('change', function () {
+                    var checked = Array.prototype.filter.call(langInputs, function (i) { return i.checked; });
+                    var hint = document.getElementById('lang-hint');
+                    if (checked.length === 0) {
+                        // 至少保留一種語言
+                        input.checked = true;
+                        hint.textContent = '至少要選擇一種語言';
+                        clearTimeout(hintTimer);
+                        hintTimer = setTimeout(function () { hint.textContent = ''; }, 2500);
+                        return;
+                    }
+                    settings.langs = checked.map(function (i) { return i.value; });
+                    update();
+                });
+            });
+
+            var advanced = document.getElementById('advanced-search');
+            advanced.checked = settings.advanced;
+            advanced.addEventListener('change', function () {
+                settings.advanced = advanced.checked;
+                update();
+            });
+
+            // 圓形驚嘆號：展開／收合說明
+            document.querySelectorAll('.info-btn').forEach(function (info) {
+                info.addEventListener('click', function () {
+                    var help = document.getElementById(info.getAttribute('aria-controls'));
+                    help.hidden = !help.hidden;
+                    info.setAttribute('aria-expanded', String(!help.hidden));
+                });
+            });
+
+            function open() {
+                document.body.classList.add('settings-open');
+                panel.inert = false;
+                gear.setAttribute('aria-expanded', 'true');
+                document.getElementById('settings-close').focus();
+            }
+
+            function close() {
+                if (!document.body.classList.contains('settings-open')) return;
+                document.body.classList.remove('settings-open');
+                panel.inert = true;
+                gear.setAttribute('aria-expanded', 'false');
+                gear.focus();
+            }
+
+            gear.addEventListener('click', open);
+            document.getElementById('settings-close').addEventListener('click', close);
+            document.getElementById('settings-overlay').addEventListener('click', close);
+            document.addEventListener('keydown', function (e) {
+                if (!document.body.classList.contains('settings-open')) return;
+                if (e.key === 'Escape') {
+                    close();
+                } else if (e.key === 'Tab') {
+                    // 焦點留在面板內
+                    var items = panel.querySelectorAll('button, input');
+                    var first = items[0], last = items[items.length - 1];
+                    if (e.shiftKey && document.activeElement === first) {
+                        last.focus();
+                        e.preventDefault();
+                    } else if (!e.shiftKey && document.activeElement === last) {
+                        first.focus();
+                        e.preventDefault();
+                    }
+                }
+            });
+        }
+
+        var COPY_LABEL_HTML = document.querySelector('#copy-url-btn .label').innerHTML;
+        var copyTimer;
         renderElements();
         renderCharacters();
+        initSettingsPanel();
         document.getElementById('copy-url-btn').addEventListener('click', copyToClipboard);
         document.getElementById('clear-selection-btn').addEventListener('click', clearSelection);
         window.addEventListener('hashchange', function () {
             loadState();
             update();
         });
+        if (window.ResizeObserver) new ResizeObserver(updateBarHeight).observe(document.getElementById('action-bar'));
         loadState();
         update();
     </script>
