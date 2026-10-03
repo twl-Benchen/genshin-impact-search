@@ -672,6 +672,7 @@
 
             .help-box strong {
                 color: var(--gold-light);
+                white-space: nowrap; /* tag 不要從 # 後面斷行 */
             }
 
             .help-box .note {
@@ -680,15 +681,34 @@
 
         /* 搜尋邏輯：膠囊切換鈕 */
         .segmented {
+            position: relative;
             display: flex;
-            gap: 4px;
             padding: 4px;
             border-radius: 999px;
             background: rgba(20, 24, 34, 0.35);
             border: 1px solid rgba(236, 229, 216, 0.15);
         }
 
+            /* 會滑動的米白膠囊 */
+            .segmented::before {
+                content: '';
+                position: absolute;
+                top: 4px;
+                bottom: 4px;
+                left: 4px;
+                width: calc(50% - 4px);
+                border-radius: 999px;
+                background: var(--cream);
+                box-shadow: 0 0 0 1px var(--gold-light), 0 0 8px rgba(255, 230, 178, 0.35);
+                transition: transform 0.3s cubic-bezier(0.22, 0.8, 0.3, 1);
+            }
+
+            .segmented:has(input[value="or"]:checked)::before {
+                transform: translateX(100%);
+            }
+
             .segmented label {
+                position: relative; /* 文字在膠囊上方 */
                 flex: 1;
                 cursor: pointer;
             }
@@ -701,7 +721,7 @@
                 font-weight: 700;
                 letter-spacing: 0.08em;
                 color: rgba(236, 229, 216, 0.75);
-                transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+                transition: color 0.3s ease;
             }
 
             .segmented label:hover span {
@@ -709,9 +729,7 @@
             }
 
             .segmented input:checked + span {
-                background: var(--cream);
                 color: var(--navy);
-                box-shadow: 0 0 0 1px var(--gold-light), 0 0 8px rgba(255, 230, 178, 0.35);
             }
 
         /* 視覺上隱藏，但保留鍵盤與螢幕閱讀器操作 */
@@ -790,6 +808,20 @@
 
             .check-text {
                 font-size: 15px;
+            }
+
+        .check-with-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+            .check-with-info .check-row {
+                flex: 1;
+            }
+
+            .check-with-info + .help-box {
+                margin: 10px 0 0;
             }
 
         .setting-hint {
@@ -949,6 +981,18 @@
             </div>
             <p class="setting-hint" id="lang-hint" aria-live="polite"></p>
         </section>
+
+        <section class="setting-section">
+            <div class="check-with-info">
+                <label class="check-row"><input type="checkbox" class="visually-hidden" id="advanced-search"><span class="check-box" aria-hidden="true"></span><span class="check-text">進階搜尋</span></label>
+                <button type="button" class="info-btn" id="advanced-info" aria-label="進階搜尋說明" aria-expanded="false" aria-controls="advanced-help">!</button>
+            </div>
+            <div class="help-box" id="advanced-help" hidden>
+                <p>有些角色的名字剛好是常見字，例如 <strong>#琴</strong>、<strong>#砂糖</strong>、<strong>#北斗</strong>、<strong>#甘雨</strong>，或日文的 <strong>#ガイア</strong>（凱亞）、<strong>#モナ</strong>（莫娜）。直接搜尋會混進大量和原神無關的貼文，所以預設不會用這些 tag。</p>
+                <p>開啟後會加入這些 tag，並自動限定要同時標有 <strong>#原神</strong>，例如 <strong>(#琴 #原神)</strong>，能多找到一些只用中、日文名字標記的圖。</p>
+                <p class="note">※ 結果會變多，但仍可能混入少量無關內容；搜尋語言的設定一樣適用。</p>
+            </div>
+        </section>
     </aside>
 
     <script src="characters.js"></script>
@@ -958,7 +1002,7 @@
         var STORAGE_KEY = 'genshin-search-state';
         var SETTINGS_KEY = 'genshin-search-settings';
         var TAG_ORDER = ['en', 'ja', 'tw', 'cn'];
-        var DEFAULT_SETTINGS = { logic: 'and', langs: ['tw', 'cn', 'en', 'ja'] };
+        var DEFAULT_SETTINGS = { logic: 'and', langs: ['tw', 'cn', 'en', 'ja'], advanced: false };
         var settings = loadSettings();
         var LOCAL_ICONS = window.LOCAL_ICONS || {};
         var charactersById = {};
@@ -1079,23 +1123,33 @@
             update();
         }
 
-        // 依設定的語言取出角色的 hashtag（去除重複，例如「胡桃」日繁簡都一樣）。
-        // 所選語言都沒有 tag 時（例如只選繁中，但「琴」沒有中文 tag），改用英文 tag。
-        function tagsFor(c) {
-            var tags = [];
+        // 依設定的語言取出角色的搜尋詞（去除重複，例如「胡桃」日繁簡都一樣）。
+        // 開啟進階搜尋時，常見字 tag 會加上 #原神 限定，例如 (#琴 #原神)。
+        // 所選語言都沒有 tag 時（例如只選繁中，但「琴」沒有一般中文 tag），改用英文 tag。
+        function termsFor(c) {
+            var seen = [], terms = [];
+            function add(t, term) {
+                if (seen.indexOf(t) >= 0) return;
+                seen.push(t);
+                terms.push(term);
+            }
             TAG_ORDER.forEach(function (lang) {
-                var t = c.tags[lang];
-                if (t && settings.langs.indexOf(lang) >= 0 && tags.indexOf(t) < 0) tags.push(t);
+                if (settings.langs.indexOf(lang) < 0) return;
+                if (c.tags[lang]) add(c.tags[lang], '#' + c.tags[lang]);
             });
-            return tags.length > 0 ? tags : [c.tags.en];
+            if (settings.advanced && c.common) {
+                TAG_ORDER.forEach(function (lang) {
+                    var t = c.common[lang];
+                    if (t && settings.langs.indexOf(lang) >= 0) add(t, '(#' + t + ' #原神)');
+                });
+            }
+            return terms.length > 0 ? terms : ['#' + c.tags.en];
         }
 
         // AND：每個角色的 tag 用 OR 組成一組，各組之間要同時出現
         // OR ：所有角色的 tag 全部用 OR 串起來，任一出現即可
         function buildQuery(ids) {
-            var groups = ids.map(function (id) {
-                return tagsFor(charactersById[id]).map(function (t) { return '#' + t; });
-            });
+            var groups = ids.map(function (id) { return termsFor(charactersById[id]); });
             if (settings.logic === 'or') {
                 return [].concat.apply([], groups).join(' OR ');
             }
@@ -1104,9 +1158,9 @@
             }).join(' ');
         }
 
-        // 底部顯示用：只列出繁體中文 tag（例如 #林尼），沒有繁中 tag 的角色顯示英文
+        // 底部顯示用：一律顯示繁體中文（例如 #林尼、#琴），與實際搜尋用哪些 tag 無關
         function displayTag(c) {
-            return '#' + (c.tags.tw || c.tags.en);
+            return '#' + (c.tags.tw || (c.common && c.common.tw) || c.name.replace(/[·\s]/g, ''));
         }
 
         function update() {
@@ -1193,6 +1247,7 @@
             return {
                 logic: saved.logic === 'or' ? 'or' : 'and',
                 langs: langs.length > 0 ? langs : DEFAULT_SETTINGS.langs.slice(),
+                advanced: saved.advanced === true,
             };
         }
 
@@ -1236,11 +1291,21 @@
                 });
             });
 
-            var info = document.getElementById('logic-info');
-            info.addEventListener('click', function () {
-                var help = document.getElementById('logic-help');
-                help.hidden = !help.hidden;
-                info.setAttribute('aria-expanded', String(!help.hidden));
+            var advanced = document.getElementById('advanced-search');
+            advanced.checked = settings.advanced;
+            advanced.addEventListener('change', function () {
+                settings.advanced = advanced.checked;
+                saveSettings();
+                update();
+            });
+
+            // 圓形驚嘆號：展開／收合說明
+            document.querySelectorAll('.info-btn').forEach(function (info) {
+                info.addEventListener('click', function () {
+                    var help = document.getElementById(info.getAttribute('aria-controls'));
+                    help.hidden = !help.hidden;
+                    info.setAttribute('aria-expanded', String(!help.hidden));
+                });
             });
 
             function open() {
