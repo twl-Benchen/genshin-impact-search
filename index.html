@@ -85,6 +85,7 @@
         /* ===== 標題 ===== */
         h1 {
             margin: 14px 0 6px;
+            padding: 0 52px; /* 留空間給右上角齒輪 */
             font-family: 'Noto Serif TC', serif;
             font-size: 1.6em;
             text-align: center;
@@ -474,6 +475,330 @@
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             }
 
+        /* ===== 右上角設定齒輪 ===== */
+        .settings-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 46px;
+            height: 46px;
+            padding: 0;
+            border: none;
+            border-radius: 50%;
+            background: none;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+            .settings-btn svg {
+                display: block;
+                width: 100%;
+                height: 100%;
+                filter: drop-shadow(0 2px 4px rgba(43, 49, 66, 0.35));
+                transition: filter 0.25s ease;
+            }
+
+            .settings-btn .gear {
+                transform-origin: 24px 24px;
+                transition: transform 0.6s ease;
+            }
+
+            .settings-btn:hover svg {
+                filter: drop-shadow(0 0 6px rgba(255, 230, 178, 0.9));
+            }
+
+            .settings-btn:hover .gear,
+            .settings-btn[aria-expanded="true"] .gear {
+                transform: rotate(60deg);
+            }
+
+        /* ===== 設定面板（從右側滑出） ===== */
+        .settings-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1100;
+            background: rgba(20, 24, 34, 0.45);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+            .settings-open .settings-overlay {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1200;
+            width: min(380px, 88vw);
+            overflow-y: auto;
+            box-sizing: border-box;
+            padding: 20px 22px 28px;
+            background:
+                radial-gradient(ellipse 120% 40% at 100% 0%, rgba(211, 188, 142, 0.10), transparent 70%),
+                #3A4357;
+            color: var(--cream);
+            border-left: 1px solid rgba(211, 188, 142, 0.35);
+            box-shadow: -8px 0 24px rgba(0, 0, 0, 0.3);
+            transform: translateX(105%);
+            visibility: hidden;
+            transition: transform 0.35s cubic-bezier(0.22, 0.8, 0.3, 1), visibility 0s linear 0.35s;
+        }
+
+            .settings-open .settings-panel {
+                transform: translateX(0);
+                visibility: visible;
+                transition: transform 0.35s cubic-bezier(0.22, 0.8, 0.3, 1);
+            }
+
+            .settings-panel h2 {
+                margin: 0;
+                font-family: 'Noto Serif TC', serif;
+                font-size: 20px;
+                color: var(--gold);
+                letter-spacing: 0.1em;
+            }
+
+            .settings-panel h3 {
+                margin: 0;
+                font-size: 16px;
+                font-weight: 700;
+                color: var(--cream);
+            }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .panel-close {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            border: 2px solid rgba(236, 229, 216, 0.5);
+            border-radius: 50%;
+            background: none;
+            color: var(--cream);
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+            .panel-close:hover {
+                border-color: var(--gold-light);
+                box-shadow: 0 0 8px rgba(255, 230, 178, 0.5);
+            }
+
+        /* 兩端帶小菱形的分隔線（參考 HoYoWiki） */
+        .panel-divider {
+            position: relative;
+            height: 1px;
+            margin: 16px 4px 20px;
+            background: rgba(236, 229, 216, 0.18);
+        }
+
+            .panel-divider::before,
+            .panel-divider::after {
+                content: '';
+                position: absolute;
+                top: -3px;
+                width: 6px;
+                height: 6px;
+                background: rgba(236, 229, 216, 0.35);
+                transform: rotate(45deg);
+            }
+
+            .panel-divider::before { left: -4px; }
+            .panel-divider::after { right: -4px; }
+
+        .setting-section + .setting-section {
+            margin-top: 26px;
+        }
+
+        .setting-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        /* 圓形驚嘆號說明按鈕 */
+        .info-btn {
+            width: 20px;
+            height: 20px;
+            padding: 0;
+            border: 1.5px solid var(--gold);
+            border-radius: 50%;
+            background: none;
+            color: var(--gold);
+            font: inherit;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+            .info-btn:hover,
+            .info-btn[aria-expanded="true"] {
+                background: var(--gold);
+                color: var(--navy-dark);
+            }
+
+        .help-box {
+            margin: -4px 0 14px;
+            padding: 12px 14px;
+            border: 1px solid rgba(211, 188, 142, 0.4);
+            border-radius: 8px;
+            background: rgba(20, 24, 34, 0.35);
+            font-size: 13px;
+            line-height: 1.7;
+            color: rgba(236, 229, 216, 0.9);
+        }
+
+            .help-box p {
+                margin: 0;
+            }
+
+                .help-box p + p {
+                    margin-top: 6px;
+                }
+
+            .help-box strong {
+                color: var(--gold-light);
+            }
+
+            .help-box .note {
+                opacity: 0.7;
+            }
+
+        /* 搜尋邏輯：膠囊切換鈕 */
+        .segmented {
+            display: flex;
+            gap: 4px;
+            padding: 4px;
+            border-radius: 999px;
+            background: rgba(20, 24, 34, 0.35);
+            border: 1px solid rgba(236, 229, 216, 0.15);
+        }
+
+            .segmented label {
+                flex: 1;
+                cursor: pointer;
+            }
+
+            .segmented span {
+                display: block;
+                padding: 8px 0;
+                border-radius: 999px;
+                text-align: center;
+                font-weight: 700;
+                letter-spacing: 0.08em;
+                color: rgba(236, 229, 216, 0.75);
+                transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+            }
+
+            .segmented label:hover span {
+                color: var(--cream);
+            }
+
+            .segmented input:checked + span {
+                background: var(--cream);
+                color: var(--navy);
+                box-shadow: 0 0 0 1px var(--gold-light), 0 0 8px rgba(255, 230, 178, 0.35);
+            }
+
+        /* 視覺上隱藏，但保留鍵盤與螢幕閱讀器操作 */
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            margin: -1px;
+            padding: 0;
+            border: 0;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            white-space: nowrap;
+        }
+
+        .segmented input:focus-visible + span,
+        .check-row input:focus-visible ~ .check-text {
+            outline: 3px solid var(--gold);
+            outline-offset: 2px;
+        }
+
+        /* 搜尋語言：整行文字都是核取方塊 */
+        .lang-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .check-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            border: 1px solid rgba(236, 229, 216, 0.14);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+            .check-row:hover {
+                border-color: rgba(255, 230, 178, 0.5);
+            }
+
+            .check-row:has(input:checked) {
+                background: rgba(236, 229, 216, 0.12);
+                border-color: rgba(211, 188, 142, 0.7);
+            }
+
+            .check-box {
+                position: relative;
+                flex: 0 0 auto;
+                width: 18px;
+                height: 18px;
+                box-sizing: border-box;
+                border: 1.5px solid var(--gold);
+                border-radius: 4px;
+                transition: background-color 0.2s ease;
+            }
+
+            .check-row input:checked ~ .check-box {
+                background: var(--gold);
+            }
+
+                .check-row input:checked ~ .check-box::after {
+                    content: '';
+                    position: absolute;
+                    left: 5px;
+                    top: 1px;
+                    width: 4px;
+                    height: 9px;
+                    border: solid var(--navy-dark);
+                    border-width: 0 2px 2px 0;
+                    transform: rotate(45deg);
+                }
+
+            .check-text {
+                font-size: 15px;
+            }
+
+        .setting-hint {
+            min-height: 1.4em;
+            margin: 8px 0 0;
+            font-size: 12px;
+            color: var(--gold-light);
+        }
+
         /* ===== 手機 ===== */
         @media screen and (max-width: 1000px) {
             .character {
@@ -532,6 +857,32 @@
     </style>
 </head>
 <body>
+    <!-- 右上角設定（原神風格齒輪） -->
+    <button type="button" class="settings-btn" id="settings-btn" aria-label="設定" aria-haspopup="dialog" aria-controls="settings-panel" aria-expanded="false">
+        <svg viewBox="0 0 48 48" aria-hidden="true">
+            <defs>
+                <linearGradient id="gear-bg" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#4A5366" />
+                    <stop offset="1" stop-color="#2B3142" />
+                </linearGradient>
+            </defs>
+            <circle cx="24" cy="24" r="21" fill="url(#gear-bg)" stroke="#D3BC8E" stroke-width="1.5" />
+            <circle cx="24" cy="24" r="17.5" fill="none" stroke="#D3BC8E" stroke-opacity="0.35" stroke-width="0.8" />
+            <!-- 上下左右的小菱形裝飾 -->
+            <g fill="#D3BC8E">
+                <path d="M24 0.8 L25.6 3 L24 5.2 L22.4 3 Z" />
+                <path d="M24 42.8 L25.6 45 L24 47.2 L22.4 45 Z" />
+                <path d="M0.8 24 L3 22.4 L5.2 24 L3 25.6 Z" />
+                <path d="M42.8 24 L45 22.4 L47.2 24 L45 25.6 Z" />
+            </g>
+            <g class="gear">
+                <path fill="#D3BC8E" fill-rule="evenodd" d="M22.2 11.5h3.6l.6 3.1a9.6 9.6 0 0 1 2.6 1.1l2.6-1.8 2.5 2.5-1.8 2.6a9.6 9.6 0 0 1 1.1 2.6l3.1.6v3.6l-3.1.6a9.6 9.6 0 0 1-1.1 2.6l1.8 2.6-2.5 2.5-2.6-1.8a9.6 9.6 0 0 1-2.6 1.1l-.6 3.1h-3.6l-.6-3.1a9.6 9.6 0 0 1-2.6-1.1l-2.6 1.8-2.5-2.5 1.8-2.6a9.6 9.6 0 0 1-1.1-2.6l-3.1-.6v-3.6l3.1-.6a9.6 9.6 0 0 1 1.1-2.6l-1.8-2.6 2.5-2.5 2.6 1.8a9.6 9.6 0 0 1 2.6-1.1zM24 18.6a5.4 5.4 0 1 0 0 10.8 5.4 5.4 0 0 0 0-10.8z" />
+                <!-- 中心四角星 -->
+                <path fill="#FFE6B2" d="M24 20.2 L25 23 L27.8 24 L25 25 L24 27.8 L23 25 L20.2 24 L23 23 Z" />
+            </g>
+        </svg>
+    </button>
+
     <h1>
         選擇要尋找的角色
         <small>(需要登入𝕏帳號)</small>
@@ -562,11 +913,53 @@
         </a>
     </div>
 
+    <div class="settings-overlay" id="settings-overlay"></div>
+    <aside class="settings-panel" id="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title" inert>
+        <div class="panel-header">
+            <h2 id="settings-title">設定</h2>
+            <button type="button" class="panel-close" id="settings-close" aria-label="關閉設定">×</button>
+        </div>
+        <div class="panel-divider" aria-hidden="true"></div>
+
+        <section class="setting-section">
+            <div class="setting-head">
+                <h3 id="logic-title">搜尋邏輯</h3>
+                <button type="button" class="info-btn" id="logic-info" aria-label="搜尋邏輯說明" aria-expanded="false" aria-controls="logic-help">!</button>
+            </div>
+            <div class="help-box" id="logic-help" hidden>
+                <p><strong>AND（同時出現）</strong>：貼文要同時標了每一位已選角色才會出現。適合找合照或 CP 圖，結果較少、較精準。</p>
+                <p><strong>OR（任一出現）</strong>：只要標了其中任何一位角色就會出現。適合一次瀏覽多位角色的圖，結果較多。</p>
+                <p class="note">※ 只選一位角色時，兩者結果相同。</p>
+            </div>
+            <div class="segmented" role="radiogroup" aria-labelledby="logic-title">
+                <label><input type="radio" class="visually-hidden" name="logic" value="and"><span>AND</span></label>
+                <label><input type="radio" class="visually-hidden" name="logic" value="or"><span>OR</span></label>
+            </div>
+        </section>
+
+        <section class="setting-section">
+            <div class="setting-head">
+                <h3 id="lang-title">搜尋語言</h3>
+            </div>
+            <div class="lang-list" role="group" aria-labelledby="lang-title">
+                <label class="check-row"><input type="checkbox" class="visually-hidden" name="lang" value="tw"><span class="check-box" aria-hidden="true"></span><span class="check-text">繁體中文</span></label>
+                <label class="check-row"><input type="checkbox" class="visually-hidden" name="lang" value="cn"><span class="check-box" aria-hidden="true"></span><span class="check-text">簡體中文</span></label>
+                <label class="check-row"><input type="checkbox" class="visually-hidden" name="lang" value="en"><span class="check-box" aria-hidden="true"></span><span class="check-text">英文</span></label>
+                <label class="check-row"><input type="checkbox" class="visually-hidden" name="lang" value="ja"><span class="check-box" aria-hidden="true"></span><span class="check-text">日文</span></label>
+            </div>
+            <p class="setting-hint" id="lang-hint" aria-live="polite"></p>
+        </section>
+    </aside>
+
     <script src="characters.js"></script>
     <!-- 本地圖片清單，由 scripts/download-icons.mjs 產生 -->
     <script src="img/manifest.js"></script>
     <script>
         var STORAGE_KEY = 'genshin-search-state';
+        var SETTINGS_KEY = 'genshin-search-settings';
+        var TAG_ORDER = ['en', 'ja', 'tw', 'cn'];
+        var DEFAULT_SETTINGS = { logic: 'and', langs: ['tw', 'cn', 'en', 'ja'] };
+        var settings = loadSettings();
         var LOCAL_ICONS = window.LOCAL_ICONS || {};
         var charactersById = {};
         CHARACTERS.forEach(function (c) { charactersById[c.id] = c; });
@@ -686,21 +1079,34 @@
             update();
         }
 
-        // 每個角色的多個 hashtag 用 OR 組成一組，不同角色之間維持原本的「同時包含」
+        // 依設定的語言取出角色的 hashtag（去除重複，例如「胡桃」日繁簡都一樣）。
+        // 所選語言都沒有 tag 時（例如只選繁中，但「琴」沒有中文 tag），改用英文 tag。
+        function tagsFor(c) {
+            var tags = [];
+            TAG_ORDER.forEach(function (lang) {
+                var t = c.tags[lang];
+                if (t && settings.langs.indexOf(lang) >= 0 && tags.indexOf(t) < 0) tags.push(t);
+            });
+            return tags.length > 0 ? tags : [c.tags.en];
+        }
+
+        // AND：每個角色的 tag 用 OR 組成一組，各組之間要同時出現
+        // OR ：所有角色的 tag 全部用 OR 串起來，任一出現即可
         function buildQuery(ids) {
-            return ids.map(function (id) {
-                var tags = charactersById[id].tags.map(function (t) { return '#' + t; });
+            var groups = ids.map(function (id) {
+                return tagsFor(charactersById[id]).map(function (t) { return '#' + t; });
+            });
+            if (settings.logic === 'or') {
+                return [].concat.apply([], groups).join(' OR ');
+            }
+            return groups.map(function (tags) {
                 return tags.length > 1 ? '(' + tags.join(' OR ') + ')' : tags[0];
             }).join(' ');
         }
 
-        // 底部顯示用：只列出繁體中文 tag（例如 #林尼），實際搜尋仍用全部 tag。
-        // 找不到繁中 tag 的角色（如琴、砂糖這類太常見而沒放中文的）就顯示英文 tag。
+        // 底部顯示用：只列出繁體中文 tag（例如 #林尼），沒有繁中 tag 的角色顯示英文
         function displayTag(c) {
-            var zh = c.tags.filter(function (t) {
-                return t.indexOf(c.name) >= 0 || c.name.indexOf(t) >= 0;
-            });
-            return '#' + (zh[0] || c.tags[0]);
+            return '#' + (c.tags.tw || c.tags.en);
         }
 
         function update() {
@@ -775,10 +1181,110 @@
             });
         }
 
+        // ===== 設定：搜尋邏輯與語言，存在 localStorage =====
+        function loadSettings() {
+            var saved = {};
+            try {
+                saved = JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {};
+            } catch (e) { /* 無痕模式或資料損壞時使用預設值 */ }
+            var langs = Array.isArray(saved.langs) ? saved.langs.filter(function (l) {
+                return DEFAULT_SETTINGS.langs.indexOf(l) >= 0;
+            }) : [];
+            return {
+                logic: saved.logic === 'or' ? 'or' : 'and',
+                langs: langs.length > 0 ? langs : DEFAULT_SETTINGS.langs.slice(),
+            };
+        }
+
+        function saveSettings() {
+            try {
+                localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+            } catch (e) { /* 同上 */ }
+        }
+
+        function initSettingsPanel() {
+            var panel = document.getElementById('settings-panel');
+            var gear = document.getElementById('settings-btn');
+            var hintTimer;
+
+            document.querySelectorAll('input[name="logic"]').forEach(function (input) {
+                input.checked = input.value === settings.logic;
+                input.addEventListener('change', function () {
+                    settings.logic = input.value;
+                    saveSettings();
+                    update();
+                });
+            });
+
+            var langInputs = document.querySelectorAll('input[name="lang"]');
+            langInputs.forEach(function (input) {
+                input.checked = settings.langs.indexOf(input.value) >= 0;
+                input.addEventListener('change', function () {
+                    var checked = Array.prototype.filter.call(langInputs, function (i) { return i.checked; });
+                    var hint = document.getElementById('lang-hint');
+                    if (checked.length === 0) {
+                        // 至少保留一種語言
+                        input.checked = true;
+                        hint.textContent = '至少要選擇一種語言';
+                        clearTimeout(hintTimer);
+                        hintTimer = setTimeout(function () { hint.textContent = ''; }, 2500);
+                        return;
+                    }
+                    settings.langs = checked.map(function (i) { return i.value; });
+                    saveSettings();
+                    update();
+                });
+            });
+
+            var info = document.getElementById('logic-info');
+            info.addEventListener('click', function () {
+                var help = document.getElementById('logic-help');
+                help.hidden = !help.hidden;
+                info.setAttribute('aria-expanded', String(!help.hidden));
+            });
+
+            function open() {
+                document.body.classList.add('settings-open');
+                panel.inert = false;
+                gear.setAttribute('aria-expanded', 'true');
+                document.getElementById('settings-close').focus();
+            }
+
+            function close() {
+                if (!document.body.classList.contains('settings-open')) return;
+                document.body.classList.remove('settings-open');
+                panel.inert = true;
+                gear.setAttribute('aria-expanded', 'false');
+                gear.focus();
+            }
+
+            gear.addEventListener('click', open);
+            document.getElementById('settings-close').addEventListener('click', close);
+            document.getElementById('settings-overlay').addEventListener('click', close);
+            document.addEventListener('keydown', function (e) {
+                if (!document.body.classList.contains('settings-open')) return;
+                if (e.key === 'Escape') {
+                    close();
+                } else if (e.key === 'Tab') {
+                    // 焦點留在面板內
+                    var items = panel.querySelectorAll('button, input');
+                    var first = items[0], last = items[items.length - 1];
+                    if (e.shiftKey && document.activeElement === first) {
+                        last.focus();
+                        e.preventDefault();
+                    } else if (!e.shiftKey && document.activeElement === last) {
+                        first.focus();
+                        e.preventDefault();
+                    }
+                }
+            });
+        }
+
         var COPY_LABEL_HTML = document.querySelector('#copy-url-btn .label').innerHTML;
         var copyTimer;
         renderElements();
         renderCharacters();
+        initSettingsPanel();
         document.getElementById('copy-url-btn').addEventListener('click', copyToClipboard);
         document.getElementById('clear-selection-btn').addEventListener('click', clearSelection);
         window.addEventListener('hashchange', function () {
