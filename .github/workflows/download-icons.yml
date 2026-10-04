@@ -1,4 +1,4 @@
-# characters.js 有變動時，自動下載角色圖片到 img/、更新 index.html 的資料版本號並提交。
+# characters.js 有變動時，自動下載角色圖片到 img/（縮成 WebP）、更新 index.html 的資料版本號並提交。
 # 也可以在 GitHub 的 Actions 分頁手動執行。
 name: 下載角色圖片
 
@@ -24,6 +24,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+      - run: npm ci
       - run: node scripts/download-icons.mjs ${{ inputs.force && '--force' || '' }}
       - name: 提交圖片
         run: |

@@ -1107,7 +1107,15 @@
         </section>
 
         <section class="setting-section">
-            <label class="check-row"><input type="checkbox" class="visually-hidden" id="no-retweets" autocomplete="off"><span class="check-box" aria-hidden="true"></span><span class="check-text">排除轉推</span></label>
+            <div class="setting-head">
+                <h3 id="faves-title">熱門度門檻</h3>
+            </div>
+            <div class="segmented compact" style="--n: 4" role="radiogroup" aria-labelledby="faves-title">
+                <label><input type="radio" class="visually-hidden" name="faves" value="0" autocomplete="off"><span>不限</span></label>
+                <label><input type="radio" class="visually-hidden" name="faves" value="100" autocomplete="off"><span>100+ 讚</span></label>
+                <label><input type="radio" class="visually-hidden" name="faves" value="500" autocomplete="off"><span>500+ 讚</span></label>
+                <label><input type="radio" class="visually-hidden" name="faves" value="1000" autocomplete="off"><span>1000+ 讚</span></label>
+            </div>
         </section>
 
         <section class="setting-section">
@@ -1123,9 +1131,9 @@
         </section>
     </aside>
 
-    <script src="characters.js?v=b68c523b"></script>
+    <script src="characters.js?v=1aeef66a"></script>
     <!-- 本地圖片清單，由 scripts/download-icons.mjs 產生 -->
-    <script src="img/manifest.js?v=b68c523b"></script>
+    <script src="img/manifest.js?v=1aeef66a"></script>
     <script>
         var STORAGE_KEY = 'genshin-search-state';
         var TAG_ORDER = ['en', 'ja', 'tw', 'cn'];
@@ -1137,7 +1145,7 @@
             date: 'any',         // any / 7 / 30 / 365 / custom
             since: '',           // 自訂日期（YYYY-MM-DD）
             until: '',
-            noRetweets: true,
+            faves: '0',          // 最少喜歡數：0（不限）/ 100 / 500 / 1000
             advanced: false,
         };
         var TYPE_FILTERS = { media: 'filter:media', images: 'filter:images', videos: 'filter:videos' };
@@ -1328,13 +1336,14 @@
             return ['since:' + formatDate(d)];
         }
 
-        // 角色 tag 之外的條件：結果類型、排除轉推、日期範圍
+        // 角色 tag 之外的條件：結果類型、日期範圍、熱門度門檻；轉推一律排除
         function buildSearchUrl(ids) {
             var query = buildQuery(ids);
             var filters = [];
             if (TYPE_FILTERS[settings.type]) filters.push(TYPE_FILTERS[settings.type]);
-            if (settings.noRetweets) filters.push('-filter:retweets');
+            filters.push('-filter:retweets');
             filters = filters.concat(dateFilters());
+            if (settings.faves !== '0') filters.push('min_faves:' + settings.faves);
             if (filters.length > 0) {
                 // OR 模式的 tag 要先用括號包起來，條件才會套用到全部角色
                 if (settings.logic === 'or' && query.indexOf(' OR ') >= 0) query = '(' + query + ')';
@@ -1442,7 +1451,7 @@
                 date: pick(saved.date, ['any', '7', '30', '365', 'custom'], DEFAULT_SETTINGS.date),
                 since: isDate(saved.since),
                 until: isDate(saved.until),
-                noRetweets: typeof saved.noRetweets === 'boolean' ? saved.noRetweets : DEFAULT_SETTINGS.noRetweets,
+                faves: pick(saved.faves, ['0', '100', '500', '1000'], DEFAULT_SETTINGS.faves),
                 advanced: saved.advanced === true,
             };
         }
@@ -1461,7 +1470,7 @@
             document.querySelectorAll('input[name="lang"]').forEach(function (input) {
                 input.checked = settings.langs.indexOf(input.value) >= 0;
             });
-            ['type', 'sort', 'date'].forEach(function (name) {
+            ['type', 'sort', 'date', 'faves'].forEach(function (name) {
                 document.querySelectorAll('input[name="' + name + '"]').forEach(function (input) {
                     input.checked = input.value === settings[name];
                 });
@@ -1469,7 +1478,6 @@
             document.getElementById('date-since').value = settings.since;
             document.getElementById('date-until').value = settings.until;
             document.getElementById('date-range').hidden = settings.date !== 'custom';
-            document.getElementById('no-retweets').checked = settings.noRetweets;
             document.getElementById('advanced-search').checked = settings.advanced;
             updateSegmentedThumbs();
         }
@@ -1490,8 +1498,8 @@
 
             syncSettingsUI();
 
-            // 單選：搜尋邏輯、結果類型、排序、日期範圍
-            ['logic', 'type', 'sort', 'date'].forEach(function (name) {
+            // 單選：搜尋邏輯、結果類型、排序、日期範圍、熱門度門檻
+            ['logic', 'type', 'sort', 'date', 'faves'].forEach(function (name) {
                 document.querySelectorAll('input[name="' + name + '"]').forEach(function (input) {
                     input.addEventListener('change', function () {
                         settings[name] = input.value;
@@ -1512,12 +1520,6 @@
                 });
             });
 
-            var noRetweets = document.getElementById('no-retweets');
-            noRetweets.addEventListener('change', function () {
-                settings.noRetweets = noRetweets.checked;
-                saveSettings();
-                update();
-            });
 
             var langInputs = document.querySelectorAll('input[name="lang"]');
             langInputs.forEach(function (input) {

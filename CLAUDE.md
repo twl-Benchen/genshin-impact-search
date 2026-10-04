@@ -14,9 +14,10 @@
 |---|---|
 | `index.html` | 整個網頁：CSS、HTML、JS 都在裡面 |
 | `characters.js` | 角色與元素資料（`ELEMENTS`、`CHARACTERS`），同時支援瀏覽器 `<script>` 與 Node `require` |
-| `img/characters/*`、`img/elements/*` | 本地頭像與元素圖示（由腳本下載，勿手動放） |
+| `img/characters/*`、`img/elements/*` | 本地頭像（200×200 WebP）與元素圖示（64×64 WebP），由腳本下載並轉檔，勿手動放 |
 | `img/manifest.js` | 自動產生的本地圖片清單 `window.LOCAL_ICONS`，勿手動編輯 |
-| `scripts/download-icons.mjs` | 下載 `characters.js` 裡的圖片到 `img/`、產生 manifest、更新 `index.html` 的資料版本號 |
+| `scripts/download-icons.mjs` | 下載 `characters.js` 裡的圖片到 `img/`、用 sharp 縮成小尺寸 WebP、產生 manifest、更新 `index.html` 的資料版本號 |
+| `package.json` | 只給維護腳本用（sharp），網頁本身不需要建置；第一次在本機跑腳本前要 `npm install` |
 | `.github/workflows/download-icons.yml` | `main` 上 `characters.js` 有變動時自動執行上面的腳本並提交（也可手動執行） |
 
 資料用 `<script>` 載入而不是 `fetch` JSON，這樣直接雙擊 `index.html`（`file://`）也能用。
@@ -41,14 +42,14 @@
 - 進階搜尋開啟時，`common` 的 tag 會加上 #原神 限定：`(#琴 #原神)`。
 - AND 模式：各角色的組之間用空格（同時出現）；OR 模式：全部攤平用 OR。
 - 所選語言都沒有 tag 時，退回英文 tag，角色不會從搜尋中消失。
-- 角色 tag 之後再加上條件（`buildSearchUrl`）：結果類型（`filter:media`／`filter:images`／`filter:videos`）、排除轉推（`-filter:retweets`）、日期範圍（`since:`／`until:`）。OR 模式會先把 tag 整段用括號包起來，條件才會套用到全部角色。
+- 角色 tag 之後再加上條件（`buildSearchUrl`）：結果類型（`filter:media`／`filter:images`／`filter:videos`）、日期範圍（`since:`／`until:`）、熱門度門檻（`min_faves:`）。轉推一律排除（`-filter:retweets`），不提供選項（使用者要求）。OR 模式會先把 tag 整段用括號包起來，條件才會套用到全部角色。
 - 𝕏 的 `until:` 不含當天，所以自訂的結束日期會自動加一天。
 - 網址：`https://x.com/search?q=` + `encodeURIComponent(query)`，排序用網址參數（最新 `&f=live`、媒體分頁 `&f=media`，熱門不加）。
 
 ### 狀態
 
 - 已選角色與元素篩選：存在網址 hash（`#c=Klee,Nahida&e=Pyro`），並備份到 localStorage（沒有 hash 時還原）。
-- 設定面板（AND/OR、搜尋語言、結果類型、排序、日期範圍、排除轉推、進階搜尋）：存在 **sessionStorage**，只保留到分頁關閉。跳去 𝕏 再返回、重新整理都會保留；開新分頁或下次再來則回到預設（AND、四種語言全選、圖片與影片、熱門、不限日期、排除轉推、進階搜尋關閉）。這是使用者的要求。
+- 設定面板（AND/OR、搜尋語言、結果類型、排序、日期範圍、熱門度門檻、進階搜尋）：存在 **sessionStorage**，只保留到分頁關閉。跳去 𝕏 再返回、重新整理都會保留；開新分頁或下次再來則回到預設（AND、四種語言全選、圖片與影片、熱門、不限日期、熱門度不限、進階搜尋關閉）。這是使用者的要求。
 
 ### 圖片載入順序
 
@@ -58,7 +59,7 @@
 
 - 元素篩選（再點一次同一元素恢復顯示全部）、角色多選
 - 多語 hashtag（英／日／繁／簡）、AND／OR、進階搜尋（常見字 + #原神 限定）
-- 結果類型（全部／圖片與影片／只有圖片／只有影片）、排序（熱門／最新／媒體分頁）、日期範圍（不限／7 天／30 天／一年／自訂）、排除轉推
+- 結果類型（全部／圖片與影片／只有圖片／只有影片）、排序（熱門／最新／媒體分頁）、日期範圍（不限／7 天／30 天／一年／自訂）、熱門度門檻（不限／100+／500+／1000+ 讚）；轉推一律排除
 - 右上角原神風格齒輪 → 從右側滑出的深藍設定面板（×、點背景、Esc 關閉；焦點鎖在面板內）
 - 底部固定操作列：已選角色頭像與繁中 tag 上下對齊（點擊移除）、前往𝕏／複製網址／清空
 - 原神介面風格：米白／深藍／金配色、膠囊按鈕、Noto Sans TC / Noto Serif TC
@@ -75,7 +76,7 @@
 - 星級底色要「淡淡的」，不能影響整體畫面顏色。
 - 選取的光暈不能太寬，避免影響隔壁角色。
 - 標題副標是「(需要登入𝕏帳號)」。
-- 設定面板底色參考 HoYoWiki 的深藍色（`#3A4357`）。面板順序：搜尋邏輯 → 搜尋語言（2×2）→ 結果類型（2×2）→ 排序 → 日期範圍 → 排除轉推 → 進階搜尋（最下面）。
+- 設定面板底色參考 HoYoWiki 的深藍色（`#3A4357`）。面板順序：搜尋邏輯 → 搜尋語言（2×2）→ 結果類型（2×2）→ 排序 → 日期範圍 → 熱門度門檻 → 進階搜尋（最下面）。
 - 改動先推到分支並提供預覽網址，使用者看過、說「直接併」後才開 PR 並合併。
 
 ## 踩過的坑
@@ -89,6 +90,7 @@
 - **`<button>` 內容預設垂直置中**：名稱換行時卡片會上下錯開，`.character` 要用 `flex-direction: column; justify-content: flex-start`。
 - **`#Gaming`（嘉明）等英文名稱本身就是常見單字**，搜尋結果會混雜，目前尚未處理（見下一步）。
 - **返回上一頁時瀏覽器會自己恢復勾選框**：曾發生只勾繁中 → 去 𝕏 → 返回後，畫面仍只勾繁中，但程式的設定已重設成四種語言，搜尋語法和畫面不一致。現在設定存在 sessionStorage，設定面板的 input 加了 `autocomplete="off"`，並在 `pageshow` 時用 `syncSettingsUI()` 讓畫面跟著設定走。
+- **`package.json` 不能設 `"type": "module"`**：會讓 Node 把 `characters.js` 當成 ES module，`module.exports` 失效，腳本讀不到角色資料。腳本本身用 `.mjs` 就夠了。
 - **在 Bash 裡 `pkill -f "http.server 8767"` 會連自己的 shell 一起殺掉**（指令列也含那段字）。改用 `pkill -f "http.server 876[0-9]"`，並放在獨立的指令裡。
 
 ## 測試方式
@@ -111,7 +113,7 @@ const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-119
 
 - 之後的新角色照 `characters.js` 的格式加（圖片網址用 HoYoWiki 官方圖，使用者通常會直接提供）。
 - 處理英文名稱是常見單字的角色（`#Gaming`、`#Amber`、`#Lisa`、`#Mona`…），例如加上 #原神 限定。
-- 進階篩選：`min_faves:`（最少喜歡數）、排除 AI 圖（`-#AIart -#AIイラスト` 等）。
+- 排除 AI 圖（`-#AIart -#AIイラスト` 等）。
 - 角色名稱搜尋框。
 - 卡片角落加小元素圖示。
 - 深色模式。
