@@ -1,0 +1,11 @@
+{
+  "name": "genshin-impact-search",
+  "private": true,
+  "description": "原神角色 𝕏 圖片搜尋：維護用腳本的相依套件（網頁本身不需要建置）",
+  "scripts": {
+    "icons": "node scripts/download-icons.mjs"
+  },
+  "devDependencies": {
+    "sharp": "^0.35.5"
+  }
+}
