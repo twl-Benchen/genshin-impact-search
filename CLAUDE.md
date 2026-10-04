@@ -46,7 +46,7 @@
 ### 狀態
 
 - 已選角色與元素篩選：存在網址 hash（`#c=Klee,Nahida&e=Pyro`），並備份到 localStorage（沒有 hash 時還原）。
-- 設定面板（AND/OR、搜尋語言、進階搜尋）：**刻意不保存**，每次開啟都回到預設（AND、四種語言全選、進階搜尋關閉）。這是使用者的要求。
+- 設定面板（AND/OR、搜尋語言、進階搜尋）：存在 **sessionStorage**，只保留到分頁關閉。跳去 𝕏 再返回、重新整理都會保留；開新分頁或下次再來則回到預設（AND、四種語言全選、進階搜尋關閉）。這是使用者的要求。
 
 ### 圖片載入順序
 
@@ -63,7 +63,7 @@
 - 背景淡米色漸層，選元素時帶一點該元素的顏色（`@property --tint` 讓漸層可以平滑轉換）
 - 角色與元素都是 `<button aria-pressed>`，可鍵盤操作
 - `<head>`：lang、charset、title、description、Open Graph、favicon
-- 角色更新到 7.0（7.1 的薇斯納、沃雅妮莎尚未加入）
+- 角色更新到 7.1（薇斯納、沃雅妮莎）
 
 ## 重要決定（使用者指定，修改前先確認）
 
@@ -85,6 +85,7 @@
 - **flex 的 `gap` 會拆開文字**：按鈕裡 `前往𝕏<span>頁面</span>` 會變成「前往𝕏 頁面」，文字要整段包在同一個 `<span>` 裡。
 - **`<button>` 內容預設垂直置中**：名稱換行時卡片會上下錯開，`.character` 要用 `flex-direction: column; justify-content: flex-start`。
 - **`#Gaming`（嘉明）等英文名稱本身就是常見單字**，搜尋結果會混雜，目前尚未處理（見下一步）。
+- **返回上一頁時瀏覽器會自己恢復勾選框**：曾發生只勾繁中 → 去 𝕏 → 返回後，畫面仍只勾繁中，但程式的設定已重設成四種語言，搜尋語法和畫面不一致。現在設定存在 sessionStorage，設定面板的 input 加了 `autocomplete="off"`，並在 `pageshow` 時用 `syncSettingsUI()` 讓畫面跟著設定走。
 - **在 Bash 裡 `pkill -f "http.server 8767"` 會連自己的 shell 一起殺掉**（指令列也含那段字）。改用 `pkill -f "http.server 876[0-9]"`，並放在獨立的指令裡。
 
 ## 測試方式
@@ -105,7 +106,7 @@ const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-119
 
 ## 下一步（尚未做）
 
-- 加入 7.1 角色（薇斯納 Vesna、沃雅妮莎 Vodyanitsa），之後的新角色照同樣格式加。
+- 之後的新角色照 `characters.js` 的格式加（圖片網址用 HoYoWiki 官方圖，使用者通常會直接提供）。
 - 搜尋加上 `filter:images`、`-filter:retweets`，或網址加 `&f=media` 直接開媒體分頁。
 - 處理英文名稱是常見單字的角色（`#Gaming`、`#Amber`、`#Lisa`、`#Mona`…），例如加上 #原神 限定。
 - 進階篩選：`min_faves:`（熱門圖）、`since:`（時間範圍）。

@@ -964,8 +964,8 @@
                 <p class="note">※ 只選一位角色時，兩者結果相同。</p>
             </div>
             <div class="segmented" role="radiogroup" aria-labelledby="logic-title">
-                <label><input type="radio" class="visually-hidden" name="logic" value="and"><span>AND</span></label>
-                <label><input type="radio" class="visually-hidden" name="logic" value="or"><span>OR</span></label>
+                <label><input type="radio" class="visually-hidden" name="logic" value="and" autocomplete="off"><span>AND</span></label>
+                <label><input type="radio" class="visually-hidden" name="logic" value="or" autocomplete="off"><span>OR</span></label>
             </div>
         </section>
 
@@ -974,17 +974,17 @@
                 <h3 id="lang-title">搜尋語言</h3>
             </div>
             <div class="lang-list" role="group" aria-labelledby="lang-title">
-                <label class="check-row"><input type="checkbox" class="visually-hidden" name="lang" value="tw"><span class="check-box" aria-hidden="true"></span><span class="check-text">繁體中文</span></label>
-                <label class="check-row"><input type="checkbox" class="visually-hidden" name="lang" value="cn"><span class="check-box" aria-hidden="true"></span><span class="check-text">簡體中文</span></label>
-                <label class="check-row"><input type="checkbox" class="visually-hidden" name="lang" value="en"><span class="check-box" aria-hidden="true"></span><span class="check-text">英文</span></label>
-                <label class="check-row"><input type="checkbox" class="visually-hidden" name="lang" value="ja"><span class="check-box" aria-hidden="true"></span><span class="check-text">日文</span></label>
+                <label class="check-row"><input type="checkbox" class="visually-hidden" name="lang" value="tw" autocomplete="off"><span class="check-box" aria-hidden="true"></span><span class="check-text">繁體中文</span></label>
+                <label class="check-row"><input type="checkbox" class="visually-hidden" name="lang" value="cn" autocomplete="off"><span class="check-box" aria-hidden="true"></span><span class="check-text">簡體中文</span></label>
+                <label class="check-row"><input type="checkbox" class="visually-hidden" name="lang" value="en" autocomplete="off"><span class="check-box" aria-hidden="true"></span><span class="check-text">英文</span></label>
+                <label class="check-row"><input type="checkbox" class="visually-hidden" name="lang" value="ja" autocomplete="off"><span class="check-box" aria-hidden="true"></span><span class="check-text">日文</span></label>
             </div>
             <p class="setting-hint" id="lang-hint" aria-live="polite"></p>
         </section>
 
         <section class="setting-section">
             <div class="check-with-info">
-                <label class="check-row"><input type="checkbox" class="visually-hidden" id="advanced-search"><span class="check-box" aria-hidden="true"></span><span class="check-text">進階搜尋</span></label>
+                <label class="check-row"><input type="checkbox" class="visually-hidden" id="advanced-search" autocomplete="off"><span class="check-box" aria-hidden="true"></span><span class="check-text">進階搜尋</span></label>
                 <button type="button" class="info-btn" id="advanced-info" aria-label="進階搜尋說明" aria-expanded="false" aria-controls="advanced-help">!</button>
             </div>
             <div class="help-box" id="advanced-help" hidden>
@@ -995,19 +995,17 @@
         </section>
     </aside>
 
-    <script src="characters.js?v=50b19c0a"></script>
+    <script src="characters.js?v=0593bd01"></script>
     <!-- 本地圖片清單，由 scripts/download-icons.mjs 產生 -->
-    <script src="img/manifest.js?v=50b19c0a"></script>
+    <script src="img/manifest.js?v=0593bd01"></script>
     <script>
         var STORAGE_KEY = 'genshin-search-state';
         var TAG_ORDER = ['en', 'ja', 'tw', 'cn'];
         var DEFAULT_SETTINGS = { logic: 'and', langs: ['tw', 'cn', 'en', 'ja'], advanced: false };
-        // 設定不會被記住：每次開啟網頁都從預設值開始（AND、四種語言全選、不開進階搜尋）
-        var settings = {
-            logic: DEFAULT_SETTINGS.logic,
-            langs: DEFAULT_SETTINGS.langs.slice(),
-            advanced: DEFAULT_SETTINGS.advanced,
-        };
+        // 設定只保留到分頁關閉（sessionStorage）：跳去 𝕏 再返回、重新整理都會保留；
+        // 開新分頁或下次再來，則從預設值開始（AND、四種語言全選、不開進階搜尋）
+        var SETTINGS_KEY = 'genshin-search-settings';
+        var settings = loadSettings();
         var LOCAL_ICONS = window.LOCAL_ICONS || {};
         var charactersById = {};
         CHARACTERS.forEach(function (c) { charactersById[c.id] = c; });
@@ -1240,22 +1238,55 @@
         }
 
         // ===== 設定：搜尋邏輯、語言與進階搜尋 =====
+        function loadSettings() {
+            var saved = {};
+            try {
+                saved = JSON.parse(sessionStorage.getItem(SETTINGS_KEY)) || {};
+            } catch (e) { /* 無痕模式或資料損壞時使用預設值 */ }
+            var langs = Array.isArray(saved.langs) ? saved.langs.filter(function (l) {
+                return DEFAULT_SETTINGS.langs.indexOf(l) >= 0;
+            }) : [];
+            return {
+                logic: saved.logic === 'or' ? 'or' : 'and',
+                langs: langs.length > 0 ? langs : DEFAULT_SETTINGS.langs.slice(),
+                advanced: saved.advanced === true,
+            };
+        }
+
+        function saveSettings() {
+            try {
+                sessionStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+            } catch (e) { /* 同上 */ }
+        }
+
+        // 讓面板上的勾選狀態一律跟著 settings，避免畫面與實際搜尋不一致
+        function syncSettingsUI() {
+            document.querySelectorAll('input[name="logic"]').forEach(function (input) {
+                input.checked = input.value === settings.logic;
+            });
+            document.querySelectorAll('input[name="lang"]').forEach(function (input) {
+                input.checked = settings.langs.indexOf(input.value) >= 0;
+            });
+            document.getElementById('advanced-search').checked = settings.advanced;
+        }
+
         function initSettingsPanel() {
             var panel = document.getElementById('settings-panel');
             var gear = document.getElementById('settings-btn');
             var hintTimer;
 
+            syncSettingsUI();
+
             document.querySelectorAll('input[name="logic"]').forEach(function (input) {
-                input.checked = input.value === settings.logic;
                 input.addEventListener('change', function () {
                     settings.logic = input.value;
+                    saveSettings();
                     update();
                 });
             });
 
             var langInputs = document.querySelectorAll('input[name="lang"]');
             langInputs.forEach(function (input) {
-                input.checked = settings.langs.indexOf(input.value) >= 0;
                 input.addEventListener('change', function () {
                     var checked = Array.prototype.filter.call(langInputs, function (i) { return i.checked; });
                     var hint = document.getElementById('lang-hint');
@@ -1268,14 +1299,15 @@
                         return;
                     }
                     settings.langs = checked.map(function (i) { return i.value; });
+                    saveSettings();
                     update();
                 });
             });
 
             var advanced = document.getElementById('advanced-search');
-            advanced.checked = settings.advanced;
             advanced.addEventListener('change', function () {
                 settings.advanced = advanced.checked;
+                saveSettings();
                 update();
             });
 
@@ -1339,6 +1371,11 @@
         if (window.ResizeObserver) new ResizeObserver(updateBarHeight).observe(document.getElementById('action-bar'));
         loadState();
         update();
+        window.addEventListener('pageshow', function () {
+            settings = loadSettings();
+            syncSettingsUI();
+            update();
+        });
     </script>
 </body>
 </html>
