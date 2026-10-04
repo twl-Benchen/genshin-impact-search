@@ -696,15 +696,12 @@
                 top: 4px;
                 bottom: 4px;
                 left: 4px;
-                width: calc(50% - 4px);
+                width: calc((100% - 8px) / var(--n, 2));
                 border-radius: 999px;
                 background: var(--cream);
                 box-shadow: 0 0 0 1px var(--gold-light), 0 0 8px rgba(255, 230, 178, 0.35);
+                transform: translateX(calc(100% * var(--i, 0)));
                 transition: transform 0.3s cubic-bezier(0.22, 0.8, 0.3, 1);
-            }
-
-            .segmented:has(input[value="or"]:checked)::before {
-                transform: translateX(100%);
             }
 
             .segmented label {
@@ -720,6 +717,7 @@
                 text-align: center;
                 font-weight: 700;
                 letter-spacing: 0.08em;
+                white-space: nowrap;
                 color: rgba(236, 229, 216, 0.75);
                 transition: color 0.3s ease;
             }
@@ -745,6 +743,12 @@
             white-space: nowrap;
         }
 
+        /* 選項多時字小一點，手機上才放得下 */
+        .segmented.compact span {
+            font-size: 13px;
+            letter-spacing: 0.02em;
+        }
+
         .segmented input:focus-visible + span,
         .check-row input:focus-visible ~ .check-text {
             outline: 3px solid var(--gold);
@@ -757,6 +761,80 @@
             flex-direction: column;
             gap: 8px;
         }
+
+        /* 2×2 排列的選項（搜尋語言、結果類型） */
+        .option-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+            .option-grid .check-row {
+                padding: 10px 12px;
+                gap: 10px;
+            }
+
+            .option-grid .check-text {
+                font-size: 14px;
+                white-space: nowrap;
+            }
+
+        /* 單選用的圓形指示點 */
+        .radio-dot {
+            position: relative;
+            flex: 0 0 auto;
+            width: 18px;
+            height: 18px;
+            box-sizing: border-box;
+            border: 1.5px solid var(--gold);
+            border-radius: 50%;
+        }
+
+            .check-row input:checked ~ .radio-dot::after {
+                content: '';
+                position: absolute;
+                inset: 3px;
+                border-radius: 50%;
+                background: var(--gold);
+            }
+
+        /* 自訂日期 */
+        .date-range {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+            .date-range[hidden] {
+                display: none;
+            }
+
+            .date-range label {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                font-size: 12px;
+                color: rgba(236, 229, 216, 0.75);
+            }
+
+            .date-range input {
+                box-sizing: border-box;
+                width: 100%;
+                padding: 8px 10px;
+                border: 1px solid rgba(211, 188, 142, 0.6);
+                border-radius: 8px;
+                background: rgba(20, 24, 34, 0.35);
+                color: var(--cream);
+                font: inherit;
+                font-size: 14px;
+                color-scheme: dark;
+            }
+
+                .date-range input:focus-visible {
+                    outline: 3px solid var(--gold);
+                    outline-offset: 1px;
+                }
 
         .check-row {
             display: flex;
@@ -830,6 +908,12 @@
             font-size: 12px;
             color: var(--gold-light);
         }
+
+            /* 沒有提示時不佔空間 */
+            .setting-hint:empty {
+                min-height: 0;
+                margin: 0;
+            }
 
         /* ===== 手機 ===== */
         @media screen and (max-width: 1000px) {
@@ -963,7 +1047,7 @@
                 <p><strong>OR（任一出現）</strong>：只要標了其中任何一位角色就會出現。適合一次瀏覽多位角色的圖，結果較多。</p>
                 <p class="note">※ 只選一位角色時，兩者結果相同。</p>
             </div>
-            <div class="segmented" role="radiogroup" aria-labelledby="logic-title">
+            <div class="segmented" style="--n: 2" role="radiogroup" aria-labelledby="logic-title">
                 <label><input type="radio" class="visually-hidden" name="logic" value="and" autocomplete="off"><span>AND</span></label>
                 <label><input type="radio" class="visually-hidden" name="logic" value="or" autocomplete="off"><span>OR</span></label>
             </div>
@@ -973,13 +1057,57 @@
             <div class="setting-head">
                 <h3 id="lang-title">搜尋語言</h3>
             </div>
-            <div class="lang-list" role="group" aria-labelledby="lang-title">
+            <div class="option-grid" role="group" aria-labelledby="lang-title">
                 <label class="check-row"><input type="checkbox" class="visually-hidden" name="lang" value="tw" autocomplete="off"><span class="check-box" aria-hidden="true"></span><span class="check-text">繁體中文</span></label>
                 <label class="check-row"><input type="checkbox" class="visually-hidden" name="lang" value="cn" autocomplete="off"><span class="check-box" aria-hidden="true"></span><span class="check-text">簡體中文</span></label>
                 <label class="check-row"><input type="checkbox" class="visually-hidden" name="lang" value="en" autocomplete="off"><span class="check-box" aria-hidden="true"></span><span class="check-text">英文</span></label>
                 <label class="check-row"><input type="checkbox" class="visually-hidden" name="lang" value="ja" autocomplete="off"><span class="check-box" aria-hidden="true"></span><span class="check-text">日文</span></label>
             </div>
             <p class="setting-hint" id="lang-hint" aria-live="polite"></p>
+        </section>
+
+        <section class="setting-section">
+            <div class="setting-head">
+                <h3 id="type-title">結果類型</h3>
+            </div>
+            <div class="option-grid" role="radiogroup" aria-labelledby="type-title">
+                <label class="check-row"><input type="radio" class="visually-hidden" name="type" value="all" autocomplete="off"><span class="radio-dot" aria-hidden="true"></span><span class="check-text">全部</span></label>
+                <label class="check-row"><input type="radio" class="visually-hidden" name="type" value="media" autocomplete="off"><span class="radio-dot" aria-hidden="true"></span><span class="check-text">圖片與影片</span></label>
+                <label class="check-row"><input type="radio" class="visually-hidden" name="type" value="images" autocomplete="off"><span class="radio-dot" aria-hidden="true"></span><span class="check-text">只有圖片</span></label>
+                <label class="check-row"><input type="radio" class="visually-hidden" name="type" value="videos" autocomplete="off"><span class="radio-dot" aria-hidden="true"></span><span class="check-text">只有影片</span></label>
+            </div>
+        </section>
+
+        <section class="setting-section">
+            <div class="setting-head">
+                <h3 id="sort-title">排序</h3>
+            </div>
+            <div class="segmented" style="--n: 3" role="radiogroup" aria-labelledby="sort-title">
+                <label><input type="radio" class="visually-hidden" name="sort" value="top" autocomplete="off"><span>熱門</span></label>
+                <label><input type="radio" class="visually-hidden" name="sort" value="live" autocomplete="off"><span>最新</span></label>
+                <label><input type="radio" class="visually-hidden" name="sort" value="media" autocomplete="off"><span>媒體分頁</span></label>
+            </div>
+        </section>
+
+        <section class="setting-section">
+            <div class="setting-head">
+                <h3 id="date-title">日期範圍</h3>
+            </div>
+            <div class="segmented compact" style="--n: 5" role="radiogroup" aria-labelledby="date-title">
+                <label><input type="radio" class="visually-hidden" name="date" value="any" autocomplete="off"><span>不限</span></label>
+                <label><input type="radio" class="visually-hidden" name="date" value="7" autocomplete="off"><span>7 天</span></label>
+                <label><input type="radio" class="visually-hidden" name="date" value="30" autocomplete="off"><span>30 天</span></label>
+                <label><input type="radio" class="visually-hidden" name="date" value="365" autocomplete="off"><span>一年</span></label>
+                <label><input type="radio" class="visually-hidden" name="date" value="custom" autocomplete="off"><span>自訂</span></label>
+            </div>
+            <div class="date-range" id="date-range" hidden>
+                <label>從<input type="date" id="date-since" autocomplete="off"></label>
+                <label>到<input type="date" id="date-until" autocomplete="off"></label>
+            </div>
+        </section>
+
+        <section class="setting-section">
+            <label class="check-row"><input type="checkbox" class="visually-hidden" id="no-retweets" autocomplete="off"><span class="check-box" aria-hidden="true"></span><span class="check-text">排除轉推</span></label>
         </section>
 
         <section class="setting-section">
@@ -1001,7 +1129,19 @@
     <script>
         var STORAGE_KEY = 'genshin-search-state';
         var TAG_ORDER = ['en', 'ja', 'tw', 'cn'];
-        var DEFAULT_SETTINGS = { logic: 'and', langs: ['tw', 'cn', 'en', 'ja'], advanced: false };
+        var DEFAULT_SETTINGS = {
+            logic: 'and',
+            langs: ['tw', 'cn', 'en', 'ja'],
+            type: 'media',       // all / media / images / videos
+            sort: 'top',         // top（熱門）/ live（最新）/ media（媒體分頁）
+            date: 'any',         // any / 7 / 30 / 365 / custom
+            since: '',           // 自訂日期（YYYY-MM-DD）
+            until: '',
+            noRetweets: true,
+            advanced: false,
+        };
+        var TYPE_FILTERS = { media: 'filter:media', images: 'filter:images', videos: 'filter:videos' };
+        var SORT_PARAMS = { live: '&f=live', media: '&f=media' };
         // 設定只保留到分頁關閉（sessionStorage）：跳去 𝕏 再返回、重新整理都會保留；
         // 開新分頁或下次再來，則從預設值開始（AND、四種語言全選、不開進階搜尋）
         var SETTINGS_KEY = 'genshin-search-settings';
@@ -1160,6 +1300,49 @@
             }).join(' ');
         }
 
+        // 日期範圍 → since:/until:（𝕏 的 until 不含當天，所以結束日期要加一天）
+        function formatDate(d) {
+            function pad(n) { return (n < 10 ? '0' : '') + n; }
+            return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+        }
+
+        function addDays(dateString, days) {
+            var parts = dateString.split('-').map(Number);
+            return formatDate(new Date(parts[0], parts[1] - 1, parts[2] + days));
+        }
+
+        function dateFilters() {
+            if (settings.date === 'custom') {
+                var since = settings.since, until = settings.until;
+                if (since && until && since > until) {
+                    var t = since; since = until; until = t;
+                }
+                var out = [];
+                if (since) out.push('since:' + since);
+                if (until) out.push('until:' + addDays(until, 1));
+                return out;
+            }
+            if (settings.date === 'any') return [];
+            var d = new Date();
+            d.setDate(d.getDate() - Number(settings.date));
+            return ['since:' + formatDate(d)];
+        }
+
+        // 角色 tag 之外的條件：結果類型、排除轉推、日期範圍
+        function buildSearchUrl(ids) {
+            var query = buildQuery(ids);
+            var filters = [];
+            if (TYPE_FILTERS[settings.type]) filters.push(TYPE_FILTERS[settings.type]);
+            if (settings.noRetweets) filters.push('-filter:retweets');
+            filters = filters.concat(dateFilters());
+            if (filters.length > 0) {
+                // OR 模式的 tag 要先用括號包起來，條件才會套用到全部角色
+                if (settings.logic === 'or' && query.indexOf(' OR ') >= 0) query = '(' + query + ')';
+                query += ' ' + filters.join(' ');
+            }
+            return 'https://x.com/search?q=' + encodeURIComponent(query) + (SORT_PARAMS[settings.sort] || '');
+        }
+
         // 底部顯示用：一律顯示繁體中文（例如 #林尼、#琴），與實際搜尋用哪些 tag 無關
         function displayTag(c) {
             return '#' + (c.tags.tw || (c.common && c.common.tw) || c.name.replace(/[·\s]/g, ''));
@@ -1180,8 +1363,7 @@
             if (activeElement) document.body.dataset.element = activeElement;
             else delete document.body.dataset.element;
 
-            var query = hasSelection ? buildQuery(selectedRoles) : '';
-            currentUrl = hasSelection ? 'https://x.com/search?q=' + encodeURIComponent(query) : '';
+            currentUrl = hasSelection ? buildSearchUrl(selectedRoles) : '';
             document.getElementById('view-results-btn').href = currentUrl || '#';
             renderChips();
 
@@ -1246,9 +1428,21 @@
             var langs = Array.isArray(saved.langs) ? saved.langs.filter(function (l) {
                 return DEFAULT_SETTINGS.langs.indexOf(l) >= 0;
             }) : [];
+            function pick(value, allowed, fallback) {
+                return allowed.indexOf(value) >= 0 ? value : fallback;
+            }
+            function isDate(value) {
+                return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : '';
+            }
             return {
                 logic: saved.logic === 'or' ? 'or' : 'and',
                 langs: langs.length > 0 ? langs : DEFAULT_SETTINGS.langs.slice(),
+                type: pick(saved.type, ['all', 'media', 'images', 'videos'], DEFAULT_SETTINGS.type),
+                sort: pick(saved.sort, ['top', 'live', 'media'], DEFAULT_SETTINGS.sort),
+                date: pick(saved.date, ['any', '7', '30', '365', 'custom'], DEFAULT_SETTINGS.date),
+                since: isDate(saved.since),
+                until: isDate(saved.until),
+                noRetweets: typeof saved.noRetweets === 'boolean' ? saved.noRetweets : DEFAULT_SETTINGS.noRetweets,
                 advanced: saved.advanced === true,
             };
         }
@@ -1267,7 +1461,26 @@
             document.querySelectorAll('input[name="lang"]').forEach(function (input) {
                 input.checked = settings.langs.indexOf(input.value) >= 0;
             });
+            ['type', 'sort', 'date'].forEach(function (name) {
+                document.querySelectorAll('input[name="' + name + '"]').forEach(function (input) {
+                    input.checked = input.value === settings[name];
+                });
+            });
+            document.getElementById('date-since').value = settings.since;
+            document.getElementById('date-until').value = settings.until;
+            document.getElementById('date-range').hidden = settings.date !== 'custom';
+            document.getElementById('no-retweets').checked = settings.noRetweets;
             document.getElementById('advanced-search').checked = settings.advanced;
+            updateSegmentedThumbs();
+        }
+
+        // 膠囊切換鈕：把選中的位置寫進 --i，讓米白膠囊滑過去
+        function updateSegmentedThumbs() {
+            document.querySelectorAll('.segmented').forEach(function (group) {
+                var inputs = Array.prototype.slice.call(group.querySelectorAll('input'));
+                var index = inputs.findIndex(function (input) { return input.checked; });
+                group.style.setProperty('--i', Math.max(index, 0));
+            });
         }
 
         function initSettingsPanel() {
@@ -1277,12 +1490,33 @@
 
             syncSettingsUI();
 
-            document.querySelectorAll('input[name="logic"]').forEach(function (input) {
+            // 單選：搜尋邏輯、結果類型、排序、日期範圍
+            ['logic', 'type', 'sort', 'date'].forEach(function (name) {
+                document.querySelectorAll('input[name="' + name + '"]').forEach(function (input) {
+                    input.addEventListener('change', function () {
+                        settings[name] = input.value;
+                        if (name === 'date') document.getElementById('date-range').hidden = input.value !== 'custom';
+                        updateSegmentedThumbs();
+                        saveSettings();
+                        update();
+                    });
+                });
+            });
+
+            ['since', 'until'].forEach(function (key) {
+                var input = document.getElementById('date-' + key);
                 input.addEventListener('change', function () {
-                    settings.logic = input.value;
+                    settings[key] = input.value;
                     saveSettings();
                     update();
                 });
+            });
+
+            var noRetweets = document.getElementById('no-retweets');
+            noRetweets.addEventListener('change', function () {
+                settings.noRetweets = noRetweets.checked;
+                saveSettings();
+                update();
             });
 
             var langInputs = document.querySelectorAll('input[name="lang"]');
