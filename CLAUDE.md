@@ -46,7 +46,7 @@
 ### 狀態
 
 - 已選角色與元素篩選：存在網址 hash（`#c=Klee,Nahida&e=Pyro`），並備份到 localStorage（沒有 hash 時還原）。
-- 設定面板（AND/OR、搜尋語言、進階搜尋）：**刻意不保存**，每次開啟都回到預設（AND、四種語言全選、進階搜尋關閉）。這是使用者的要求。
+- 設定面板（AND/OR、搜尋語言、進階搜尋）：存在 **sessionStorage**，只保留到分頁關閉。跳去 𝕏 再返回、重新整理都會保留；開新分頁或下次再來則回到預設（AND、四種語言全選、進階搜尋關閉）。這是使用者的要求。
 
 ### 圖片載入順序
 
@@ -85,6 +85,7 @@
 - **flex 的 `gap` 會拆開文字**：按鈕裡 `前往𝕏<span>頁面</span>` 會變成「前往𝕏 頁面」，文字要整段包在同一個 `<span>` 裡。
 - **`<button>` 內容預設垂直置中**：名稱換行時卡片會上下錯開，`.character` 要用 `flex-direction: column; justify-content: flex-start`。
 - **`#Gaming`（嘉明）等英文名稱本身就是常見單字**，搜尋結果會混雜，目前尚未處理（見下一步）。
+- **返回上一頁時瀏覽器會自己恢復勾選框**：曾發生只勾繁中 → 去 𝕏 → 返回後，畫面仍只勾繁中，但程式的設定已重設成四種語言，搜尋語法和畫面不一致。現在設定存在 sessionStorage，設定面板的 input 加了 `autocomplete="off"`，並在 `pageshow` 時用 `syncSettingsUI()` 讓畫面跟著設定走。
 - **在 Bash 裡 `pkill -f "http.server 8767"` 會連自己的 shell 一起殺掉**（指令列也含那段字）。改用 `pkill -f "http.server 876[0-9]"`，並放在獨立的指令裡。
 
 ## 測試方式
