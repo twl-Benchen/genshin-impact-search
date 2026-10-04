@@ -63,7 +63,7 @@
 - 背景淡米色漸層，選元素時帶一點該元素的顏色（`@property --tint` 讓漸層可以平滑轉換）
 - 角色與元素都是 `<button aria-pressed>`，可鍵盤操作
 - `<head>`：lang、charset、title、description、Open Graph、favicon
-- 角色更新到 7.0（7.1 的薇斯納、沃雅妮莎尚未加入）
+- 角色更新到 7.1（薇斯納、沃雅妮莎）
 
 ## 重要決定（使用者指定，修改前先確認）
 
@@ -106,7 +106,7 @@ const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-119
 
 ## 下一步（尚未做）
 
-- 加入 7.1 角色（薇斯納 Vesna、沃雅妮莎 Vodyanitsa），之後的新角色照同樣格式加。
+- 之後的新角色照 `characters.js` 的格式加（圖片網址用 HoYoWiki 官方圖，使用者通常會直接提供）。
 - 搜尋加上 `filter:images`、`-filter:retweets`，或網址加 `&f=media` 直接開媒體分頁。
 - 處理英文名稱是常見單字的角色（`#Gaming`、`#Amber`、`#Lisa`、`#Mona`…），例如加上 #原神 限定。
 - 進階篩選：`min_faves:`（熱門圖）、`since:`（時間範圍）。

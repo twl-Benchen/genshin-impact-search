@@ -94,6 +94,8 @@ const CHARACTERS = [
       img: 'https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2025/09/09/4e58c851d6c947865026faa168db83bd_3944254802105067377.png' },
     { id: 'Columbina', name: '哥倫比婭', element: 'Hydro', rarity: 5, tags: { en: 'Columbina', ja: 'コロンビーナ', tw: '哥倫比婭', cn: '哥伦比娅' },
       img: 'https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2026/01/13/80fa97679c8d1828fdd96c6aa9638632_4327573591148809640.png' },
+    { id: 'Vodyanitsa', name: '沃雅妮莎', element: 'Hydro', rarity: 5, tags: { en: 'Vodyanitsa', ja: 'ヴォジャニーツァ', tw: '沃雅妮莎', cn: '沃雅妮莎' },
+      img: 'https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2026/09/21/e106be431d7c8ebbb9607b032fc66e3d_995961298610120887.png?x-oss-process=image%2Fformat%2Cwebp' },
 
     // Anemo
     { id: 'Sayu', name: '早柚', element: 'Anemo', rarity: 4, tags: { en: 'Sayu', ja: '早柚', tw: '早柚', cn: '早柚' },
@@ -132,6 +134,8 @@ const CHARACTERS = [
       img: 'https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2026/02/21/553feb81c3bbc5e3bc69a765e157c33f_8250978205515428490.png' },
     { id: 'Prune', name: '布倫妮', element: 'Anemo', rarity: 4, tags: { en: 'Prune', ja: 'プルーネ', tw: '布倫妮', cn: '布伦妮' },
       img: 'https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2026/05/19/51e83d3537b37acc3f422910fe5bef82_3083259311239382441.png' },
+    { id: 'Vesna', name: '薇斯納', element: 'Anemo', rarity: 5, tags: { en: 'Vesna', ja: 'ヴェスナ', tw: '薇斯納', cn: '薇斯纳' },
+      img: 'https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2026/09/20/5aa0d3ab5845c5926d388e3dd9077ab4_881544340488400495.png?x-oss-process=image%2Fformat%2Cwebp' },
 
     // Electro
     { id: 'Lisa', name: '麗莎', element: 'Electro', rarity: 4, tags: { en: 'Lisa', tw: '麗莎', cn: '丽莎' }, common: { ja: 'リサ' },
