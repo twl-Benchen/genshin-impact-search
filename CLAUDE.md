@@ -74,7 +74,11 @@
 - 分階段開發（使用者每階段測過才做下一階段）：
   1. 上傳圖片合併 ✅
   2. 貼 𝕏 連結抓圖 ✅（FxTwitter API `https://api.fxtwitter.com/status/{id}` → `tweet.media.photos[].url` 加 `?name=orig`；多篇同時抓、依貼上順序加入；在頁面任何地方貼上連結也會自動抓）
-  3. GIF 下載 ✅（𝕏 的 GIF 是 MP4：每支影片提供「下載 MP4」「轉成 GIF」；幀率 10/15/20/30、寬度 240/320/480/原始；進度條、取消；超過 900 幀先確認）
+  3. GIF 下載 ✅（𝕏 的 GIF 是 MP4：每支影片提供「下載 MP4」「轉成 GIF」；幀率 原始/30/20/15/10、寬度 原始/480/320/240，預設都是最左邊的「原始」；進度條、取消；超過 900 幀先確認）
+  - 選項排列（使用者要求）：預設值放最左邊，往右遞減。拼接方向是「橫式（左右）｜直式（上下）」，預設橫式。
+  - 「原始」幀率：瀏覽器不提供影片幀率，`gif.js` 的 `detectMp4Fps` 直接讀 MP4 的 `mdhd`＋`stts`（影片軌）計算；讀不到（非 MP4）用 30。GIF 每幀至少 20ms，所以最高 50。
+  - GIF 延遲以 10ms 為單位，`frameDelay` 用累加後取整，總長度與原影片一致（24fps 不會變快）；擷取時間取每格的中間點 `(i + 0.5) / fps`。
+  - `detectMp4Fps`、`frameDelay` 可在 Node `require('./merge/gif.js')` 測試。
   4. Android 分享直達 ✅（manifest `share_target` GET → `merge.html?title=&text=&url=`；`x.js` 的 `readSharedLinks` 從三個參數找貼文連結自動開始抓，再用 `replaceState` 清掉參數，重新整理不會重抓）
 - PWA 注意事項：
   - manifest 的 `start_url`、`scope`、`share_target.action`、圖示一律用**相對路徑**（以 manifest 網址解析，正式站會變成 `/genshin-impact-search/…`）。
@@ -108,6 +112,7 @@
 - 角色與元素都是 `<button aria-pressed>`，可鍵盤操作
 - `<head>`：lang、charset、title、description、Open Graph、favicon
 - 角色更新到 7.1（薇斯納、沃雅妮莎）
+- 合併頁：選項預設值都在最左邊（拼接方向預設橫式；GIF 幀率／寬度預設「原始」，原始幀率從 MP4 讀取）
 - 合併頁：抓取按鈕改成狀態膠囊（貼上／Enter 自動抓）、膠囊切換鈕改成與首頁相同的滑動動畫
 - PWA：可安裝成 App，Android 從 𝕏 App 分享貼文可直達合併頁並自動抓圖／影片
 - 圖片合併下載頁改成「圖片」「影片」資料夾分頁（共用貼連結框）
@@ -137,7 +142,7 @@
 - **`#Gaming`（嘉明）等英文名稱本身就是常見單字**，搜尋結果會混雜，目前尚未處理（見下一步）。
 - **返回上一頁時瀏覽器會自己恢復勾選框**：曾發生只勾繁中 → 去 𝕏 → 返回後，畫面仍只勾繁中，但程式的設定已重設成四種語言，搜尋語法和畫面不一致。現在設定存在 sessionStorage，設定面板的 input 加了 `autocomplete="off"`，並在 `pageshow` 時用 `syncSettingsUI()` 讓畫面跟著設定走。
 - **`package.json` 不能設 `"type": "module"`**：會讓 Node 把 `characters.js` 當成 ES module，`module.exports` 失效，腳本讀不到角色資料。腳本本身用 `.mjs` 就夠了。
-- **雲端 session 連不到 cdn.jsdelivr.net、api.fxtwitter.com、pbs.twimg.com、video.twimg.com**（代理 403）。Playwright 測試時用 `page.route` 把 SortableJS、gifenc 的 CDN 網址換成 npm 裝下來的檔案；Playwright 的 Chromium 不支援 H.264，測試影片要用 `ffmpeg` 產生 VP9 webm；𝕏／FxTwitter 的實際行為要請使用者在自己的瀏覽器測。
+- **雲端 session 連不到 cdn.jsdelivr.net、api.fxtwitter.com、pbs.twimg.com、video.twimg.com**（代理 403）。Playwright 測試時用 `page.route` 把 SortableJS、gifenc 的 CDN 網址換成 npm 裝下來的檔案；Playwright 的 Chromium 不支援 H.264，測試影片要用 `ffmpeg` 產生 VP9（要測「原始」幀率就用 VP9 放在 .mp4 容器）；𝕏／FxTwitter 的實際行為要請使用者在自己的瀏覽器測。
 - **在 Bash 裡 `pkill -f "http.server 8767"` 會連自己的 shell 一起殺掉**（指令列也含那段字）。改用 `pkill -f "http.server 876[0-9]"`，並放在獨立的指令裡。
 
 ## 測試方式

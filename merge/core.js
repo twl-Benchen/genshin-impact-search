@@ -9,7 +9,7 @@
     var PREVIEW_AREA = 4000000; // 預覽 canvas 的最大面積
     var MAX_SIDE = 32767;     // Chrome／Firefox 的單邊上限
     var SETTINGS_KEY = 'genshin-merge-settings';
-    var DEFAULTS = { direction: 'vertical', align: 'max', gap: 0, bg: '#ffffff', custom: '#3a4357', format: 'png', quality: 92 };
+    var DEFAULTS = { direction: 'horizontal', align: 'max', gap: 0, bg: '#ffffff', custom: '#3a4357', format: 'png', quality: 92 };
 
     // canvas 最大面積：iOS／iPadOS Safari 是 4096×4096；其他手機記憶體較少，保守一點
     var isIOS = /iP(hone|od|ad)/.test(navigator.userAgent) ||

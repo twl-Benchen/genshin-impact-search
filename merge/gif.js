@@ -5,9 +5,85 @@
 (function () {
     'use strict';
 
+    // ===== 讀 MP4 的原始幀率 =====
+    // 瀏覽器不提供影片幀率，所以直接讀 MP4 檔頭：找影片軌（hdlr = vide）的 mdhd（時間單位）與
+    // stts（每一幀的時間長度），幀率 = 幀數 ÷ 總時間。讀不到（不是 MP4、檔案壞掉）時回傳 0。
+    var CONTAINERS = ['moov', 'trak', 'mdia', 'minf', 'stbl'];
+
+    function readBoxes(view, start, end, visit) {
+        var pos = start;
+        while (pos + 8 <= end) {
+            var size = view.getUint32(pos);
+            var type = String.fromCharCode(view.getUint8(pos + 4), view.getUint8(pos + 5), view.getUint8(pos + 6), view.getUint8(pos + 7));
+            var header = 8;
+            if (size === 1) {
+                if (pos + 16 > end) return;
+                size = view.getUint32(pos + 8) * 4294967296 + view.getUint32(pos + 12);
+                header = 16;
+            } else if (size === 0) {
+                size = end - pos;
+            }
+            if (size < header || pos + size > end) return;
+            visit(type, pos + header, pos + size);
+            pos += size;
+        }
+    }
+
+    function detectMp4Fps(buffer) {
+        var view = new DataView(buffer);
+        var fps = 0;
+        function walkTrack(start, end) {
+            var track = { video: false, timescale: 0, frames: 0, ticks: 0 };
+            (function walk(s, e) {
+                readBoxes(view, s, e, function (type, bs, be) {
+                    if (type === 'hdlr' && be - bs >= 12) {
+                        track.video = view.getUint32(bs + 8) === 0x76696465; // 'vide'
+                    } else if (type === 'mdhd') {
+                        var v1 = view.getUint8(bs) === 1;
+                        track.timescale = view.getUint32(bs + (v1 ? 20 : 12));
+                    } else if (type === 'stts' && be - bs >= 8) {
+                        var count = view.getUint32(bs + 4);
+                        for (var i = 0; i < count && bs + 16 + i * 8 <= be; i++) {
+                            var n = view.getUint32(bs + 8 + i * 8);
+                            track.frames += n;
+                            track.ticks += n * view.getUint32(bs + 12 + i * 8);
+                        }
+                    } else if (CONTAINERS.indexOf(type) !== -1) {
+                        walk(bs, be);
+                    }
+                });
+            })(start, end);
+            if (!fps && track.video && track.timescale && track.ticks) fps = track.frames / (track.ticks / track.timescale);
+        }
+        try {
+            readBoxes(view, 0, view.byteLength, function (type, bs, be) {
+                if (type !== 'moov') return;
+                readBoxes(view, bs, be, function (t, ts, te) {
+                    if (t === 'trak') walkTrack(ts, te);
+                });
+            });
+        } catch (e) {
+            return 0;
+        }
+        return fps > 0 && fps < 1000 ? fps : 0;
+    }
+
+    // GIF 的延遲以 10ms 為單位：把每一幀的時間累加後再取整，總長度才會和原影片一樣
+    // （例如 24fps 不會因為每幀都四捨五入成 40ms 而變快）
+    function frameDelay(i, fps) {
+        return Math.round((i + 1) * 100 / fps) * 10 - Math.round(i * 100 / fps) * 10;
+    }
+
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = { detectMp4Fps: detectMp4Fps, frameDelay: frameDelay };
+    }
+    if (typeof document === 'undefined') return;
+
     var GIFENC_URL = 'https://cdn.jsdelivr.net/npm/gifenc@1.0.3/dist/gifenc.esm.js';
     var SETTINGS_KEY = 'genshin-gif-settings';
-    var DEFAULTS = { fps: 15, width: 480 };
+    var DEFAULTS = { fps: 0, width: 0 }; // 0 = 原始
+    var MAX_GIF_FPS = 50;   // GIF 每幀至少 20ms，更快的話瀏覽器會放慢播放
+    var FALLBACK_FPS = 30;  // 讀不到原始幀率時使用
     var LONG_VIDEO = 20;    // 秒；超過時提示 GIF 會很大
     var MAX_QUEUE = 6;      // 等待編碼的幀數上限，避免擷取太快塞爆記憶體
     var SEEK_TIMEOUT = 3000;
@@ -24,8 +100,8 @@
         var s = {};
         try { s = JSON.parse(sessionStorage.getItem(SETTINGS_KEY)) || {}; } catch (e) { }
         return {
-            fps: [10, 15, 20, 30].indexOf(s.fps) !== -1 ? s.fps : DEFAULTS.fps,
-            width: [240, 320, 480, 0].indexOf(s.width) !== -1 ? s.width : DEFAULTS.width
+            fps: [0, 30, 20, 15, 10].indexOf(s.fps) !== -1 ? s.fps : DEFAULTS.fps,
+            width: [0, 480, 320, 240].indexOf(s.width) !== -1 ? s.width : DEFAULTS.width
         };
     }
 
@@ -284,14 +360,14 @@
     // ===== GIF 編碼器 =====
     var WORKER_SOURCE = [
         "import { GIFEncoder, quantize, applyPalette } from '" + GIFENC_URL + "';",
-        'let gif, width, height, delay, count = 0;',
+        'let gif, width, height, count = 0;',
         'self.onmessage = (e) => {',
         '    const m = e.data;',
-        "    if (m.type === 'init') { gif = GIFEncoder(); width = m.width; height = m.height; delay = m.delay; return; }",
+        "    if (m.type === 'init') { gif = GIFEncoder(); width = m.width; height = m.height; return; }",
         "    if (m.type === 'frame') {",
         '        const rgba = new Uint8ClampedArray(m.buffer);',
         '        const palette = quantize(rgba, 256);',
-        '        gif.writeFrame(applyPalette(rgba, palette), width, height, { palette, delay });',
+        '        gif.writeFrame(applyPalette(rgba, palette), width, height, { palette, delay: m.delay });',
         "        self.postMessage({ type: 'progress', encoded: ++count });",
         '        return;',
         '    }',
@@ -304,8 +380,8 @@
         "self.postMessage({ type: 'ready' });"
     ].join('\n');
 
-    // 統一介面：{ add(buffer), finish() → Promise<Uint8Array>, encoded, terminate() }
-    function workerEncoder(width, height, delay) {
+    // 統一介面：{ add(buffer, delay), finish() → Promise<Uint8Array>, encoded, terminate() }
+    function workerEncoder(width, height) {
         return new Promise(function (resolve, reject) {
             var url = URL.createObjectURL(new Blob([WORKER_SOURCE], { type: 'text/javascript' }));
             var worker;
@@ -320,7 +396,7 @@
                 encoded: 0,
                 failed: false,
                 onprogress: null,
-                add: function (buffer) { worker.postMessage({ type: 'frame', buffer: buffer }, [buffer]); },
+                add: function (buffer, delay) { worker.postMessage({ type: 'frame', buffer: buffer, delay: delay }, [buffer]); },
                 finish: function () {
                     return new Promise(function (res) {
                         finishResolve = res;
@@ -353,7 +429,7 @@
                         enc.failed = true;
                         if (finishResolve) finishResolve(null);
                     };
-                    worker.postMessage({ type: 'init', width: width, height: height, delay: delay });
+                    worker.postMessage({ type: 'init', width: width, height: height });
                     resolve(enc);
                 } else if (m.type === 'progress') {
                     enc.encoded = m.encoded;
@@ -366,13 +442,13 @@
     }
 
     // 備案：主執行緒編碼（舊瀏覽器不支援 module Worker 時）
-    async function mainThreadEncoder(width, height, delay) {
+    async function mainThreadEncoder(width, height) {
         var lib = await import(GIFENC_URL);
         var gif = lib.GIFEncoder();
         var enc = {
             encoded: 0,
             onprogress: null,
-            add: function (buffer) {
+            add: function (buffer, delay) {
                 var rgba = new Uint8ClampedArray(buffer);
                 var palette = lib.quantize(rgba, 256);
                 gif.writeFrame(lib.applyPalette(rgba, palette), width, height, { palette: palette, delay: delay });
@@ -388,14 +464,14 @@
         return enc;
     }
 
-    async function createEncoder(width, height, delay) {
+    async function createEncoder(width, height) {
         if (window.Worker && !window.__GIF_NO_WORKER) {
             try {
-                return await workerEncoder(width, height, delay);
+                return await workerEncoder(width, height);
             } catch (e) { }
         }
         try {
-            return await mainThreadEncoder(width, height, delay);
+            return await mainThreadEncoder(width, height);
         } catch (e) {
             throw new UserError('GIF 編碼器載入失敗，請檢查網路後重試');
         }
@@ -422,7 +498,9 @@
             checkCancel(j);
 
             var duration = isFinite(video.duration) && video.duration > 0 ? video.duration : v.duration || 1;
-            var fps = settings.fps;
+            // 原始幀率：從 MP4 檔頭讀，最高 50；讀不到就用 30
+            var sourceFps = detectMp4Fps(await blob.arrayBuffer());
+            var fps = settings.fps || Math.min(MAX_GIF_FPS, sourceFps || FALLBACK_FPS);
             var total = Math.max(1, Math.floor(duration * fps));
             if (total > 900 && !confirm('這支影片約 ' + Math.round(duration) + ' 秒，會產生 ' + total + ' 幀，GIF 可能非常大、轉檔很久。確定要轉嗎？')) {
                 throw new Cancelled();
@@ -434,7 +512,7 @@
             var height = Math.max(1, Math.round(srcH * width / srcW));
 
             showJob('載入 GIF 編碼器…', null);
-            var encoder = await createEncoder(width, height, Math.round(1000 / fps));
+            var encoder = await createEncoder(width, height);
             j.cleanup.push(function () { encoder.terminate(); });
             checkCancel(j);
 
@@ -456,12 +534,13 @@
                 await waitFor(function () { return j.cancelled || encoder.failed || captured - encoder.encoded < MAX_QUEUE; });
                 checkCancel(j);
                 if (encoder.failed) throw new Error('encoder');
-                await seekTo(video, Math.min(i / fps, Math.max(0, duration - 0.001)));
+                // 取每一格時間的中間點，避免剛好落在兩幀交界而重複或漏幀
+                await seekTo(video, Math.min((i + 0.5) / fps, Math.max(0, duration - 0.001)));
                 checkCancel(j);
                 ctx.drawImage(video, 0, 0, width, height);
                 var frame = ctx.getImageData(0, 0, width, height);
                 captured++;
-                encoder.add(frame.data.buffer);
+                encoder.add(frame.data.buffer, frameDelay(i, fps));
                 report();
                 // 主執行緒編碼時讓畫面有機會更新
                 await new Promise(function (r) { setTimeout(r, 0); });
@@ -474,7 +553,7 @@
             var bytes = await encoder.finish();
             checkCancel(j);
             if (!bytes) throw new Error('encoder');
-            showResult(new Blob([bytes], { type: 'image/gif' }), v.name + '.gif', width, height, total);
+            showResult(new Blob([bytes], { type: 'image/gif' }), v.name + '.gif', width, height, total, fps);
         } catch (e) {
             if (e instanceof Cancelled) {
                 setStatus('已取消');
@@ -494,10 +573,10 @@
         $('gif-preview').removeAttribute('src');
     }
 
-    function showResult(blob, name, width, height, frames) {
+    function showResult(blob, name, width, height, frames, fps) {
         result = { blob: blob, name: name, url: URL.createObjectURL(blob) };
         $('gif-preview').src = result.url;
-        $('gif-info').textContent = name + '：' + width + ' × ' + height + ' px · ' + frames + ' 幀 · ' + window.MergeCore.formatBytes(blob.size);
+        $('gif-info').textContent = name + '：' + width + ' × ' + height + ' px · ' + frames + ' 幀 · ' + (Math.round(fps * 10) / 10) + ' fps · ' + window.MergeCore.formatBytes(blob.size);
         $('gif-result').hidden = false;
         $('gif-share').hidden = !window.MergeCore.canShareFiles('image/gif');
     }

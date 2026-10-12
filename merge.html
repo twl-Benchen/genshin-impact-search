@@ -112,18 +112,18 @@
                         <div class="option">
                             <h3 class="option-title" id="opt-direction">拼接方向</h3>
                             <div class="segmented" role="radiogroup" aria-labelledby="opt-direction">
-                                <label><input type="radio" name="direction" value="vertical" class="visually-hidden" autocomplete="off" checked><span>直式（上下）</span></label>
-                                <label><input type="radio" name="direction" value="horizontal" class="visually-hidden" autocomplete="off"><span>橫式（左右）</span></label>
+                                <label><input type="radio" name="direction" value="horizontal" class="visually-hidden" autocomplete="off" checked><span>橫式（左右）</span></label>
+                                <label><input type="radio" name="direction" value="vertical" class="visually-hidden" autocomplete="off"><span>直式（上下）</span></label>
                             </div>
                         </div>
 
                         <div class="option">
                             <h3 class="option-title" id="opt-align">尺寸不同時</h3>
                             <div class="segmented" role="radiogroup" aria-labelledby="opt-align">
-                                <label><input type="radio" name="align" value="max" class="visually-hidden" autocomplete="off" checked><span data-v="放大到最寬" data-h="放大到最高">放大到最寬</span></label>
-                                <label><input type="radio" name="align" value="min" class="visually-hidden" autocomplete="off"><span data-v="縮小到最窄" data-h="縮小到最矮">縮小到最窄</span></label>
+                                <label><input type="radio" name="align" value="max" class="visually-hidden" autocomplete="off" checked><span data-v="放大到最寬" data-h="放大到最高">放大到最高</span></label>
+                                <label><input type="radio" name="align" value="min" class="visually-hidden" autocomplete="off"><span data-v="縮小到最窄" data-h="縮小到最矮">縮小到最矮</span></label>
                             </div>
-                            <p class="option-note" id="align-note">其他圖片會等比縮放，讓寬度一致</p>
+                            <p class="option-note" id="align-note">其他圖片會等比縮放，讓高度一致</p>
                         </div>
 
                         <div class="option">
@@ -183,21 +183,22 @@
 
                     <div class="gif-options" id="gif-options">
                         <div class="option">
-                            <h3 class="option-title" id="opt-fps">GIF 幀率<span class="option-sub">（越高越流暢，檔案越大）</span></h3>
+                            <h3 class="option-title" id="opt-fps">GIF 幀率<span class="option-sub">（越高越流暢，檔案越大；原始最高 50）</span></h3>
                             <div class="segmented" role="radiogroup" aria-labelledby="opt-fps">
-                                <label><input type="radio" name="fps" value="10" class="visually-hidden" autocomplete="off"><span>10</span></label>
-                                <label><input type="radio" name="fps" value="15" class="visually-hidden" autocomplete="off" checked><span>15</span></label>
-                                <label><input type="radio" name="fps" value="20" class="visually-hidden" autocomplete="off"><span>20</span></label>
+                                <label><input type="radio" name="fps" value="0" class="visually-hidden" autocomplete="off" checked><span>原始</span></label>
                                 <label><input type="radio" name="fps" value="30" class="visually-hidden" autocomplete="off"><span>30</span></label>
+                                <label><input type="radio" name="fps" value="20" class="visually-hidden" autocomplete="off"><span>20</span></label>
+                                <label><input type="radio" name="fps" value="15" class="visually-hidden" autocomplete="off"><span>15</span></label>
+                                <label><input type="radio" name="fps" value="10" class="visually-hidden" autocomplete="off"><span>10</span></label>
                             </div>
                         </div>
                         <div class="option">
                             <h3 class="option-title" id="opt-gif-width">GIF 寬度<span class="option-sub">（不會超過原始寬度）</span></h3>
                             <div class="segmented" role="radiogroup" aria-labelledby="opt-gif-width">
-                                <label><input type="radio" name="gif-width" value="240" class="visually-hidden" autocomplete="off"><span>240</span></label>
+                                <label><input type="radio" name="gif-width" value="0" class="visually-hidden" autocomplete="off" checked><span>原始</span></label>
+                                <label><input type="radio" name="gif-width" value="480" class="visually-hidden" autocomplete="off"><span>480</span></label>
                                 <label><input type="radio" name="gif-width" value="320" class="visually-hidden" autocomplete="off"><span>320</span></label>
-                                <label><input type="radio" name="gif-width" value="480" class="visually-hidden" autocomplete="off" checked><span>480</span></label>
-                                <label><input type="radio" name="gif-width" value="0" class="visually-hidden" autocomplete="off"><span>原始</span></label>
+                                <label><input type="radio" name="gif-width" value="240" class="visually-hidden" autocomplete="off"><span>240</span></label>
                             </div>
                         </div>
                     </div>
@@ -227,8 +228,8 @@
     <!-- 拖曳排序（觸控也能用）；載入失敗時仍可用 ◀ ▶ 按鈕排序 -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js" defer></script>
     <script src="merge/ui.js?v=01360ffe" defer></script>
-    <script src="merge/core.js?v=64214b5d" defer></script>
+    <script src="merge/core.js?v=5f93958b" defer></script>
     <script src="merge/x.js?v=71d77532" defer></script>
-    <script src="merge/gif.js?v=d2512f4f" defer></script>
+    <script src="merge/gif.js?v=6d1e58af" defer></script>
 </body>
 </html>
