@@ -21,9 +21,9 @@
 | `.github/workflows/download-icons.yml` | `main` 上 `characters.js` 有變動時自動執行上面的腳本並提交（也可手動執行） |
 | `merge.html` | 圖片合併下載頁（獨立頁面，首頁左上角按鈕進入） |
 | `merge/merge.css`、`merge/core.js` | 合併頁的樣式與程式（色票、`.gbtn` 從 `index.html` 複製一份，不共用） |
-| `merge/x.js` | 貼 𝕏 連結抓圖：解析連結、呼叫 FxTwitter API、錯誤訊息（解析函式可在 Node `require` 測試） |
-| `cloudflare-worker/twimg-proxy.js` | 𝕏 影片代理的 Worker 程式（**提案，尚未部署**，等使用者決定） |
-| `cors-test.html` | 暫時的 CORS 測試頁，階段 3 測完影片代理後刪除 |
+| `merge/x.js` | 貼 𝕏 連結抓圖：解析連結、呼叫 FxTwitter API、`fetchMedia`（不送 Referer）、錯誤訊息（解析函式可在 Node `require` 測試） |
+| `merge/gif.js` | GIF／影片：下載 MP4、canvas 逐格擷取 + gifenc（module Worker）轉成 GIF |
+| `cors-test.html` | 暫時的 CORS 測試頁，使用者用 iPhone 確認 no-referrer 後刪除 |
 | `scripts/update-merge-version.mjs` | 依 `merge/*` 內容雜湊更新 `merge.html` 的 `?v=`；**改了 `merge/` 底下的檔案後一定要跑** |
 
 資料用 `<script>` 載入而不是 `fetch` JSON，這樣直接雙擊 `index.html`（`file://`）也能用。
@@ -67,9 +67,14 @@
 - 分階段開發（使用者每階段測過才做下一階段）：
   1. 上傳圖片合併 ✅
   2. 貼 𝕏 連結抓圖 ✅（FxTwitter API `https://api.fxtwitter.com/status/{id}` → `tweet.media.photos[].url` 加 `?name=orig`；多篇同時抓、依貼上順序加入；在頁面任何地方貼上連結也會自動抓）
-  3. GIF 下載（𝕏 的 GIF 是 MP4，逐格畫 canvas + gifenc 編碼，另提供直接下載 MP4）
+  3. GIF 下載 ✅（𝕏 的 GIF 是 MP4：每支影片提供「下載 MP4」「轉成 GIF」；幀率 10/15/20/30、寬度 240/320/480/原始；進度條、取消；超過 900 幀先確認）
   4. Android 分享直達（manifest `share_target` → `merge.html`，路徑一律用相對路徑；iOS 不支援但不能壞）
-- **CORS 實測結果**（使用者在 Windows Chrome、Android Samsung Internet 測）：FxTwitter API ✅；pbs.twimg.com 圖片用 `fetch` → blob ✅（可畫進 canvas 匯出）；video.twimg.com **回 HTTP 403**（伺服器拒絕其他網站來的請求，`fetch` 與 `<video crossorigin>` 都失敗）→ 影片需要代理，已提出 Cloudflare Worker 方案，**不要自行改用其他繞過方式**。
+- **CORS 實測結果**（使用者在 Windows Chrome、Android Samsung Internet 測）：FxTwitter API ✅；pbs.twimg.com 圖片用 `fetch` → blob ✅（可畫進 canvas 匯出）。
+- **video.twimg.com 看到其他網站的 Referer 會回 403**（使用者實測：加 `referrerPolicy: 'no-referrer'` 就回 200）。所以：
+  - 所有 𝕏 媒體請求一律走 `MergeX.fetchMedia`（`fetch` + `referrerPolicy: 'no-referrer'`）→ blob → `URL.createObjectURL` 再給 `<video>`／canvas。
+  - **不可**直接 `<video src=影片網址>`（`<video>` 不能設 referrerpolicy）。縮圖 `<img>` 要加 `referrerpolicy="no-referrer"`。
+  - 不需要代理（曾提出的 Cloudflare Worker 方案已放棄）。
+- GIF 編碼：gifenc 只有 ESM 能在瀏覽器用（另一版是 CommonJS），所以用 Blob URL 建 module Worker 在 Worker 裡 `import`；Worker 不能用時退回主執行緒 `import()`。測試時可設 `window.__GIF_NO_WORKER = true` 測備案。擷取時最多 6 幀等待編碼，避免記憶體暴增。
   - 測試頁的 `<img crossorigin>` 失敗是因為加了 `cb=` 參數，pbs.twimg.com 不接受未知參數；抓圖一律用 `fetch`。
 - 圖片用 `<img>` + object URL 解碼（相容 iOS HEIC、自動依 EXIF 轉正）。清單與預覽只保留縮小版 canvas，下載時才一張張解碼原圖、畫完就釋放，避免手機記憶體不足。
 - canvas 上限：iOS 面積 4096²、其他手機 8192×4096、桌面 1 億像素、單邊 32767；匯出前再實際建立 canvas 讀回一個像素確認，畫不出來就再縮小，並顯示提示。測試時可用 `window.__MERGE_MAX_AREA` 覆寫面積上限。
@@ -90,6 +95,7 @@
 - 角色與元素都是 `<button aria-pressed>`，可鍵盤操作
 - `<head>`：lang、charset、title、description、Open Graph、favicon
 - 角色更新到 7.1（薇斯納、沃雅妮莎）
+- 圖片合併下載頁階段 3：𝕏 GIF／影片可下載 MP4 或轉成 GIF（可調幀率與寬度、進度條、取消）
 - 圖片合併下載頁階段 2：貼 𝕏 連結抓原圖（可一次多個連結），貼文不存在／私人帳號／沒有圖片／GIF 影片／API 掛掉都有中文提示；下載檔名為「作者_貼文ID_merged」
 - 圖片合併下載頁（階段 1：上傳、拖曳排序、直式／橫式、對齊、間距、背景色、PNG／JPG、canvas 上限自動縮小）；首頁左上角有與齒輪同款的入口按鈕
 
@@ -115,7 +121,7 @@
 - **`#Gaming`（嘉明）等英文名稱本身就是常見單字**，搜尋結果會混雜，目前尚未處理（見下一步）。
 - **返回上一頁時瀏覽器會自己恢復勾選框**：曾發生只勾繁中 → 去 𝕏 → 返回後，畫面仍只勾繁中，但程式的設定已重設成四種語言，搜尋語法和畫面不一致。現在設定存在 sessionStorage，設定面板的 input 加了 `autocomplete="off"`，並在 `pageshow` 時用 `syncSettingsUI()` 讓畫面跟著設定走。
 - **`package.json` 不能設 `"type": "module"`**：會讓 Node 把 `characters.js` 當成 ES module，`module.exports` 失效，腳本讀不到角色資料。腳本本身用 `.mjs` 就夠了。
-- **雲端 session 連不到 cdn.jsdelivr.net、api.fxtwitter.com、pbs.twimg.com、video.twimg.com**（代理 403）。Playwright 測試時用 `page.route` 把 SortableJS 的 CDN 網址換成 npm 裝下來的檔案；𝕏／FxTwitter 的實際行為要請使用者在自己的瀏覽器測。
+- **雲端 session 連不到 cdn.jsdelivr.net、api.fxtwitter.com、pbs.twimg.com、video.twimg.com**（代理 403）。Playwright 測試時用 `page.route` 把 SortableJS、gifenc 的 CDN 網址換成 npm 裝下來的檔案；Playwright 的 Chromium 不支援 H.264，測試影片要用 `ffmpeg` 產生 VP9 webm；𝕏／FxTwitter 的實際行為要請使用者在自己的瀏覽器測。
 - **在 Bash 裡 `pkill -f "http.server 8767"` 會連自己的 shell 一起殺掉**（指令列也含那段字）。改用 `pkill -f "http.server 876[0-9]"`，並放在獨立的指令裡。
 
 ## 測試方式

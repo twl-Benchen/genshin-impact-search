@@ -518,14 +518,7 @@
         btn.disabled = true;
         try {
             var result = await buildExport();
-            var url = URL.createObjectURL(result.blob);
-            var a = document.createElement('a');
-            a.href = url;
-            a.download = result.name;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+            saveBlob(result.blob, result.name);
             setStatus('export-status', '已下載 ' + result.name + '（' + formatBytes(result.blob.size) + '）');
         } catch (e) {
             exportError();
@@ -541,9 +534,8 @@
         btn.disabled = true;
         try {
             var result = await buildExport();
-            var file = new File([result.blob], result.name, { type: result.blob.type });
             try {
-                await navigator.share({ files: [file] });
+                await shareBlob(result.blob, result.name);
                 setStatus('export-status', '');
             } catch (e) {
                 if (e.name === 'AbortError') {
@@ -562,9 +554,26 @@
         }
     }
 
-    function canShareFiles() {
+    // 用 <a download> 存檔（合併圖、GIF、MP4 共用）
+    function saveBlob(blob, name) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+    }
+
+    // 系統分享；使用者取消時丟出 AbortError
+    function shareBlob(blob, name) {
+        return navigator.share({ files: [new File([blob], name, { type: blob.type })] });
+    }
+
+    function canShareFiles(type) {
         try {
-            return !!(navigator.canShare && navigator.canShare({ files: [new File([''], 'a.png', { type: 'image/png' })] }));
+            return !!(navigator.canShare && navigator.canShare({ files: [new File([''], 'a', { type: type || 'image/png' })] }));
         } catch (e) {
             return false;
         }
@@ -638,7 +647,11 @@
     // 給之後的「貼 𝕏 連結抓圖」使用
     window.MergeCore = {
         addImages: addImages,
-        setStatus: setStatus
+        setStatus: setStatus,
+        saveBlob: saveBlob,
+        shareBlob: shareBlob,
+        canShareFiles: canShareFiles,
+        formatBytes: formatBytes
     };
 
     syncSettingsUI();

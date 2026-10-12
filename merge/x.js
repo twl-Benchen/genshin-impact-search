@@ -25,8 +25,18 @@
         return url.split('?')[0] + '?name=orig';
     }
 
+    // 影片有多種畫質時，選 bitrate 最高的 MP4
+    function bestVideoUrl(video) {
+        var mp4 = (video.variants || []).filter(function (v) {
+            return v && v.url && /mp4/.test(v.content_type || v.url);
+        });
+        if (!mp4.length) return video.url;
+        mp4.sort(function (a, b) { return (b.bitrate || 0) - (a.bitrate || 0); });
+        return mp4[0].url;
+    }
+
     if (typeof module !== 'undefined' && module.exports) {
-        module.exports = { parseStatusIds: parseStatusIds, originalPhotoUrl: originalPhotoUrl };
+        module.exports = { parseStatusIds: parseStatusIds, originalPhotoUrl: originalPhotoUrl, bestVideoUrl: bestVideoUrl };
     }
     if (typeof document === 'undefined') return;
 
@@ -66,17 +76,42 @@
         return data.tweet;
     }
 
-    async function fetchPhoto(url) {
-        var res;
+    // 抓 𝕏 的圖片／影片。video.twimg.com 看到其他網站的 Referer 會回 403，
+    // 所以一律不送 Referer；也因此影片不能直接 <video src>（<video> 無法設定 referrerpolicy），
+    // 要先抓成 blob 再給 <video>。onProgress(0~1) 只在伺服器有回傳檔案大小時才會呼叫；
+    // timeout（毫秒）可省略，影片檔較大就不設。
+    async function fetchMedia(url, onProgress, timeout) {
+        var controller = timeout && window.AbortController ? new AbortController() : null;
+        var timer = controller && setTimeout(function () { controller.abort(); }, timeout);
         try {
-            res = await fetchWithTimeout(originalPhotoUrl(url));
-            if (!res.ok) throw new Error();
+            var res = await fetch(url, { referrerPolicy: 'no-referrer', signal: controller ? controller.signal : undefined });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            var total = Number(res.headers.get('content-length')) || 0;
+            if (!onProgress || !total || !res.body || !res.body.getReader) return await res.blob();
+
+            var reader = res.body.getReader();
+            var chunks = [];
+            var loaded = 0;
+            for (;;) {
+                var step = await reader.read();
+                if (step.done) break;
+                chunks.push(step.value);
+                loaded += step.value.length;
+                onProgress(Math.min(1, loaded / total));
+            }
+            return new Blob(chunks, { type: res.headers.get('content-type') || '' });
+        } finally {
+            clearTimeout(timer);
+        }
+    }
+
+    async function fetchPhoto(url) {
+        try {
+            return await fetchMedia(originalPhotoUrl(url), null, 30000);
         } catch (e) {
             // 原圖抓不到時，退回 API 給的網址
-            res = await fetchWithTimeout(url);
-            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return fetchMedia(url, null, 30000);
         }
-        return res.blob();
     }
 
     // 抓一篇貼文的所有圖片；回傳 { ok, text, entries }
@@ -90,9 +125,23 @@
         var author = tweet.author && tweet.author.screen_name || 'x';
         var media = tweet.media || {};
         var photos = media.photos || [];
+        var videos = (media.videos || []).filter(function (v) { return v && (v.url || v.variants); }).map(function (v, i, all) {
+            return {
+                url: bestVideoUrl(v),
+                type: v.type === 'gif' ? 'gif' : 'video',
+                thumb: v.thumbnail_url || '',
+                width: v.width || 0,
+                height: v.height || 0,
+                duration: v.duration || 0,
+                author: author,
+                id: id,
+                name: author + '_' + id + (all.length > 1 ? '_' + (i + 1) : '')
+            };
+        });
+        var videoText = videos.length ? (videos.every(function (v) { return v.type === 'gif'; }) ? 'GIF ' : '影片 ') + videos.length + ' 支' : '';
         if (!photos.length) {
-            var hasVideo = media.videos && media.videos.length;
-            return { ok: false, author: author, text: hasVideo ? '這篇貼文是 GIF／影片，沒有圖片可以合併' : '這篇貼文沒有圖片', entries: [] };
+            if (videos.length) return { ok: true, author: author, text: videoText + '（在下方「GIF／影片」下載）', entries: [], videos: videos };
+            return { ok: false, author: author, text: '這篇貼文沒有圖片', entries: [] };
         }
 
         var results = await Promise.all(photos.map(function (p) {
@@ -112,12 +161,15 @@
                 source: { author: author, id: id }
             });
         });
-        if (!entries.length) return { ok: false, author: author, text: '圖片下載失敗，請稍後再試', entries: [] };
+        if (!entries.length) {
+            return { ok: false, author: author, text: '圖片下載失敗，請稍後再試' + (videoText ? '；' + videoText + '在下方' : ''), entries: [], videos: videos };
+        }
         return {
             ok: true,
             author: author,
-            text: entries.length + ' 張圖片' + (failed ? '（' + failed + ' 張下載失敗）' : ''),
-            entries: entries
+            text: entries.length + ' 張圖片' + (failed ? '（' + failed + ' 張下載失敗）' : '') + (videoText ? '、' + videoText + '（在下方）' : ''),
+            entries: entries,
+            videos: videos
         };
     }
 
@@ -168,7 +220,12 @@
             });
         }));
         var entries = [];
-        results.forEach(function (r) { entries = entries.concat(r.entries); });
+        var videos = [];
+        results.forEach(function (r) {
+            entries = entries.concat(r.entries);
+            videos = videos.concat(r.videos || []);
+        });
+        if (videos.length && window.MergeGif) window.MergeGif.addVideos(videos);
         if (entries.length) await window.MergeCore.addImages(entries);
 
         busy = false;
@@ -209,5 +266,5 @@
         run(text);
     });
 
-    window.MergeX = { parseStatusIds: parseStatusIds, run: run };
+    window.MergeX = { parseStatusIds: parseStatusIds, fetchMedia: fetchMedia, run: run };
 })();

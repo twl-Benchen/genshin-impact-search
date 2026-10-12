@@ -172,7 +172,7 @@
         }
         // B. <img crossorigin="anonymous"> → canvas
         try {
-            var img2 = await withTimeout(loadImg(url + (url.indexOf('?') < 0 ? '?' : '&') + 'cb=1', true), 20000);
+            var img2 = await withTimeout(loadImg(url, true), 20000);
             await canvasExport(img2, img2.naturalWidth, img2.naturalHeight);
             addRow('圖片：<img crossorigin> → canvas 匯出', true, img2.naturalWidth + '×' + img2.naturalHeight);
         } catch (e) {
@@ -180,7 +180,7 @@
         }
         // C. 參考：不加 crossorigin 應該會被 tainted
         try {
-            var img3 = await withTimeout(loadImg(url + (url.indexOf('?') < 0 ? '?' : '&') + 'cb=2', false), 20000);
+            var img3 = await withTimeout(loadImg(url, false), 20000);
             await canvasExport(img3, img3.naturalWidth, img3.naturalHeight);
             addRow('參考：<img> 不加 crossorigin → canvas', null, '沒有被 tainted（少見）');
         } catch (e) {
@@ -188,22 +188,32 @@
         }
     }
 
-    async function testVideo(url) {
-        // A. fetch → blob → <video> → canvas（下載 MP4、轉 GIF 用）
+    // fetch → blob → <video> → seek → canvas（下載 MP4、轉 GIF 用）
+    async function testVideoFetch(url, noReferrer) {
+        var name = noReferrer ? '影片：fetch（referrerPolicy: no-referrer）→ blob → seek → canvas 匯出' : '影片：fetch → blob → canvas 匯出（對照，預期 403）';
         try {
-            var res = await withTimeout(fetch(url), 30000);
+            var res = await withTimeout(fetch(url, noReferrer ? { referrerPolicy: 'no-referrer' } : {}), 30000);
             if (!res.ok) throw new Error('HTTP ' + res.status);
             var blob = await res.blob();
             var objUrl = URL.createObjectURL(blob);
             var v = await withTimeout(loadVideo(objUrl, false), 20000);
+            await withTimeout(new Promise(function (resolve) {
+                v.onseeked = resolve;
+                v.currentTime = Math.min(0.5, (v.duration || 1) / 2);
+            }), 10000);
             await canvasExport(v, v.videoWidth, v.videoHeight);
             URL.revokeObjectURL(objUrl);
-            addRow('影片：fetch → blob → canvas 匯出', true,
+            addRow(name, true,
                 v.videoWidth + '×' + v.videoHeight + '，' + v.duration.toFixed(1) + ' 秒，' + Math.round(blob.size / 1024) + ' KB');
         } catch (e) {
-            addRow('影片：fetch → blob → canvas 匯出', false, errText(e));
+            addRow(name, false, errText(e));
         }
-        // B. <video crossorigin> 直接載入 → seek → canvas
+    }
+
+    async function testVideo(url) {
+        await testVideoFetch(url, true);
+        await testVideoFetch(url, false);
+        // 對照：<video crossorigin> 直接載入（不能設 referrerpolicy，預期 403）
         try {
             var v2 = await withTimeout(loadVideo(url, true), 20000);
             await new Promise(function (resolve) {
@@ -211,9 +221,9 @@
                 v2.currentTime = Math.min(0.5, (v2.duration || 1) / 2);
             });
             await canvasExport(v2, v2.videoWidth, v2.videoHeight);
-            addRow('影片：<video crossorigin> → seek → canvas 匯出', true, v2.videoWidth + '×' + v2.videoHeight);
+            addRow('影片：<video crossorigin> 直接載入（對照，預期失敗）', true, v2.videoWidth + '×' + v2.videoHeight);
         } catch (e) {
-            addRow('影片：<video crossorigin> → seek → canvas 匯出', false, errText(e));
+            addRow('影片：<video crossorigin> 直接載入（對照，預期失敗）', false, errText(e));
         }
     }
 

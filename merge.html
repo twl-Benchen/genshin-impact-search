@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>圖片合併下載｜原神角色 𝕏 圖片搜尋</title>
-    <meta name="description" content="貼上 𝕏 貼文連結或上傳圖片，把被拆成好幾張的圖片合併成一張下載。所有處理都在你的瀏覽器完成，不會上傳。">
+    <meta name="description" content="貼上 𝕏 貼文連結或上傳圖片，把被拆成好幾張的圖片合併成一張下載，也能把 𝕏 的 GIF 存成 GIF 或 MP4。所有處理都在你的瀏覽器完成，不會上傳。">
     <meta name="theme-color" content="#3B4255">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✨</text></svg>">
 
@@ -18,7 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&display=swap">
-    <link rel="stylesheet" href="merge/merge.css?v=2289019a">
+    <link rel="stylesheet" href="merge/merge.css?v=16b4f455">
 </head>
 <body>
     <!-- 左上角返回搜尋（與首頁齒輪同款外框） -->
@@ -147,11 +147,56 @@
             </div>
             <p class="status" id="export-status" role="status" aria-live="polite"></p>
         </section>
+        <!-- GIF／影片（貼文有影片時才顯示） -->
+        <section class="card gif-card" id="gif-card" aria-labelledby="step-gif" hidden>
+            <h2 class="card-title" id="step-gif"><span class="step" aria-hidden="true">▶</span>GIF／影片</h2>
+            <ul class="video-list" id="video-list" aria-label="貼文裡的 GIF 與影片"></ul>
+
+            <div class="gif-options">
+                <div class="option">
+                    <h3 class="option-title" id="opt-fps">GIF 幀率<span class="option-sub">（越高越流暢，檔案越大）</span></h3>
+                    <div class="segmented" role="radiogroup" aria-labelledby="opt-fps">
+                        <label><input type="radio" name="fps" value="10" class="visually-hidden" autocomplete="off"><span>10</span></label>
+                        <label><input type="radio" name="fps" value="15" class="visually-hidden" autocomplete="off" checked><span>15</span></label>
+                        <label><input type="radio" name="fps" value="20" class="visually-hidden" autocomplete="off"><span>20</span></label>
+                        <label><input type="radio" name="fps" value="30" class="visually-hidden" autocomplete="off"><span>30</span></label>
+                    </div>
+                </div>
+                <div class="option">
+                    <h3 class="option-title" id="opt-gif-width">GIF 寬度<span class="option-sub">（不會超過原始寬度）</span></h3>
+                    <div class="segmented" role="radiogroup" aria-labelledby="opt-gif-width">
+                        <label><input type="radio" name="gif-width" value="240" class="visually-hidden" autocomplete="off"><span>240</span></label>
+                        <label><input type="radio" name="gif-width" value="320" class="visually-hidden" autocomplete="off"><span>320</span></label>
+                        <label><input type="radio" name="gif-width" value="480" class="visually-hidden" autocomplete="off" checked><span>480</span></label>
+                        <label><input type="radio" name="gif-width" value="0" class="visually-hidden" autocomplete="off"><span>原始</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="gif-job" id="gif-job" hidden>
+                <div class="job-head">
+                    <span id="job-text" role="status" aria-live="polite"></span>
+                    <button type="button" class="text-btn" id="job-cancel">取消</button>
+                </div>
+                <progress id="job-progress" max="1" value="0"></progress>
+            </div>
+            <p class="status" id="gif-status" role="status" aria-live="polite"></p>
+
+            <div class="gif-result" id="gif-result" hidden>
+                <div class="gif-preview"><img id="gif-preview" alt="轉好的 GIF 預覽"></div>
+                <p class="size-info" id="gif-info"></p>
+                <div class="download-row">
+                    <button type="button" class="gbtn primary" id="gif-download"><span class="icon" aria-hidden="true">↓</span><span>下載 GIF</span></button>
+                    <button type="button" class="gbtn" id="gif-share" hidden><span class="icon" aria-hidden="true">⇪</span><span>分享／存到相簿</span></button>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- 拖曳排序（觸控也能用）；載入失敗時仍可用 ◀ ▶ 按鈕排序 -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js" defer></script>
-    <script src="merge/core.js?v=90278dc3" defer></script>
-    <script src="merge/x.js?v=87ffd79a" defer></script>
+    <script src="merge/core.js?v=9598ffd8" defer></script>
+    <script src="merge/x.js?v=f2f7c143" defer></script>
+    <script src="merge/gif.js?v=846a9143" defer></script>
 </body>
 </html>
