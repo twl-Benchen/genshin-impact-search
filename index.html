@@ -7,6 +7,11 @@
     <meta name="description" content="點選原神角色，一鍵產生 𝕏（Twitter）hashtag 搜尋網址，快速找到角色圖片與同人圖。">
     <meta name="theme-color" content="#3B4255">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✨</text></svg>">
+    <!-- 可安裝成 App（PWA）：Android 可從分享選單直接把 𝕏 貼文送到圖片合併頁 -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-title" content="原神𝕏搜尋">
+    <script src="pwa.js" defer></script>
 
     <!-- 分享連結時的預覽（Discord、LINE、𝕏 等） -->
     <meta property="og:type" content="website">
@@ -512,6 +517,60 @@
                 transform: rotate(60deg);
             }
 
+        /* ===== 左上角：圖片合併下載入口（與齒輪同款外框） ===== */
+        .merge-link {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            width: 46px;
+            color: var(--navy);
+            text-decoration: none;
+        }
+
+            .merge-link svg {
+                display: block;
+                width: 46px;
+                height: 46px;
+                filter: drop-shadow(0 2px 4px rgba(43, 49, 66, 0.35));
+                transition: filter 0.25s ease;
+            }
+
+            .merge-link .merge-icon {
+                transform-origin: 24px 24px;
+                transition: transform 0.25s ease;
+            }
+
+            .merge-link:hover svg {
+                filter: drop-shadow(0 0 6px rgba(255, 230, 178, 0.9));
+            }
+
+            .merge-link:hover .merge-icon {
+                transform: scale(1.08);
+            }
+
+            .merge-link:focus-visible {
+                outline: none;
+            }
+
+                .merge-link:focus-visible svg {
+                    border-radius: 50%;
+                    outline: 3px solid var(--gold);
+                    outline-offset: 2px;
+                }
+
+            .merge-link span {
+                font-size: 11px;
+                font-weight: 500;
+                line-height: 1.2;
+                white-space: nowrap;
+                opacity: 0.8;
+            }
+
         /* ===== 設定面板（從右側滑出） ===== */
         .settings-overlay {
             position: fixed;
@@ -998,6 +1057,34 @@
             </g>
         </svg>
     </button>
+
+    <!-- 左上角：圖片合併下載 -->
+    <a class="merge-link" href="merge.html" aria-label="圖片合併下載" title="圖片合併下載：把拆成好幾張的圖合併成一張">
+        <svg viewBox="0 0 48 48" aria-hidden="true">
+            <defs>
+                <linearGradient id="merge-bg" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#4A5366" />
+                    <stop offset="1" stop-color="#2B3142" />
+                </linearGradient>
+            </defs>
+            <circle cx="24" cy="24" r="21" fill="url(#merge-bg)" stroke="#D3BC8E" stroke-width="1.5" />
+            <circle cx="24" cy="24" r="17.5" fill="none" stroke="#D3BC8E" stroke-opacity="0.35" stroke-width="0.8" />
+            <g fill="#D3BC8E">
+                <path d="M24 0.8 L25.6 3 L24 5.2 L22.4 3 Z" />
+                <path d="M24 42.8 L25.6 45 L24 47.2 L22.4 45 Z" />
+                <path d="M0.8 24 L3 22.4 L5.2 24 L3 25.6 Z" />
+                <path d="M42.8 24 L45 22.4 L47.2 24 L45 25.6 Z" />
+            </g>
+            <!-- 上下兩張圖片拼成一張 -->
+            <g class="merge-icon">
+                <rect x="16" y="13" width="16" height="10" rx="1.5" fill="none" stroke="#D3BC8E" stroke-width="1.8" />
+                <rect x="16" y="25" width="16" height="10" rx="1.5" fill="none" stroke="#D3BC8E" stroke-width="1.8" />
+                <path fill="#FFE6B2" d="M18.5 21 L21.5 17 L24 19.5 L26 17.5 L29.5 21 Z" />
+                <path fill="#FFE6B2" d="M18.5 33 L21.5 29 L24 31.5 L26 29.5 L29.5 33 Z" />
+            </g>
+        </svg>
+        <span>合併</span>
+    </a>
 
     <h1>
         選擇要尋找的角色

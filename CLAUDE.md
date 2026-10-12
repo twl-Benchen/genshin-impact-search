@@ -19,6 +19,14 @@
 | `scripts/download-icons.mjs` | 下載 `characters.js` 裡的圖片到 `img/`、用 sharp 縮成小尺寸 WebP、產生 manifest、更新 `index.html` 的資料版本號 |
 | `package.json` | 只給維護腳本用（sharp），網頁本身不需要建置；第一次在本機跑腳本前要 `npm install` |
 | `.github/workflows/download-icons.yml` | `main` 上 `characters.js` 有變動時自動執行上面的腳本並提交（也可手動執行） |
+| `merge.html` | 圖片合併下載頁（獨立頁面，首頁左上角按鈕進入） |
+| `merge/ui.js` | 合併頁共用介面：資料夾分頁（圖片／影片，分頁記在網址 hash `#video`）、膠囊切換鈕的滑動動畫（`MergeUI`） |
+| `merge/merge.css`、`merge/core.js` | 合併頁的樣式與程式（色票、`.gbtn` 從 `index.html` 複製一份，不共用） |
+| `merge/x.js` | 貼 𝕏 連結抓圖：解析連結、呼叫 FxTwitter API、`fetchMedia`（不送 Referer）、錯誤訊息（解析函式可在 Node `require` 測試） |
+| `merge/gif.js` | GIF／影片：下載 MP4、canvas 逐格擷取 + gifenc（module Worker）轉成 GIF |
+| `manifest.json`、`sw.js`、`pwa.js` | PWA：可安裝成 App，Android 分享選單直達 `merge.html`（`pwa.js` 註冊 SW，兩個頁面都載入） |
+| `img/app-icon-*.png`、`img/apple-touch-icon.png` | App 圖示，由 `scripts/generate-app-icons.mjs`（sharp）產生 |
+| `scripts/update-merge-version.mjs` | 依 `merge/*` 內容雜湊更新 `merge.html` 的 `?v=`；**改了 `merge/` 底下的檔案後一定要跑** |
 
 資料用 `<script>` 載入而不是 `fetch` JSON，這樣直接雙擊 `index.html`（`file://`）也能用。
 
@@ -55,6 +63,42 @@
 
 本地圖片（`LOCAL_ICONS`）→ `characters.js` 的原網址 → 顯示名稱首字的替代方塊。圖片都有 `loading="lazy"`。
 
+### 圖片合併頁（`merge.html`）
+
+- 使用流程：在 𝕏 看到一張圖拆成好幾張發 → 把圖加進來 → 合併成一張下載。所有處理都在瀏覽器本地完成，不上傳。
+- **版面是資料夾分頁**（使用者要求）：標題下方「圖片」「影片」兩個分頁，分頁上顯示數量。貼連結的框在資料夾最上面、兩個分頁共用；圖片進「圖片」分頁（加入圖片／合併設定／預覽），GIF／影片進「影片」分頁，只要下載 GIF 時不必看到合併選單。
+  - 抓到的只有影片 → 自動切到「影片」；只有圖片 → 切到「圖片」；兩種都有 → 留在原分頁。在「影片」分頁上傳或拖放圖片會切回「圖片」。
+  - **沒有「抓取」按鈕**（使用者要求）：貼上就自動抓，手動輸入時按 Enter（Shift+Enter 換行）。原按鈕位置改成狀態膠囊：貼上就會自動抓取 → 抓取中 x/y（轉圈）→ 抓取完成／n 篇失敗，4 秒後回到提示。
+  - 膠囊切換鈕與首頁設定面板相同：`::before` 的米白膠囊依 `--i`、`--n` 滑動（`MergeUI.updateSegmented()`）。程式改選項後（還原設定等）要呼叫它；使用者點選時由 `change` 事件自動更新。
+  - 切回「圖片」分頁時要重畫預覽（隱藏時量不到預覽框寬度），由 `merge-tab` 事件通知。
+- 分階段開發（使用者每階段測過才做下一階段）：
+  1. 上傳圖片合併 ✅
+  2. 貼 𝕏 連結抓圖 ✅（FxTwitter API `https://api.fxtwitter.com/status/{id}` → `tweet.media.photos[].url` 加 `?name=orig`；多篇同時抓、依貼上順序加入；在頁面任何地方貼上連結也會自動抓）
+  3. GIF 下載 ✅（𝕏 的 GIF 是 MP4：每支影片提供「下載 MP4」「轉成 GIF」；幀率 原始/30/20/15/10、寬度 原始/480/320/240，預設都是最左邊的「原始」；進度條、取消；超過 900 幀先確認）
+  - 選項排列（使用者要求）：預設值放最左邊，往右遞減。拼接方向是「橫式（左右）｜直式（上下）」，預設橫式。
+  - 「原始」幀率：瀏覽器不提供影片幀率，`gif.js` 的 `detectMp4Fps` 直接讀 MP4 的 `mdhd`＋`stts`（影片軌）計算；讀不到（非 MP4）用 30。GIF 每幀至少 20ms，所以最高 50。
+  - GIF 延遲以 10ms 為單位，`frameDelay` 用累加後取整，總長度與原影片一致（24fps 不會變快）；擷取時間取每格的中間點 `(i + 0.5) / fps`。
+  - `detectMp4Fps`、`frameDelay` 可在 Node `require('./merge/gif.js')` 測試。
+  4. Android 分享直達 ✅（manifest `share_target` GET → `merge.html?title=&text=&url=`；`x.js` 的 `readSharedLinks` 從三個參數找貼文連結自動開始抓，再用 `replaceState` 清掉參數，重新整理不會重抓）
+- PWA 注意事項：
+  - manifest 的 `start_url`、`scope`、`share_target.action`、圖示一律用**相對路徑**（以 manifest 網址解析，正式站會變成 `/genshin-impact-search/…`）。
+  - `id` 要寫 `"genshin-impact-search/"`：`id` 是以**網域根目錄**解析的，寫 `"./"` 會變成 `twl-benchen.github.io/`，和同網域其他專案衝突。
+  - `sw.js` **刻意不快取**（避免和 `?v=` 衝突），只接手頁面導覽、離線時顯示一行提示；其他請求完全不經過 SW（𝕏 媒體的 no-referrer 不受影響）。
+  - iOS 不支援分享目標；`apple-touch-icon` 讓「加入主畫面」有圖示，SW 註冊失敗時什麼都不做。
+  - 安裝與分享選單只能在正式網址（HTTPS、正確 scope）上實測，所以要合併到 `main` 後才能在 Android 測。本機可用 CDP `Page.getAppManifest`、`Page.getInstallabilityErrors` 檢查（Playwright 預設是無痕模式，會多一個 `in-incognito`，要用 `launchPersistentContext`）。
+- **CORS 實測結果**（使用者在 Windows Chrome、Android Samsung Internet 測）：FxTwitter API ✅；pbs.twimg.com 圖片用 `fetch` → blob ✅（可畫進 canvas 匯出）。
+- **video.twimg.com 看到其他網站的 Referer 會回 403**（使用者實測：加 `referrerPolicy: 'no-referrer'` 就回 200）。所以：
+  - 所有 𝕏 媒體請求一律走 `MergeX.fetchMedia`（`fetch` + `referrerPolicy: 'no-referrer'`）→ blob → `URL.createObjectURL` 再給 `<video>`／canvas。
+  - **不可**直接 `<video src=影片網址>`（`<video>` 不能設 referrerpolicy）。縮圖 `<img>` 要加 `referrerpolicy="no-referrer"`。
+  - 不需要代理（曾提出的 Cloudflare Worker 方案已放棄）。
+- GIF 編碼：gifenc 只有 ESM 能在瀏覽器用（另一版是 CommonJS），所以用 Blob URL 建 module Worker 在 Worker 裡 `import`；Worker 不能用時退回主執行緒 `import()`。測試時可設 `window.__GIF_NO_WORKER = true` 測備案。擷取時最多 6 幀等待編碼，避免記憶體暴增。
+  - 測試頁的 `<img crossorigin>` 失敗是因為加了 `cb=` 參數，pbs.twimg.com 不接受未知參數；抓圖一律用 `fetch`。
+- 圖片用 `<img>` + object URL 解碼（相容 iOS HEIC、自動依 EXIF 轉正）。清單與預覽只保留縮小版 canvas，下載時才一張張解碼原圖、畫完就釋放，避免手機記憶體不足。
+- canvas 上限：iOS 面積 4096²、其他手機 8192×4096、桌面 1 億像素、單邊 32767；匯出前再實際建立 canvas 讀回一個像素確認，畫不出來就再縮小，並顯示提示。測試時可用 `window.__MERGE_MAX_AREA` 覆寫面積上限。
+- 拖曳排序用 SortableJS（CDN，觸控也能用）；載入失敗時仍可用縮圖下方的 ◀ ▶ 排序。
+- 合併設定存在 sessionStorage（與首頁設定同樣只保留到分頁關閉）。
+- 支援 `navigator.share` 檔案分享的裝置多一顆「分享／存到相簿」（iOS 下載會進「檔案」而不是「照片」）。
+
 ## 已完成的功能
 
 - 元素篩選（再點一次同一元素恢復顯示全部）、角色多選
@@ -68,6 +112,13 @@
 - 角色與元素都是 `<button aria-pressed>`，可鍵盤操作
 - `<head>`：lang、charset、title、description、Open Graph、favicon
 - 角色更新到 7.1（薇斯納、沃雅妮莎）
+- 合併頁：選項預設值都在最左邊（拼接方向預設橫式；GIF 幀率／寬度預設「原始」，原始幀率從 MP4 讀取）
+- 合併頁：抓取按鈕改成狀態膠囊（貼上／Enter 自動抓）、膠囊切換鈕改成與首頁相同的滑動動畫
+- PWA：可安裝成 App，Android 從 𝕏 App 分享貼文可直達合併頁並自動抓圖／影片
+- 圖片合併下載頁改成「圖片」「影片」資料夾分頁（共用貼連結框）
+- 圖片合併下載頁階段 3：𝕏 GIF／影片可下載 MP4 或轉成 GIF（可調幀率與寬度、進度條、取消）
+- 圖片合併下載頁階段 2：貼 𝕏 連結抓原圖（可一次多個連結），貼文不存在／私人帳號／沒有圖片／GIF 影片／API 掛掉都有中文提示；下載檔名為「作者_貼文ID_merged」
+- 圖片合併下載頁（階段 1：上傳、拖曳排序、直式／橫式、對齊、間距、背景色、PNG／JPG、canvas 上限自動縮小）；首頁左上角有與齒輪同款的入口按鈕
 
 ## 重要決定（使用者指定，修改前先確認）
 
@@ -91,6 +142,7 @@
 - **`#Gaming`（嘉明）等英文名稱本身就是常見單字**，搜尋結果會混雜，目前尚未處理（見下一步）。
 - **返回上一頁時瀏覽器會自己恢復勾選框**：曾發生只勾繁中 → 去 𝕏 → 返回後，畫面仍只勾繁中，但程式的設定已重設成四種語言，搜尋語法和畫面不一致。現在設定存在 sessionStorage，設定面板的 input 加了 `autocomplete="off"`，並在 `pageshow` 時用 `syncSettingsUI()` 讓畫面跟著設定走。
 - **`package.json` 不能設 `"type": "module"`**：會讓 Node 把 `characters.js` 當成 ES module，`module.exports` 失效，腳本讀不到角色資料。腳本本身用 `.mjs` 就夠了。
+- **雲端 session 連不到 cdn.jsdelivr.net、api.fxtwitter.com、pbs.twimg.com、video.twimg.com**（代理 403）。Playwright 測試時用 `page.route` 把 SortableJS、gifenc 的 CDN 網址換成 npm 裝下來的檔案；Playwright 的 Chromium 不支援 H.264，測試影片要用 `ffmpeg` 產生 VP9（要測「原始」幀率就用 VP9 放在 .mp4 容器）；𝕏／FxTwitter 的實際行為要請使用者在自己的瀏覽器測。
 - **在 Bash 裡 `pkill -f "http.server 8767"` 會連自己的 shell 一起殺掉**（指令列也含那段字）。改用 `pkill -f "http.server 876[0-9]"`，並放在獨立的指令裡。
 
 ## 測試方式
