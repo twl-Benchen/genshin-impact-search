@@ -58,6 +58,7 @@
         $('quality-input').value = settings.quality;
         $('bg-color').value = settings.custom;
         updateOptionLabels();
+        window.MergeUI.updateSegmented();
     }
 
     function updateOptionLabels() {
@@ -203,7 +204,7 @@
             if (skipped) setStatus('add-status', '只能加入圖片檔', true);
             return Promise.resolve();
         }
-        window.MergeTabs.select('images'); // 在「影片」分頁拖放或貼上圖片時，切回圖片分頁
+        window.MergeUI.select('images'); // 在「影片」分頁拖放或貼上圖片時，切回圖片分頁
         return addImages(files.map(function (f) { return { blob: f, name: f.name }; }));
     }
 
@@ -279,7 +280,7 @@
 
         $('list-head').hidden = items.length === 0;
         $('list-count').textContent = '共 ' + items.length + ' 張';
-        window.MergeTabs.setCount('images', items.length);
+        window.MergeUI.setCount('images', items.length);
     }
 
     function moveButton(text, label, item, delta) {

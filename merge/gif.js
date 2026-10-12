@@ -34,6 +34,7 @@
         var width = document.querySelector('input[name="gif-width"][value="' + settings.width + '"]');
         if (fps) fps.checked = true;
         if (width) width.checked = true;
+        window.MergeUI.updateSegmented();
     }
 
     function bindSettings() {
@@ -147,7 +148,7 @@
         var has = videos.length > 0;
         $('video-empty').hidden = has;
         $('gif-options').hidden = !has;
-        window.MergeTabs.setCount('videos', videos.length);
+        window.MergeUI.setCount('videos', videos.length);
     }
 
     // ===== 進度與狀態 =====

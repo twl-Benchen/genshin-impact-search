@@ -175,9 +175,22 @@
 
     // ===== 介面 =====
     var input = document.getElementById('link-input');
-    var button = document.getElementById('fetch-btn');
     var list = document.getElementById('fetch-results');
+    var stateBox = document.getElementById('fetch-state');
     var busy = false;
+    var idleTimer;
+
+    // 輸入框旁的狀態膠囊：idle（提示）／loading（抓取中）／done／error
+    var IDLE_TEXT = '貼上就會自動抓取';
+    function setState(state, text) {
+        clearTimeout(idleTimer);
+        stateBox.dataset.state = state;
+        document.getElementById('fetch-state-text').textContent = text;
+        // 完成的訊息顯示一下就回到提示
+        if (state === 'done' || state === 'error') {
+            idleTimer = setTimeout(function () { setState('idle', IDLE_TEXT); }, 4000);
+        }
+    }
 
     function resultRow(id, state, text) {
         var li = document.createElement('li');
@@ -200,11 +213,13 @@
         list.textContent = '';
         if (!ids.length) {
             list.appendChild(resultRow('', 'error', '看不出是 𝕏 貼文連結，請貼上像 https://x.com/帳號/status/數字 這樣的網址'));
+            setState('error', '找不到連結');
             return;
         }
 
         busy = true;
-        button.disabled = true;
+        var finished = 0;
+        setState('loading', ids.length > 1 ? '抓取中 0/' + ids.length : '抓取中…');
         var rows = ids.map(function (id) {
             var row = resultRow(id, 'loading', '貼文 ' + id + '：抓取中…');
             list.appendChild(row);
@@ -216,6 +231,8 @@
             return loadTweet(id).then(function (r) {
                 var prefix = r.author ? '@' + r.author + '（' + id + '）：' : '貼文 ' + id + '：';
                 rows[i].replaceWith(rows[i] = resultRow(id, r.ok ? 'ok' : 'error', prefix + r.text));
+                finished++;
+                if (ids.length > 1) setState('loading', '抓取中 ' + finished + '/' + ids.length);
                 return r;
             });
         }));
@@ -227,23 +244,23 @@
         });
         if (videos.length && window.MergeGif) window.MergeGif.addVideos(videos);
         // 只有影片就切到「影片」分頁、只有圖片就切到「圖片」；兩種都有時留在原分頁，看分頁上的數字
-        if (videos.length && !entries.length) window.MergeTabs.select('videos');
-        if (entries.length && !videos.length) window.MergeTabs.select('images');
+        if (videos.length && !entries.length) window.MergeUI.select('videos');
+        if (entries.length && !videos.length) window.MergeUI.select('images');
         if (entries.length) await window.MergeCore.addImages(entries);
 
         busy = false;
-        button.disabled = false;
-        // 全部成功就清空輸入框，方便貼下一批
-        if (results.every(function (r) { return r.ok; })) input.value = '';
+        var failed = results.filter(function (r) { return !r.ok; }).length;
+        if (!failed) {
+            setState('done', '抓取完成');
+            input.value = ''; // 全部成功就清空輸入框，方便貼下一批
+        } else {
+            setState('error', failed === ids.length ? '抓取失敗' : failed + ' 篇失敗');
+        }
     }
 
-    button.addEventListener('click', function () {
-        run(input.value);
-    });
-
-    // Ctrl／⌘ + Enter 送出
+    // 手動輸入時按 Enter 送出（Shift + Enter 換行）
     input.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
             e.preventDefault();
             run(input.value);
         }

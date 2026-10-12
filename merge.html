@@ -23,7 +23,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&display=swap">
-    <link rel="stylesheet" href="merge/merge.css?v=8b77c385">
+    <link rel="stylesheet" href="merge/merge.css?v=3734aa8b">
 </head>
 <body>
     <!-- 左上角返回搜尋（與首頁齒輪同款外框） -->
@@ -71,10 +71,14 @@
             <!-- 貼 𝕏 連結：兩個分頁共用 -->
             <section class="card link-card" aria-label="貼上 𝕏 貼文連結">
                 <div class="link-box">
-                    <label class="link-label" for="link-input">貼上 𝕏 貼文連結<span class="option-sub">（可以一次貼多個；圖片會放進「圖片」、GIF／影片會放進「影片」）</span></label>
+                    <label class="link-label" for="link-input">貼上 𝕏 貼文連結<span class="option-sub">（可以一次貼多個；手動輸入時按 Enter。圖片會放進「圖片」、GIF／影片會放進「影片」）</span></label>
                     <div class="link-row">
-                        <textarea id="link-input" rows="2" placeholder="https://x.com/帳號/status/1234567890" autocomplete="off" spellcheck="false"></textarea>
-                        <button type="button" class="gbtn primary" id="fetch-btn"><span class="icon" aria-hidden="true">𝕏</span><span>抓取</span></button>
+                        <textarea id="link-input" rows="2" placeholder="https://x.com/帳號/status/1234567890" autocomplete="off" spellcheck="false" enterkeyhint="go"></textarea>
+                        <!-- 抓取狀態（貼上就會自動抓取，不需要按鈕；手動輸入時按 Enter） -->
+                        <div class="fetch-state" id="fetch-state" data-state="idle" role="status" aria-live="polite">
+                            <span class="fetch-state-icon" aria-hidden="true"></span>
+                            <span id="fetch-state-text">貼上就會自動抓取</span>
+                        </div>
                     </div>
                     <ul class="fetch-results" id="fetch-results" aria-live="polite"></ul>
                 </div>
@@ -222,9 +226,9 @@
 
     <!-- 拖曳排序（觸控也能用）；載入失敗時仍可用 ◀ ▶ 按鈕排序 -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js" defer></script>
-    <script src="merge/tabs.js?v=eda6d631" defer></script>
-    <script src="merge/core.js?v=3262e16b" defer></script>
-    <script src="merge/x.js?v=6fd00e63" defer></script>
-    <script src="merge/gif.js?v=909e7ef2" defer></script>
+    <script src="merge/ui.js?v=01360ffe" defer></script>
+    <script src="merge/core.js?v=64214b5d" defer></script>
+    <script src="merge/x.js?v=71d77532" defer></script>
+    <script src="merge/gif.js?v=d2512f4f" defer></script>
 </body>
 </html>

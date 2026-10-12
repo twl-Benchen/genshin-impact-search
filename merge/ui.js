@@ -1,4 +1,4 @@
-// 圖片合併頁：資料夾分頁（圖片／影片）
+// 圖片合併頁的共用介面：資料夾分頁（圖片／影片）、膠囊切換鈕的滑動動畫
 // 目前分頁記在網址 hash（#video），重新整理或分享連結時會停在同一頁。
 (function () {
     'use strict';
@@ -43,10 +43,25 @@
         });
     });
 
-    window.MergeTabs = {
+    // 膠囊切換鈕（同首頁設定面板）：選項數寫進 --n、選中的位置寫進 --i，讓膠囊用動畫滑過去
+    function updateSegmented() {
+        document.querySelectorAll('.segmented').forEach(function (group) {
+            var inputs = Array.prototype.slice.call(group.querySelectorAll('input'));
+            var index = inputs.findIndex(function (input) { return input.checked; });
+            group.style.setProperty('--n', inputs.length);
+            group.style.setProperty('--i', Math.max(index, 0));
+        });
+    }
+
+    document.addEventListener('change', function (e) {
+        if (e.target.closest && e.target.closest('.segmented')) updateSegmented();
+    });
+
+    window.MergeUI = {
         select: select,
         setCount: setCount,
-        current: function () { return current; }
+        current: function () { return current; },
+        updateSegmented: updateSegmented
     };
 
     function fromHash() {
@@ -55,4 +70,5 @@
 
     window.addEventListener('hashchange', fromHash);
     fromHash();
+    updateSegmented();
 })();
