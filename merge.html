@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>圖片合併下載｜原神角色 𝕏 圖片搜尋</title>
+    <meta name="description" content="把被拆成好幾張的圖片合併成一張下載。所有處理都在你的瀏覽器完成，不會上傳。">
+    <meta name="theme-color" content="#3B4255">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✨</text></svg>">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="圖片合併下載｜原神角色 𝕏 圖片搜尋">
+    <meta property="og:description" content="把被拆成好幾張的圖片合併成一張下載，所有處理都在瀏覽器完成。">
+    <meta property="og:url" content="https://twl-benchen.github.io/genshin-impact-search/merge.html">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&display=swap">
+    <link rel="stylesheet" href="merge/merge.css?v=9001d7d4">
+</head>
+<body>
+    <!-- 左上角返回搜尋（與首頁齒輪同款外框） -->
+    <a class="corner-btn" href="./" aria-label="返回角色搜尋" title="返回角色搜尋">
+        <svg viewBox="0 0 48 48" aria-hidden="true">
+            <defs>
+                <linearGradient id="corner-bg" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#4A5366" />
+                    <stop offset="1" stop-color="#2B3142" />
+                </linearGradient>
+            </defs>
+            <circle cx="24" cy="24" r="21" fill="url(#corner-bg)" stroke="#D3BC8E" stroke-width="1.5" />
+            <circle cx="24" cy="24" r="17.5" fill="none" stroke="#D3BC8E" stroke-opacity="0.35" stroke-width="0.8" />
+            <g fill="#D3BC8E">
+                <path d="M24 0.8 L25.6 3 L24 5.2 L22.4 3 Z" />
+                <path d="M24 42.8 L25.6 45 L24 47.2 L22.4 45 Z" />
+                <path d="M0.8 24 L3 22.4 L5.2 24 L3 25.6 Z" />
+                <path d="M42.8 24 L45 22.4 L47.2 24 L45 25.6 Z" />
+            </g>
+            <path class="corner-icon" fill="none" stroke="#FFE6B2" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M27 16 L19 24 L27 32" />
+        </svg>
+        <span class="corner-label">搜尋</span>
+    </a>
+
+    <h1>
+        圖片合併下載
+        <small>(圖片只在你的瀏覽器處理，不會上傳)</small>
+    </h1>
+    <div class="title-ornament" aria-hidden="true">✦</div>
+
+    <main class="merge-layout">
+        <!-- 1. 加入圖片 -->
+        <section class="card" aria-labelledby="step-add">
+            <h2 class="card-title" id="step-add"><span class="step">1</span>加入圖片</h2>
+
+            <div class="drop-zone" id="drop-zone">
+                <input type="file" id="file-input" accept="image/*" multiple class="visually-hidden" autocomplete="off">
+                <label for="file-input" class="gbtn primary"><span class="icon" aria-hidden="true">＋</span><span>選擇圖片</span></label>
+                <p class="drop-hint">或把圖片拖到這裡、按 Ctrl+V 貼上</p>
+            </div>
+
+            <div class="list-head" id="list-head" hidden>
+                <span id="list-count"></span>
+                <span class="list-tip">拖曳縮圖可調整順序</span>
+                <button type="button" class="text-btn" id="clear-btn">全部清除</button>
+            </div>
+            <ol class="thumb-list" id="thumb-list" aria-label="已加入的圖片（依合併順序）"></ol>
+            <p class="status" id="add-status" role="status" aria-live="polite"></p>
+        </section>
+
+        <!-- 2. 合併設定 -->
+        <section class="card dark" aria-labelledby="step-options">
+            <h2 class="card-title" id="step-options"><span class="step">2</span>合併設定</h2>
+
+            <div class="option">
+                <h3 class="option-title" id="opt-direction">拼接方向</h3>
+                <div class="segmented" role="radiogroup" aria-labelledby="opt-direction">
+                    <label><input type="radio" name="direction" value="vertical" class="visually-hidden" autocomplete="off" checked><span>直式（上下）</span></label>
+                    <label><input type="radio" name="direction" value="horizontal" class="visually-hidden" autocomplete="off"><span>橫式（左右）</span></label>
+                </div>
+            </div>
+
+            <div class="option">
+                <h3 class="option-title" id="opt-align">尺寸不同時</h3>
+                <div class="segmented" role="radiogroup" aria-labelledby="opt-align">
+                    <label><input type="radio" name="align" value="max" class="visually-hidden" autocomplete="off" checked><span data-v="放大到最寬" data-h="放大到最高">放大到最寬</span></label>
+                    <label><input type="radio" name="align" value="min" class="visually-hidden" autocomplete="off"><span data-v="縮小到最窄" data-h="縮小到最矮">縮小到最窄</span></label>
+                </div>
+                <p class="option-note" id="align-note">其他圖片會等比縮放，讓寬度一致</p>
+            </div>
+
+            <div class="option">
+                <h3 class="option-title"><label for="gap-input">間距</label><output id="gap-output" for="gap-input">0 px</output></h3>
+                <input type="range" id="gap-input" min="0" max="100" step="1" value="0" autocomplete="off">
+            </div>
+
+            <div class="option">
+                <h3 class="option-title" id="opt-bg">背景色<span class="option-sub">（間距與空白處）</span></h3>
+                <div class="swatches" role="radiogroup" aria-labelledby="opt-bg">
+                    <label class="swatch" title="白色"><input type="radio" name="bg" value="#ffffff" class="visually-hidden" autocomplete="off" checked><span style="--c: #ffffff"></span><span class="visually-hidden">白色</span></label>
+                    <label class="swatch" title="米白"><input type="radio" name="bg" value="#ece5d8" class="visually-hidden" autocomplete="off"><span style="--c: #ece5d8"></span><span class="visually-hidden">米白</span></label>
+                    <label class="swatch" title="黑色"><input type="radio" name="bg" value="#000000" class="visually-hidden" autocomplete="off"><span style="--c: #000000"></span><span class="visually-hidden">黑色</span></label>
+                    <label class="swatch transparent" title="透明（只有 PNG）"><input type="radio" name="bg" value="transparent" class="visually-hidden" autocomplete="off"><span></span><span class="visually-hidden">透明（只有 PNG）</span></label>
+                    <label class="swatch custom" title="自訂顏色"><input type="radio" name="bg" value="custom" class="visually-hidden" autocomplete="off"><span id="custom-swatch" style="--c: #3a4357"></span><span class="visually-hidden">自訂顏色</span></label>
+                    <input type="color" id="bg-color" value="#3a4357" aria-label="選擇自訂背景色" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="option">
+                <h3 class="option-title" id="opt-format">輸出格式</h3>
+                <div class="segmented" role="radiogroup" aria-labelledby="opt-format">
+                    <label><input type="radio" name="format" value="png" class="visually-hidden" autocomplete="off" checked><span>PNG（無損）</span></label>
+                    <label><input type="radio" name="format" value="jpeg" class="visually-hidden" autocomplete="off"><span>JPG（檔案小）</span></label>
+                </div>
+                <div class="quality" id="quality-row" hidden>
+                    <h3 class="option-title"><label for="quality-input">JPG 品質</label><output id="quality-output" for="quality-input">92</output></h3>
+                    <input type="range" id="quality-input" min="50" max="100" step="1" value="92" autocomplete="off">
+                </div>
+                <p class="option-note" id="format-note"></p>
+            </div>
+        </section>
+
+        <!-- 3. 預覽與下載 -->
+        <section class="card preview-card" aria-labelledby="step-preview">
+            <h2 class="card-title" id="step-preview"><span class="step">3</span>預覽與下載</h2>
+            <div class="preview-box" id="preview-box">
+                <p class="preview-empty" id="preview-empty">加入圖片後會在這裡顯示合併結果</p>
+                <canvas id="preview-canvas" hidden></canvas>
+            </div>
+            <p class="size-info" id="size-info"></p>
+            <p class="warn" id="size-warn" hidden></p>
+            <div class="download-row">
+                <button type="button" class="gbtn primary" id="download-btn" disabled><span class="icon" aria-hidden="true">↓</span><span>下載圖片</span></button>
+                <button type="button" class="gbtn" id="share-btn" hidden disabled><span class="icon" aria-hidden="true">⇪</span><span>分享／存到相簿</span></button>
+            </div>
+            <p class="status" id="export-status" role="status" aria-live="polite"></p>
+        </section>
+    </main>
+
+    <!-- 拖曳排序（觸控也能用）；載入失敗時仍可用 ◀ ▶ 按鈕排序 -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js" defer></script>
+    <script src="merge/core.js?v=d4afe0c3" defer></script>
+</body>
+</html>
