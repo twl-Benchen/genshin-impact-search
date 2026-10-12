@@ -309,6 +309,121 @@ input[type="color"]:focus-visible {
     }
 
 /* ===== 1. 加入圖片 ===== */
+/* 貼 𝕏 連結 */
+.link-label {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.link-row {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+}
+
+    .link-row textarea {
+        flex: 1;
+        min-width: 0;
+        box-sizing: border-box;
+        min-height: 46px;
+        padding: 10px 12px;
+        border: 1px solid rgba(211, 188, 142, 0.9);
+        border-radius: 10px;
+        background: #fff;
+        color: var(--navy);
+        font: inherit;
+        font-size: 16px; /* 小於 16px 時 iOS Safari 點輸入框會自動放大畫面 */
+        line-height: 1.5;
+        resize: vertical;
+    }
+
+        .link-row textarea:focus-visible {
+            outline: 3px solid var(--gold);
+            outline-offset: 1px;
+        }
+
+    .link-row .gbtn {
+        align-self: flex-start;
+    }
+
+.fetch-results {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+    .fetch-results:not(:empty) {
+        margin-top: 10px;
+    }
+
+.fetch-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 4px 0;
+    font-size: 13px;
+    line-height: 1.5;
+    word-break: break-all;
+}
+
+.fetch-mark {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    border-radius: 50%;
+    background: rgba(59, 66, 85, 0.15);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.fetch-row.ok .fetch-mark {
+    background: #5B8C5A;
+    color: #fff;
+}
+
+.fetch-row.error {
+    color: var(--warn);
+}
+
+    .fetch-row.error .fetch-mark {
+        background: var(--warn);
+        color: #fff;
+    }
+
+.fetch-row.loading .fetch-mark {
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    50% { opacity: 0.35; }
+}
+
+.or-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 16px 0 12px;
+    font-size: 12px;
+    color: rgba(59, 66, 85, 0.6);
+}
+
+    .or-divider::before,
+    .or-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: rgba(211, 188, 142, 0.6);
+    }
+
 .drop-zone {
     display: flex;
     flex-direction: column;
@@ -761,6 +876,15 @@ input[type="range"] {
     .list-head #list-count {
         flex: 1;
     }
+
+    /* 手機：按鈕放到輸入框下面 */
+    .link-row {
+        flex-direction: column;
+    }
+
+        .link-row .gbtn {
+            align-self: center;
+        }
 }
 
 @media (hover: none) {
@@ -773,5 +897,6 @@ input[type="range"] {
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
         transition: none !important;
+        animation: none !important;
     }
 }

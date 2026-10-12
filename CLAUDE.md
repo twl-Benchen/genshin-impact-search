@@ -21,6 +21,9 @@
 | `.github/workflows/download-icons.yml` | `main` 上 `characters.js` 有變動時自動執行上面的腳本並提交（也可手動執行） |
 | `merge.html` | 圖片合併下載頁（獨立頁面，首頁左上角按鈕進入） |
 | `merge/merge.css`、`merge/core.js` | 合併頁的樣式與程式（色票、`.gbtn` 從 `index.html` 複製一份，不共用） |
+| `merge/x.js` | 貼 𝕏 連結抓圖：解析連結、呼叫 FxTwitter API、錯誤訊息（解析函式可在 Node `require` 測試） |
+| `cloudflare-worker/twimg-proxy.js` | 𝕏 影片代理的 Worker 程式（**提案，尚未部署**，等使用者決定） |
+| `cors-test.html` | 暫時的 CORS 測試頁，階段 3 測完影片代理後刪除 |
 | `scripts/update-merge-version.mjs` | 依 `merge/*` 內容雜湊更新 `merge.html` 的 `?v=`；**改了 `merge/` 底下的檔案後一定要跑** |
 
 資料用 `<script>` 載入而不是 `fetch` JSON，這樣直接雙擊 `index.html`（`file://`）也能用。
@@ -63,9 +66,11 @@
 - 使用流程：在 𝕏 看到一張圖拆成好幾張發 → 把圖加進來 → 合併成一張下載。所有處理都在瀏覽器本地完成，不上傳。
 - 分階段開發（使用者每階段測過才做下一階段）：
   1. 上傳圖片合併 ✅
-  2. 貼 𝕏 連結抓圖（FxTwitter API `https://api.fxtwitter.com/status/{id}`；先用測試頁實測 CORS，被擋的話提出 Cloudflare Worker 代理方案給使用者決定，**不要自行改用其他繞過方式**）
+  2. 貼 𝕏 連結抓圖 ✅（FxTwitter API `https://api.fxtwitter.com/status/{id}` → `tweet.media.photos[].url` 加 `?name=orig`；多篇同時抓、依貼上順序加入；在頁面任何地方貼上連結也會自動抓）
   3. GIF 下載（𝕏 的 GIF 是 MP4，逐格畫 canvas + gifenc 編碼，另提供直接下載 MP4）
   4. Android 分享直達（manifest `share_target` → `merge.html`，路徑一律用相對路徑；iOS 不支援但不能壞）
+- **CORS 實測結果**（使用者在 Windows Chrome、Android Samsung Internet 測）：FxTwitter API ✅；pbs.twimg.com 圖片用 `fetch` → blob ✅（可畫進 canvas 匯出）；video.twimg.com **回 HTTP 403**（伺服器拒絕其他網站來的請求，`fetch` 與 `<video crossorigin>` 都失敗）→ 影片需要代理，已提出 Cloudflare Worker 方案，**不要自行改用其他繞過方式**。
+  - 測試頁的 `<img crossorigin>` 失敗是因為加了 `cb=` 參數，pbs.twimg.com 不接受未知參數；抓圖一律用 `fetch`。
 - 圖片用 `<img>` + object URL 解碼（相容 iOS HEIC、自動依 EXIF 轉正）。清單與預覽只保留縮小版 canvas，下載時才一張張解碼原圖、畫完就釋放，避免手機記憶體不足。
 - canvas 上限：iOS 面積 4096²、其他手機 8192×4096、桌面 1 億像素、單邊 32767；匯出前再實際建立 canvas 讀回一個像素確認，畫不出來就再縮小，並顯示提示。測試時可用 `window.__MERGE_MAX_AREA` 覆寫面積上限。
 - 拖曳排序用 SortableJS（CDN，觸控也能用）；載入失敗時仍可用縮圖下方的 ◀ ▶ 排序。
@@ -85,6 +90,7 @@
 - 角色與元素都是 `<button aria-pressed>`，可鍵盤操作
 - `<head>`：lang、charset、title、description、Open Graph、favicon
 - 角色更新到 7.1（薇斯納、沃雅妮莎）
+- 圖片合併下載頁階段 2：貼 𝕏 連結抓原圖（可一次多個連結），貼文不存在／私人帳號／沒有圖片／GIF 影片／API 掛掉都有中文提示；下載檔名為「作者_貼文ID_merged」
 - 圖片合併下載頁（階段 1：上傳、拖曳排序、直式／橫式、對齊、間距、背景色、PNG／JPG、canvas 上限自動縮小）；首頁左上角有與齒輪同款的入口按鈕
 
 ## 重要決定（使用者指定，修改前先確認）

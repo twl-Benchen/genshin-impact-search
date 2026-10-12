@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>圖片合併下載｜原神角色 𝕏 圖片搜尋</title>
-    <meta name="description" content="把被拆成好幾張的圖片合併成一張下載。所有處理都在你的瀏覽器完成，不會上傳。">
+    <meta name="description" content="貼上 𝕏 貼文連結或上傳圖片，把被拆成好幾張的圖片合併成一張下載。所有處理都在你的瀏覽器完成，不會上傳。">
     <meta name="theme-color" content="#3B4255">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✨</text></svg>">
 
@@ -18,7 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&display=swap">
-    <link rel="stylesheet" href="merge/merge.css?v=9001d7d4">
+    <link rel="stylesheet" href="merge/merge.css?v=2289019a">
 </head>
 <body>
     <!-- 左上角返回搜尋（與首頁齒輪同款外框） -->
@@ -54,9 +54,20 @@
         <section class="card" aria-labelledby="step-add">
             <h2 class="card-title" id="step-add"><span class="step">1</span>加入圖片</h2>
 
+            <div class="link-box">
+                <label class="link-label" for="link-input">貼上 𝕏 貼文連結<span class="option-sub">（可以一次貼多個，每篇的圖片會依序加入）</span></label>
+                <div class="link-row">
+                    <textarea id="link-input" rows="2" placeholder="https://x.com/帳號/status/1234567890" autocomplete="off" spellcheck="false"></textarea>
+                    <button type="button" class="gbtn primary" id="fetch-btn"><span class="icon" aria-hidden="true">𝕏</span><span>抓取圖片</span></button>
+                </div>
+                <ul class="fetch-results" id="fetch-results" aria-live="polite"></ul>
+            </div>
+
+            <div class="or-divider" aria-hidden="true"><span>或從裝置加入</span></div>
+
             <div class="drop-zone" id="drop-zone">
                 <input type="file" id="file-input" accept="image/*" multiple class="visually-hidden" autocomplete="off">
-                <label for="file-input" class="gbtn primary"><span class="icon" aria-hidden="true">＋</span><span>選擇圖片</span></label>
+                <label for="file-input" class="gbtn"><span class="icon" aria-hidden="true">＋</span><span>選擇圖片</span></label>
                 <p class="drop-hint">或把圖片拖到這裡、按 Ctrl+V 貼上</p>
             </div>
 
@@ -140,6 +151,7 @@
 
     <!-- 拖曳排序（觸控也能用）；載入失敗時仍可用 ◀ ▶ 按鈕排序 -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js" defer></script>
-    <script src="merge/core.js?v=d4afe0c3" defer></script>
+    <script src="merge/core.js?v=90278dc3" defer></script>
+    <script src="merge/x.js?v=87ffd79a" defer></script>
 </body>
 </html>

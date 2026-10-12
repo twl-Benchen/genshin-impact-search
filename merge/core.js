@@ -160,7 +160,7 @@
         return c;
     }
 
-    // entries: [{ blob, name, label }]；label 是縮圖下方的說明（例如來源作者），可省略
+    // entries: [{ blob, name, label, source }]；label 是縮圖下方的說明（例如來源作者），可省略
     async function addImages(entries) {
         var failed = [];
         setStatus('add-status', '讀取中…');
@@ -177,6 +177,7 @@
                     id: nextId++,
                     name: entry.name || '圖片',
                     label: entry.label || '',
+                    source: entry.source || null, // 來自 𝕏 貼文時：{ author, id }
                     blob: entry.blob,
                     width: w,
                     height: h,
@@ -493,10 +494,13 @@
         canvas.width = canvas.height = 0;
         if (!blob) throw new Error('toBlob');
 
+        // 第一張來自 𝕏 貼文時，檔名用「作者_貼文ID_merged」，比較好找
+        var source = items[0].source;
         cachedExport = {
             key: key,
             blob: blob,
-            name: 'merged-' + timestamp() + (settings.format === 'jpeg' ? '.jpg' : '.png')
+            name: (source ? source.author + '_' + source.id + '_merged' : 'merged-' + timestamp()) +
+                (settings.format === 'jpeg' ? '.jpg' : '.png')
         };
         return cachedExport;
     }
