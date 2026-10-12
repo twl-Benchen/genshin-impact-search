@@ -238,6 +238,102 @@ input[type="color"]:focus-visible {
         opacity: 1;
     }
 
+/* ===== 資料夾分頁（圖片／影片） ===== */
+.folder {
+    --folder-bg: #FBF8F2;
+    max-width: 1240px;
+    margin: 0 auto;
+}
+
+.tabs {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    padding-left: 14px;
+}
+
+.tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 -1px; /* 蓋住資料夾本體的上框線，看起來接在一起 */
+    padding: 9px 22px 10px;
+    border: 1px solid rgba(211, 188, 142, 0.55);
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+    background: rgba(236, 229, 216, 0.7);
+    color: rgba(59, 66, 85, 0.6);
+    font: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+    .tab:hover {
+        color: var(--navy);
+        background: rgba(236, 229, 216, 1);
+    }
+
+    .tab[aria-selected="true"] {
+        padding-top: 13px; /* 選中的分頁比較高，像拉出來的資料夾 */
+        border-color: var(--gold);
+        background: var(--folder-bg);
+        color: var(--navy);
+        box-shadow: inset 0 3px 0 var(--gold);
+    }
+
+    .tab:focus-visible {
+        outline: 3px solid var(--gold);
+        outline-offset: 2px;
+    }
+
+.tab-icon {
+    width: 20px;
+    height: 20px;
+}
+
+    .tab[aria-selected="true"] .tab-icon {
+        color: #B8995C;
+    }
+
+.tab-count {
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    box-sizing: border-box;
+    border-radius: 999px;
+    background: var(--navy);
+    color: var(--gold-light);
+    font-size: 12px;
+    line-height: 20px;
+    letter-spacing: 0;
+    text-align: center;
+}
+
+    .tab-count[hidden] {
+        display: none;
+    }
+
+.folder-body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 18px;
+    border: 1px solid var(--gold);
+    border-radius: 0 14px 14px 14px;
+    background: var(--folder-bg);
+    box-shadow: 0 4px 16px rgba(59, 66, 85, 0.08);
+}
+
+.tab-panel[hidden] {
+    display: none;
+}
+
 /* ===== 版面：桌面左右兩欄（左：加入圖片＋預覽；右：設定），手機一欄 ===== */
 .merge-layout {
     display: grid;
@@ -247,26 +343,11 @@ input[type="color"]:focus-visible {
         "preview options";
     align-items: start;
     gap: 18px;
-    max-width: 1240px;
-    margin: 0 auto;
 }
-
-    /* 有影片時才多一列「GIF／影片」，沒有時不留空白 */
-    .merge-layout.has-videos {
-        grid-template-areas:
-            "add options"
-            "gif options"
-            "preview options";
-    }
 
     .merge-layout > :nth-child(1) { grid-area: add; }
     .merge-layout > :nth-child(2) { grid-area: options; position: sticky; top: 12px; }
     .merge-layout > :nth-child(3) { grid-area: preview; }
-    .merge-layout > .gif-card { grid-area: gif; }
-
-    .card[hidden] {
-        display: none;
-    }
 
 .card {
     min-width: 0;
@@ -969,6 +1050,22 @@ input[type="range"] {
         cursor: default;
     }
 
+.video-empty {
+    margin: 0;
+    padding: 28px 12px;
+    border: 2px dashed rgba(211, 188, 142, 0.9);
+    border-radius: 12px;
+    background: rgba(246, 242, 234, 0.7);
+    font-size: 14px;
+    text-align: center;
+    opacity: 0.8;
+}
+
+    .video-empty[hidden],
+    .gif-options[hidden] {
+        display: none;
+    }
+
 .gif-options {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1083,20 +1180,26 @@ input[type="range"] {
         gap: 14px;
     }
 
-        .merge-layout.has-videos {
-            grid-template-areas:
-                "add"
-                "gif"
-                "options"
-                "preview";
-        }
-
         .merge-layout > :nth-child(2) {
             position: static;
         }
 
     .card {
         padding: 16px 14px 18px;
+    }
+
+    .folder-body {
+        gap: 14px;
+        padding: 10px;
+    }
+
+    .tabs {
+        padding-left: 8px;
+    }
+
+    .tab {
+        padding-left: 18px;
+        padding-right: 18px;
     }
 
     .thumb-list {

@@ -140,7 +140,7 @@
         });
         var videoText = videos.length ? (videos.every(function (v) { return v.type === 'gif'; }) ? 'GIF ' : '影片 ') + videos.length + ' 支' : '';
         if (!photos.length) {
-            if (videos.length) return { ok: true, author: author, text: videoText + '（在下方「GIF／影片」下載）', entries: [], videos: videos };
+            if (videos.length) return { ok: true, author: author, text: videoText + '（在「影片」分頁）', entries: [], videos: videos };
             return { ok: false, author: author, text: '這篇貼文沒有圖片', entries: [] };
         }
 
@@ -162,12 +162,12 @@
             });
         });
         if (!entries.length) {
-            return { ok: false, author: author, text: '圖片下載失敗，請稍後再試' + (videoText ? '；' + videoText + '在下方' : ''), entries: [], videos: videos };
+            return { ok: false, author: author, text: '圖片下載失敗，請稍後再試' + (videoText ? '；' + videoText + '在「影片」分頁' : ''), entries: [], videos: videos };
         }
         return {
             ok: true,
             author: author,
-            text: entries.length + ' 張圖片' + (failed ? '（' + failed + ' 張下載失敗）' : '') + (videoText ? '、' + videoText + '（在下方）' : ''),
+            text: entries.length + ' 張圖片' + (failed ? '（' + failed + ' 張下載失敗）' : '') + (videoText ? '、' + videoText + '（在「影片」分頁）' : ''),
             entries: entries,
             videos: videos
         };
@@ -226,6 +226,9 @@
             videos = videos.concat(r.videos || []);
         });
         if (videos.length && window.MergeGif) window.MergeGif.addVideos(videos);
+        // 只有影片就切到「影片」分頁、只有圖片就切到「圖片」；兩種都有時留在原分頁，看分頁上的數字
+        if (videos.length && !entries.length) window.MergeTabs.select('videos');
+        if (entries.length && !videos.length) window.MergeTabs.select('images');
         if (entries.length) await window.MergeCore.addImages(entries);
 
         busy = false;

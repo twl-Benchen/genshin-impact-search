@@ -20,10 +20,10 @@
 | `package.json` | 只給維護腳本用（sharp），網頁本身不需要建置；第一次在本機跑腳本前要 `npm install` |
 | `.github/workflows/download-icons.yml` | `main` 上 `characters.js` 有變動時自動執行上面的腳本並提交（也可手動執行） |
 | `merge.html` | 圖片合併下載頁（獨立頁面，首頁左上角按鈕進入） |
+| `merge/tabs.js` | 合併頁的資料夾分頁（圖片／影片），分頁記在網址 hash `#video` |
 | `merge/merge.css`、`merge/core.js` | 合併頁的樣式與程式（色票、`.gbtn` 從 `index.html` 複製一份，不共用） |
 | `merge/x.js` | 貼 𝕏 連結抓圖：解析連結、呼叫 FxTwitter API、`fetchMedia`（不送 Referer）、錯誤訊息（解析函式可在 Node `require` 測試） |
 | `merge/gif.js` | GIF／影片：下載 MP4、canvas 逐格擷取 + gifenc（module Worker）轉成 GIF |
-| `cors-test.html` | 暫時的 CORS 測試頁，使用者用 iPhone 確認 no-referrer 後刪除 |
 | `scripts/update-merge-version.mjs` | 依 `merge/*` 內容雜湊更新 `merge.html` 的 `?v=`；**改了 `merge/` 底下的檔案後一定要跑** |
 
 資料用 `<script>` 載入而不是 `fetch` JSON，這樣直接雙擊 `index.html`（`file://`）也能用。
@@ -64,6 +64,9 @@
 ### 圖片合併頁（`merge.html`）
 
 - 使用流程：在 𝕏 看到一張圖拆成好幾張發 → 把圖加進來 → 合併成一張下載。所有處理都在瀏覽器本地完成，不上傳。
+- **版面是資料夾分頁**（使用者要求）：標題下方「圖片」「影片」兩個分頁，分頁上顯示數量。貼連結的框在資料夾最上面、兩個分頁共用；圖片進「圖片」分頁（加入圖片／合併設定／預覽），GIF／影片進「影片」分頁，只要下載 GIF 時不必看到合併選單。
+  - 抓到的只有影片 → 自動切到「影片」；只有圖片 → 切到「圖片」；兩種都有 → 留在原分頁。在「影片」分頁上傳或拖放圖片會切回「圖片」。
+  - 切回「圖片」分頁時要重畫預覽（隱藏時量不到預覽框寬度），由 `merge-tab` 事件通知。
 - 分階段開發（使用者每階段測過才做下一階段）：
   1. 上傳圖片合併 ✅
   2. 貼 𝕏 連結抓圖 ✅（FxTwitter API `https://api.fxtwitter.com/status/{id}` → `tweet.media.photos[].url` 加 `?name=orig`；多篇同時抓、依貼上順序加入；在頁面任何地方貼上連結也會自動抓）
@@ -95,6 +98,7 @@
 - 角色與元素都是 `<button aria-pressed>`，可鍵盤操作
 - `<head>`：lang、charset、title、description、Open Graph、favicon
 - 角色更新到 7.1（薇斯納、沃雅妮莎）
+- 圖片合併下載頁改成「圖片」「影片」資料夾分頁（共用貼連結框）
 - 圖片合併下載頁階段 3：𝕏 GIF／影片可下載 MP4 或轉成 GIF（可調幀率與寬度、進度條、取消）
 - 圖片合併下載頁階段 2：貼 𝕏 連結抓原圖（可一次多個連結），貼文不存在／私人帳號／沒有圖片／GIF 影片／API 掛掉都有中文提示；下載檔名為「作者_貼文ID_merged」
 - 圖片合併下載頁（階段 1：上傳、拖曳排序、直式／橫式、對齊、間距、背景色、PNG／JPG、canvas 上限自動縮小）；首頁左上角有與齒輪同款的入口按鈕

@@ -203,6 +203,7 @@
             if (skipped) setStatus('add-status', '只能加入圖片檔', true);
             return Promise.resolve();
         }
+        window.MergeTabs.select('images'); // 在「影片」分頁拖放或貼上圖片時，切回圖片分頁
         return addImages(files.map(function (f) { return { blob: f, name: f.name }; }));
     }
 
@@ -278,6 +279,7 @@
 
         $('list-head').hidden = items.length === 0;
         $('list-count').textContent = '共 ' + items.length + ' 張';
+        window.MergeTabs.setCount('images', items.length);
     }
 
     function moveButton(text, label, item, delta) {
@@ -635,6 +637,11 @@
             $('share-btn').hidden = false;
             $('share-btn').addEventListener('click', share);
         }
+
+        // 切回圖片分頁時重畫預覽（分頁隱藏時量不到預覽框寬度）
+        document.addEventListener('merge-tab', function (e) {
+            if (e.detail === 'images') renderPreview();
+        });
 
         // 版面寬度改變時重畫預覽（例如手機轉向）
         var resizeTimer;

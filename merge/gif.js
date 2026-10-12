@@ -145,8 +145,9 @@
         });
 
         var has = videos.length > 0;
-        $('gif-card').hidden = !has;
-        document.querySelector('.merge-layout').classList.toggle('has-videos', has);
+        $('video-empty').hidden = has;
+        $('gif-options').hidden = !has;
+        window.MergeTabs.setCount('videos', videos.length);
     }
 
     // ===== 進度與狀態 =====

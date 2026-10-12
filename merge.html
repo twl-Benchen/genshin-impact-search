@@ -18,7 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&display=swap">
-    <link rel="stylesheet" href="merge/merge.css?v=16b4f455">
+    <link rel="stylesheet" href="merge/merge.css?v=8b77c385">
 </head>
 <body>
     <!-- 左上角返回搜尋（與首頁齒輪同款外框） -->
@@ -49,154 +49,177 @@
     </h1>
     <div class="title-ornament" aria-hidden="true">✦</div>
 
-    <main class="merge-layout">
-        <!-- 1. 加入圖片 -->
-        <section class="card" aria-labelledby="step-add">
-            <h2 class="card-title" id="step-add"><span class="step">1</span>加入圖片</h2>
+    <main class="folder">
+        <!-- 資料夾分頁：圖片（合併）／影片（GIF、MP4） -->
+        <div class="tabs" role="tablist" aria-label="功能">
+            <button type="button" class="tab" role="tab" id="tab-images" aria-controls="panel-images" aria-selected="true">
+                <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2" /><path d="M5 18 L10 12 L13 15 L15.5 12.5 L19 18 Z" fill="currentColor" /><circle cx="16" cy="8.5" r="1.8" fill="currentColor" /></svg>
+                <span>圖片</span><span class="tab-count" id="count-images" hidden></span>
+            </button>
+            <button type="button" class="tab" role="tab" id="tab-videos" aria-controls="panel-videos" aria-selected="false" tabindex="-1">
+                <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2" /><path d="M10 8.5 L16 12 L10 15.5 Z" fill="currentColor" /></svg>
+                <span>影片</span><span class="tab-count" id="count-videos" hidden></span>
+            </button>
+        </div>
 
-            <div class="link-box">
-                <label class="link-label" for="link-input">貼上 𝕏 貼文連結<span class="option-sub">（可以一次貼多個，每篇的圖片會依序加入）</span></label>
-                <div class="link-row">
-                    <textarea id="link-input" rows="2" placeholder="https://x.com/帳號/status/1234567890" autocomplete="off" spellcheck="false"></textarea>
-                    <button type="button" class="gbtn primary" id="fetch-btn"><span class="icon" aria-hidden="true">𝕏</span><span>抓取圖片</span></button>
-                </div>
-                <ul class="fetch-results" id="fetch-results" aria-live="polite"></ul>
-            </div>
-
-            <div class="or-divider" aria-hidden="true"><span>或從裝置加入</span></div>
-
-            <div class="drop-zone" id="drop-zone">
-                <input type="file" id="file-input" accept="image/*" multiple class="visually-hidden" autocomplete="off">
-                <label for="file-input" class="gbtn"><span class="icon" aria-hidden="true">＋</span><span>選擇圖片</span></label>
-                <p class="drop-hint">或把圖片拖到這裡、按 Ctrl+V 貼上</p>
-            </div>
-
-            <div class="list-head" id="list-head" hidden>
-                <span id="list-count"></span>
-                <span class="list-tip">拖曳縮圖可調整順序</span>
-                <button type="button" class="text-btn" id="clear-btn">全部清除</button>
-            </div>
-            <ol class="thumb-list" id="thumb-list" aria-label="已加入的圖片（依合併順序）"></ol>
-            <p class="status" id="add-status" role="status" aria-live="polite"></p>
-        </section>
-
-        <!-- 2. 合併設定 -->
-        <section class="card dark" aria-labelledby="step-options">
-            <h2 class="card-title" id="step-options"><span class="step">2</span>合併設定</h2>
-
-            <div class="option">
-                <h3 class="option-title" id="opt-direction">拼接方向</h3>
-                <div class="segmented" role="radiogroup" aria-labelledby="opt-direction">
-                    <label><input type="radio" name="direction" value="vertical" class="visually-hidden" autocomplete="off" checked><span>直式（上下）</span></label>
-                    <label><input type="radio" name="direction" value="horizontal" class="visually-hidden" autocomplete="off"><span>橫式（左右）</span></label>
-                </div>
-            </div>
-
-            <div class="option">
-                <h3 class="option-title" id="opt-align">尺寸不同時</h3>
-                <div class="segmented" role="radiogroup" aria-labelledby="opt-align">
-                    <label><input type="radio" name="align" value="max" class="visually-hidden" autocomplete="off" checked><span data-v="放大到最寬" data-h="放大到最高">放大到最寬</span></label>
-                    <label><input type="radio" name="align" value="min" class="visually-hidden" autocomplete="off"><span data-v="縮小到最窄" data-h="縮小到最矮">縮小到最窄</span></label>
-                </div>
-                <p class="option-note" id="align-note">其他圖片會等比縮放，讓寬度一致</p>
-            </div>
-
-            <div class="option">
-                <h3 class="option-title"><label for="gap-input">間距</label><output id="gap-output" for="gap-input">0 px</output></h3>
-                <input type="range" id="gap-input" min="0" max="100" step="1" value="0" autocomplete="off">
-            </div>
-
-            <div class="option">
-                <h3 class="option-title" id="opt-bg">背景色<span class="option-sub">（間距與空白處）</span></h3>
-                <div class="swatches" role="radiogroup" aria-labelledby="opt-bg">
-                    <label class="swatch" title="白色"><input type="radio" name="bg" value="#ffffff" class="visually-hidden" autocomplete="off" checked><span style="--c: #ffffff"></span><span class="visually-hidden">白色</span></label>
-                    <label class="swatch" title="米白"><input type="radio" name="bg" value="#ece5d8" class="visually-hidden" autocomplete="off"><span style="--c: #ece5d8"></span><span class="visually-hidden">米白</span></label>
-                    <label class="swatch" title="黑色"><input type="radio" name="bg" value="#000000" class="visually-hidden" autocomplete="off"><span style="--c: #000000"></span><span class="visually-hidden">黑色</span></label>
-                    <label class="swatch transparent" title="透明（只有 PNG）"><input type="radio" name="bg" value="transparent" class="visually-hidden" autocomplete="off"><span></span><span class="visually-hidden">透明（只有 PNG）</span></label>
-                    <label class="swatch custom" title="自訂顏色"><input type="radio" name="bg" value="custom" class="visually-hidden" autocomplete="off"><span id="custom-swatch" style="--c: #3a4357"></span><span class="visually-hidden">自訂顏色</span></label>
-                    <input type="color" id="bg-color" value="#3a4357" aria-label="選擇自訂背景色" autocomplete="off">
-                </div>
-            </div>
-
-            <div class="option">
-                <h3 class="option-title" id="opt-format">輸出格式</h3>
-                <div class="segmented" role="radiogroup" aria-labelledby="opt-format">
-                    <label><input type="radio" name="format" value="png" class="visually-hidden" autocomplete="off" checked><span>PNG（無損）</span></label>
-                    <label><input type="radio" name="format" value="jpeg" class="visually-hidden" autocomplete="off"><span>JPG（檔案小）</span></label>
-                </div>
-                <div class="quality" id="quality-row" hidden>
-                    <h3 class="option-title"><label for="quality-input">JPG 品質</label><output id="quality-output" for="quality-input">92</output></h3>
-                    <input type="range" id="quality-input" min="50" max="100" step="1" value="92" autocomplete="off">
-                </div>
-                <p class="option-note" id="format-note"></p>
-            </div>
-        </section>
-
-        <!-- 3. 預覽與下載 -->
-        <section class="card preview-card" aria-labelledby="step-preview">
-            <h2 class="card-title" id="step-preview"><span class="step">3</span>預覽與下載</h2>
-            <div class="preview-box" id="preview-box">
-                <p class="preview-empty" id="preview-empty">加入圖片後會在這裡顯示合併結果</p>
-                <canvas id="preview-canvas" hidden></canvas>
-            </div>
-            <p class="size-info" id="size-info"></p>
-            <p class="warn" id="size-warn" hidden></p>
-            <div class="download-row">
-                <button type="button" class="gbtn primary" id="download-btn" disabled><span class="icon" aria-hidden="true">↓</span><span>下載圖片</span></button>
-                <button type="button" class="gbtn" id="share-btn" hidden disabled><span class="icon" aria-hidden="true">⇪</span><span>分享／存到相簿</span></button>
-            </div>
-            <p class="status" id="export-status" role="status" aria-live="polite"></p>
-        </section>
-        <!-- GIF／影片（貼文有影片時才顯示） -->
-        <section class="card gif-card" id="gif-card" aria-labelledby="step-gif" hidden>
-            <h2 class="card-title" id="step-gif"><span class="step" aria-hidden="true">▶</span>GIF／影片</h2>
-            <ul class="video-list" id="video-list" aria-label="貼文裡的 GIF 與影片"></ul>
-
-            <div class="gif-options">
-                <div class="option">
-                    <h3 class="option-title" id="opt-fps">GIF 幀率<span class="option-sub">（越高越流暢，檔案越大）</span></h3>
-                    <div class="segmented" role="radiogroup" aria-labelledby="opt-fps">
-                        <label><input type="radio" name="fps" value="10" class="visually-hidden" autocomplete="off"><span>10</span></label>
-                        <label><input type="radio" name="fps" value="15" class="visually-hidden" autocomplete="off" checked><span>15</span></label>
-                        <label><input type="radio" name="fps" value="20" class="visually-hidden" autocomplete="off"><span>20</span></label>
-                        <label><input type="radio" name="fps" value="30" class="visually-hidden" autocomplete="off"><span>30</span></label>
+        <div class="folder-body">
+            <!-- 貼 𝕏 連結：兩個分頁共用 -->
+            <section class="card link-card" aria-label="貼上 𝕏 貼文連結">
+                <div class="link-box">
+                    <label class="link-label" for="link-input">貼上 𝕏 貼文連結<span class="option-sub">（可以一次貼多個；圖片會放進「圖片」、GIF／影片會放進「影片」）</span></label>
+                    <div class="link-row">
+                        <textarea id="link-input" rows="2" placeholder="https://x.com/帳號/status/1234567890" autocomplete="off" spellcheck="false"></textarea>
+                        <button type="button" class="gbtn primary" id="fetch-btn"><span class="icon" aria-hidden="true">𝕏</span><span>抓取</span></button>
                     </div>
+                    <ul class="fetch-results" id="fetch-results" aria-live="polite"></ul>
                 </div>
-                <div class="option">
-                    <h3 class="option-title" id="opt-gif-width">GIF 寬度<span class="option-sub">（不會超過原始寬度）</span></h3>
-                    <div class="segmented" role="radiogroup" aria-labelledby="opt-gif-width">
-                        <label><input type="radio" name="gif-width" value="240" class="visually-hidden" autocomplete="off"><span>240</span></label>
-                        <label><input type="radio" name="gif-width" value="320" class="visually-hidden" autocomplete="off"><span>320</span></label>
-                        <label><input type="radio" name="gif-width" value="480" class="visually-hidden" autocomplete="off" checked><span>480</span></label>
-                        <label><input type="radio" name="gif-width" value="0" class="visually-hidden" autocomplete="off"><span>原始</span></label>
+            </section>
+
+            <div class="tab-panel" role="tabpanel" id="panel-images" aria-labelledby="tab-images">
+                <div class="merge-layout">
+                    <!-- 1. 加入圖片 -->
+                    <section class="card" aria-labelledby="step-add">
+                        <h2 class="card-title" id="step-add"><span class="step">1</span>加入圖片</h2>
+
+                        <div class="drop-zone" id="drop-zone">
+                            <input type="file" id="file-input" accept="image/*" multiple class="visually-hidden" autocomplete="off">
+                            <label for="file-input" class="gbtn"><span class="icon" aria-hidden="true">＋</span><span>選擇圖片</span></label>
+                            <p class="drop-hint">或把圖片拖到這裡、按 Ctrl+V 貼上</p>
+                        </div>
+
+                        <div class="list-head" id="list-head" hidden>
+                            <span id="list-count"></span>
+                            <span class="list-tip">拖曳縮圖可調整順序</span>
+                            <button type="button" class="text-btn" id="clear-btn">全部清除</button>
+                        </div>
+                        <ol class="thumb-list" id="thumb-list" aria-label="已加入的圖片（依合併順序）"></ol>
+                        <p class="status" id="add-status" role="status" aria-live="polite"></p>
+                    </section>
+
+                    <!-- 2. 合併設定 -->
+                    <section class="card dark" aria-labelledby="step-options">
+                        <h2 class="card-title" id="step-options"><span class="step">2</span>合併設定</h2>
+
+                        <div class="option">
+                            <h3 class="option-title" id="opt-direction">拼接方向</h3>
+                            <div class="segmented" role="radiogroup" aria-labelledby="opt-direction">
+                                <label><input type="radio" name="direction" value="vertical" class="visually-hidden" autocomplete="off" checked><span>直式（上下）</span></label>
+                                <label><input type="radio" name="direction" value="horizontal" class="visually-hidden" autocomplete="off"><span>橫式（左右）</span></label>
+                            </div>
+                        </div>
+
+                        <div class="option">
+                            <h3 class="option-title" id="opt-align">尺寸不同時</h3>
+                            <div class="segmented" role="radiogroup" aria-labelledby="opt-align">
+                                <label><input type="radio" name="align" value="max" class="visually-hidden" autocomplete="off" checked><span data-v="放大到最寬" data-h="放大到最高">放大到最寬</span></label>
+                                <label><input type="radio" name="align" value="min" class="visually-hidden" autocomplete="off"><span data-v="縮小到最窄" data-h="縮小到最矮">縮小到最窄</span></label>
+                            </div>
+                            <p class="option-note" id="align-note">其他圖片會等比縮放，讓寬度一致</p>
+                        </div>
+
+                        <div class="option">
+                            <h3 class="option-title"><label for="gap-input">間距</label><output id="gap-output" for="gap-input">0 px</output></h3>
+                            <input type="range" id="gap-input" min="0" max="100" step="1" value="0" autocomplete="off">
+                        </div>
+
+                        <div class="option">
+                            <h3 class="option-title" id="opt-bg">背景色<span class="option-sub">（間距與空白處）</span></h3>
+                            <div class="swatches" role="radiogroup" aria-labelledby="opt-bg">
+                                <label class="swatch" title="白色"><input type="radio" name="bg" value="#ffffff" class="visually-hidden" autocomplete="off" checked><span style="--c: #ffffff"></span><span class="visually-hidden">白色</span></label>
+                                <label class="swatch" title="米白"><input type="radio" name="bg" value="#ece5d8" class="visually-hidden" autocomplete="off"><span style="--c: #ece5d8"></span><span class="visually-hidden">米白</span></label>
+                                <label class="swatch" title="黑色"><input type="radio" name="bg" value="#000000" class="visually-hidden" autocomplete="off"><span style="--c: #000000"></span><span class="visually-hidden">黑色</span></label>
+                                <label class="swatch transparent" title="透明（只有 PNG）"><input type="radio" name="bg" value="transparent" class="visually-hidden" autocomplete="off"><span></span><span class="visually-hidden">透明（只有 PNG）</span></label>
+                                <label class="swatch custom" title="自訂顏色"><input type="radio" name="bg" value="custom" class="visually-hidden" autocomplete="off"><span id="custom-swatch" style="--c: #3a4357"></span><span class="visually-hidden">自訂顏色</span></label>
+                                <input type="color" id="bg-color" value="#3a4357" aria-label="選擇自訂背景色" autocomplete="off">
+                            </div>
+                        </div>
+
+                        <div class="option">
+                            <h3 class="option-title" id="opt-format">輸出格式</h3>
+                            <div class="segmented" role="radiogroup" aria-labelledby="opt-format">
+                                <label><input type="radio" name="format" value="png" class="visually-hidden" autocomplete="off" checked><span>PNG（無損）</span></label>
+                                <label><input type="radio" name="format" value="jpeg" class="visually-hidden" autocomplete="off"><span>JPG（檔案小）</span></label>
+                            </div>
+                            <div class="quality" id="quality-row" hidden>
+                                <h3 class="option-title"><label for="quality-input">JPG 品質</label><output id="quality-output" for="quality-input">92</output></h3>
+                                <input type="range" id="quality-input" min="50" max="100" step="1" value="92" autocomplete="off">
+                            </div>
+                            <p class="option-note" id="format-note"></p>
+                        </div>
+                    </section>
+
+                    <!-- 3. 預覽與下載 -->
+                    <section class="card preview-card" aria-labelledby="step-preview">
+                        <h2 class="card-title" id="step-preview"><span class="step">3</span>預覽與下載</h2>
+                        <div class="preview-box" id="preview-box">
+                            <p class="preview-empty" id="preview-empty">加入圖片後會在這裡顯示合併結果</p>
+                            <canvas id="preview-canvas" hidden></canvas>
+                        </div>
+                        <p class="size-info" id="size-info"></p>
+                        <p class="warn" id="size-warn" hidden></p>
+                        <div class="download-row">
+                            <button type="button" class="gbtn primary" id="download-btn" disabled><span class="icon" aria-hidden="true">↓</span><span>下載圖片</span></button>
+                            <button type="button" class="gbtn" id="share-btn" hidden disabled><span class="icon" aria-hidden="true">⇪</span><span>分享／存到相簿</span></button>
+                        </div>
+                        <p class="status" id="export-status" role="status" aria-live="polite"></p>
+                    </section>
+                </div>
+            </div>
+
+            <div class="tab-panel" role="tabpanel" id="panel-videos" aria-labelledby="tab-videos" hidden>
+                <section class="card gif-card" id="gif-card" aria-labelledby="step-gif">
+                    <h2 class="card-title" id="step-gif"><span class="step" aria-hidden="true">▶</span>GIF／影片</h2>
+                    <p class="video-empty" id="video-empty">還沒有影片。在上方貼上有 GIF 或影片的 𝕏 貼文連結，就會出現在這裡。</p>
+                    <ul class="video-list" id="video-list" aria-label="貼文裡的 GIF 與影片"></ul>
+
+                    <div class="gif-options" id="gif-options">
+                        <div class="option">
+                            <h3 class="option-title" id="opt-fps">GIF 幀率<span class="option-sub">（越高越流暢，檔案越大）</span></h3>
+                            <div class="segmented" role="radiogroup" aria-labelledby="opt-fps">
+                                <label><input type="radio" name="fps" value="10" class="visually-hidden" autocomplete="off"><span>10</span></label>
+                                <label><input type="radio" name="fps" value="15" class="visually-hidden" autocomplete="off" checked><span>15</span></label>
+                                <label><input type="radio" name="fps" value="20" class="visually-hidden" autocomplete="off"><span>20</span></label>
+                                <label><input type="radio" name="fps" value="30" class="visually-hidden" autocomplete="off"><span>30</span></label>
+                            </div>
+                        </div>
+                        <div class="option">
+                            <h3 class="option-title" id="opt-gif-width">GIF 寬度<span class="option-sub">（不會超過原始寬度）</span></h3>
+                            <div class="segmented" role="radiogroup" aria-labelledby="opt-gif-width">
+                                <label><input type="radio" name="gif-width" value="240" class="visually-hidden" autocomplete="off"><span>240</span></label>
+                                <label><input type="radio" name="gif-width" value="320" class="visually-hidden" autocomplete="off"><span>320</span></label>
+                                <label><input type="radio" name="gif-width" value="480" class="visually-hidden" autocomplete="off" checked><span>480</span></label>
+                                <label><input type="radio" name="gif-width" value="0" class="visually-hidden" autocomplete="off"><span>原始</span></label>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <div class="gif-job" id="gif-job" hidden>
-                <div class="job-head">
-                    <span id="job-text" role="status" aria-live="polite"></span>
-                    <button type="button" class="text-btn" id="job-cancel">取消</button>
-                </div>
-                <progress id="job-progress" max="1" value="0"></progress>
-            </div>
-            <p class="status" id="gif-status" role="status" aria-live="polite"></p>
+                    <div class="gif-job" id="gif-job" hidden>
+                        <div class="job-head">
+                            <span id="job-text" role="status" aria-live="polite"></span>
+                            <button type="button" class="text-btn" id="job-cancel">取消</button>
+                        </div>
+                        <progress id="job-progress" max="1" value="0"></progress>
+                    </div>
+                    <p class="status" id="gif-status" role="status" aria-live="polite"></p>
 
-            <div class="gif-result" id="gif-result" hidden>
-                <div class="gif-preview"><img id="gif-preview" alt="轉好的 GIF 預覽"></div>
-                <p class="size-info" id="gif-info"></p>
-                <div class="download-row">
-                    <button type="button" class="gbtn primary" id="gif-download"><span class="icon" aria-hidden="true">↓</span><span>下載 GIF</span></button>
-                    <button type="button" class="gbtn" id="gif-share" hidden><span class="icon" aria-hidden="true">⇪</span><span>分享／存到相簿</span></button>
-                </div>
+                    <div class="gif-result" id="gif-result" hidden>
+                        <div class="gif-preview"><img id="gif-preview" alt="轉好的 GIF 預覽"></div>
+                        <p class="size-info" id="gif-info"></p>
+                        <div class="download-row">
+                            <button type="button" class="gbtn primary" id="gif-download"><span class="icon" aria-hidden="true">↓</span><span>下載 GIF</span></button>
+                            <button type="button" class="gbtn" id="gif-share" hidden><span class="icon" aria-hidden="true">⇪</span><span>分享／存到相簿</span></button>
+                        </div>
+                    </div>
+                </section>
             </div>
-        </section>
+        </div>
     </main>
 
     <!-- 拖曳排序（觸控也能用）；載入失敗時仍可用 ◀ ▶ 按鈕排序 -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js" defer></script>
-    <script src="merge/core.js?v=9598ffd8" defer></script>
-    <script src="merge/x.js?v=f2f7c143" defer></script>
-    <script src="merge/gif.js?v=846a9143" defer></script>
+    <script src="merge/tabs.js?v=eda6d631" defer></script>
+    <script src="merge/core.js?v=3262e16b" defer></script>
+    <script src="merge/x.js?v=4c8f36da" defer></script>
+    <script src="merge/gif.js?v=909e7ef2" defer></script>
 </body>
 </html>
