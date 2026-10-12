@@ -269,5 +269,21 @@
         run(text);
     });
 
+    // Android 分享選單（manifest 的 share_target）會開 merge.html?title=…&text=…&url=…
+    // 𝕏 App 分享時連結通常在 text 裡；三個都找，有貼文連結就自動開始抓
+    function readSharedLinks() {
+        var params = new URLSearchParams(location.search);
+        var text = ['title', 'text', 'url'].map(function (k) { return params.get(k) || ''; }).filter(Boolean).join('\n');
+        if (!text) return;
+        // 清掉參數，重新整理時不會再抓一次
+        try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) { }
+        var ids = parseStatusIds(text);
+        input.value = ids.length ? ids.map(function (id) { return 'https://x.com/i/status/' + id; }).join('\n') : text;
+        run(text);
+    }
+
+    // 等其他腳本（gif.js）都載入後再開始
+    document.addEventListener('DOMContentLoaded', readSharedLinks);
+
     window.MergeX = { parseStatusIds: parseStatusIds, fetchMedia: fetchMedia, run: run };
 })();

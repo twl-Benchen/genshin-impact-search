@@ -1,0 +1,26 @@
+{
+    "id": "genshin-impact-search/",
+    "name": "原神角色 𝕏 圖片搜尋",
+    "short_name": "原神𝕏搜尋",
+    "description": "點選原神角色產生 𝕏 hashtag 搜尋；也能合併 𝕏 的拆圖、把 GIF 存成 GIF 或 MP4。",
+    "lang": "zh-Hant",
+    "start_url": "./",
+    "scope": "./",
+    "display": "standalone",
+    "background_color": "#F6F2EA",
+    "theme_color": "#3B4255",
+    "icons": [
+        { "src": "img/app-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+        { "src": "img/app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+        { "src": "img/app-icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    ],
+    "shortcuts": [
+        { "name": "圖片合併下載", "short_name": "合併", "url": "merge.html", "icons": [{ "src": "img/app-icon-192.png", "sizes": "192x192" }] }
+    ],
+    "share_target": {
+        "action": "merge.html",
+        "method": "GET",
+        "enctype": "application/x-www-form-urlencoded",
+        "params": { "title": "title", "text": "text", "url": "url" }
+    }
+}

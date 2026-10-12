@@ -7,6 +7,11 @@
     <meta name="description" content="貼上 𝕏 貼文連結或上傳圖片，把被拆成好幾張的圖片合併成一張下載，也能把 𝕏 的 GIF 存成 GIF 或 MP4。所有處理都在你的瀏覽器完成，不會上傳。">
     <meta name="theme-color" content="#3B4255">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✨</text></svg>">
+    <!-- 可安裝成 App（PWA）：Android 可從分享選單直接把 𝕏 貼文送到圖片合併頁 -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-title" content="原神𝕏搜尋">
+    <script src="pwa.js" defer></script>
 
     <meta property="og:type" content="website">
     <meta property="og:title" content="圖片合併下載｜原神角色 𝕏 圖片搜尋">
@@ -219,7 +224,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js" defer></script>
     <script src="merge/tabs.js?v=eda6d631" defer></script>
     <script src="merge/core.js?v=3262e16b" defer></script>
-    <script src="merge/x.js?v=4c8f36da" defer></script>
+    <script src="merge/x.js?v=6fd00e63" defer></script>
     <script src="merge/gif.js?v=909e7ef2" defer></script>
 </body>
 </html>

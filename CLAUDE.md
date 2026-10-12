@@ -24,6 +24,8 @@
 | `merge/merge.css`、`merge/core.js` | 合併頁的樣式與程式（色票、`.gbtn` 從 `index.html` 複製一份，不共用） |
 | `merge/x.js` | 貼 𝕏 連結抓圖：解析連結、呼叫 FxTwitter API、`fetchMedia`（不送 Referer）、錯誤訊息（解析函式可在 Node `require` 測試） |
 | `merge/gif.js` | GIF／影片：下載 MP4、canvas 逐格擷取 + gifenc（module Worker）轉成 GIF |
+| `manifest.json`、`sw.js`、`pwa.js` | PWA：可安裝成 App，Android 分享選單直達 `merge.html`（`pwa.js` 註冊 SW，兩個頁面都載入） |
+| `img/app-icon-*.png`、`img/apple-touch-icon.png` | App 圖示，由 `scripts/generate-app-icons.mjs`（sharp）產生 |
 | `scripts/update-merge-version.mjs` | 依 `merge/*` 內容雜湊更新 `merge.html` 的 `?v=`；**改了 `merge/` 底下的檔案後一定要跑** |
 
 資料用 `<script>` 載入而不是 `fetch` JSON，這樣直接雙擊 `index.html`（`file://`）也能用。
@@ -71,7 +73,13 @@
   1. 上傳圖片合併 ✅
   2. 貼 𝕏 連結抓圖 ✅（FxTwitter API `https://api.fxtwitter.com/status/{id}` → `tweet.media.photos[].url` 加 `?name=orig`；多篇同時抓、依貼上順序加入；在頁面任何地方貼上連結也會自動抓）
   3. GIF 下載 ✅（𝕏 的 GIF 是 MP4：每支影片提供「下載 MP4」「轉成 GIF」；幀率 10/15/20/30、寬度 240/320/480/原始；進度條、取消；超過 900 幀先確認）
-  4. Android 分享直達（manifest `share_target` → `merge.html`，路徑一律用相對路徑；iOS 不支援但不能壞）
+  4. Android 分享直達 ✅（manifest `share_target` GET → `merge.html?title=&text=&url=`；`x.js` 的 `readSharedLinks` 從三個參數找貼文連結自動開始抓，再用 `replaceState` 清掉參數，重新整理不會重抓）
+- PWA 注意事項：
+  - manifest 的 `start_url`、`scope`、`share_target.action`、圖示一律用**相對路徑**（以 manifest 網址解析，正式站會變成 `/genshin-impact-search/…`）。
+  - `id` 要寫 `"genshin-impact-search/"`：`id` 是以**網域根目錄**解析的，寫 `"./"` 會變成 `twl-benchen.github.io/`，和同網域其他專案衝突。
+  - `sw.js` **刻意不快取**（避免和 `?v=` 衝突），只接手頁面導覽、離線時顯示一行提示；其他請求完全不經過 SW（𝕏 媒體的 no-referrer 不受影響）。
+  - iOS 不支援分享目標；`apple-touch-icon` 讓「加入主畫面」有圖示，SW 註冊失敗時什麼都不做。
+  - 安裝與分享選單只能在正式網址（HTTPS、正確 scope）上實測，所以要合併到 `main` 後才能在 Android 測。本機可用 CDP `Page.getAppManifest`、`Page.getInstallabilityErrors` 檢查（Playwright 預設是無痕模式，會多一個 `in-incognito`，要用 `launchPersistentContext`）。
 - **CORS 實測結果**（使用者在 Windows Chrome、Android Samsung Internet 測）：FxTwitter API ✅；pbs.twimg.com 圖片用 `fetch` → blob ✅（可畫進 canvas 匯出）。
 - **video.twimg.com 看到其他網站的 Referer 會回 403**（使用者實測：加 `referrerPolicy: 'no-referrer'` 就回 200）。所以：
   - 所有 𝕏 媒體請求一律走 `MergeX.fetchMedia`（`fetch` + `referrerPolicy: 'no-referrer'`）→ blob → `URL.createObjectURL` 再給 `<video>`／canvas。
@@ -98,6 +106,7 @@
 - 角色與元素都是 `<button aria-pressed>`，可鍵盤操作
 - `<head>`：lang、charset、title、description、Open Graph、favicon
 - 角色更新到 7.1（薇斯納、沃雅妮莎）
+- PWA：可安裝成 App，Android 從 𝕏 App 分享貼文可直達合併頁並自動抓圖／影片
 - 圖片合併下載頁改成「圖片」「影片」資料夾分頁（共用貼連結框）
 - 圖片合併下載頁階段 3：𝕏 GIF／影片可下載 MP4 或轉成 GIF（可調幀率與寬度、進度條、取消）
 - 圖片合併下載頁階段 2：貼 𝕏 連結抓原圖（可一次多個連結），貼文不存在／私人帳號／沒有圖片／GIF 影片／API 掛掉都有中文提示；下載檔名為「作者_貼文ID_merged」
