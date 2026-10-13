@@ -46,7 +46,8 @@
     // 膠囊切換鈕（同首頁設定面板）：選項數寫進 --n、選中的位置寫進 --i，讓膠囊用動畫滑過去
     function updateSegmented() {
         document.querySelectorAll('.segmented').forEach(function (group) {
-            var inputs = Array.prototype.slice.call(group.querySelectorAll('input'));
+            // 只算看得到的選項（例如 2×2 只在 4 張時出現）
+            var inputs = Array.prototype.slice.call(group.querySelectorAll('label:not([hidden]) input'));
             var index = inputs.findIndex(function (input) { return input.checked; });
             group.style.setProperty('--n', inputs.length);
             group.style.setProperty('--i', Math.max(index, 0));

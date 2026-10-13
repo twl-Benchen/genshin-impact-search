@@ -49,7 +49,6 @@
 
     // 讓畫面跟著設定走（返回上一頁時瀏覽器可能會自己恢復表單狀態）
     function syncSettingsUI() {
-        setRadio('direction', settings.direction);
         setRadio('align', settings.align);
         setRadio('format', settings.format);
         var preset = settings.bg !== 'custom' && document.querySelector('input[name="bg"][value="' + settings.bg + '"]');
@@ -57,16 +56,36 @@
         $('gap-input').value = settings.gap;
         $('quality-input').value = settings.quality;
         $('bg-color').value = settings.custom;
+        syncDirectionUI();
+    }
+
+    // 2×2 只在剛好 4 張時可用；設定仍記得 grid，張數不對時暫時用橫式，回到 4 張會自動恢復
+    function effectiveDirection() {
+        if (settings.direction === 'grid') return items.length === 4 ? 'grid' : 'horizontal';
+        return settings.direction === 'vertical' ? 'vertical' : 'horizontal';
+    }
+
+    // 依張數顯示／隱藏 2×2 選項，並勾選實際使用的排列
+    function syncDirectionUI() {
+        $('grid-option').hidden = items.length !== 4;
+        setRadio('direction', effectiveDirection());
         updateOptionLabels();
         window.MergeUI.updateSegmented();
     }
 
+    var ALIGN_NOTES = {
+        horizontal: '其他圖片會等比縮放，讓高度一致',
+        vertical: '其他圖片會等比縮放，讓寬度一致',
+        grid: '同一列的兩張高度一致，上下兩列寬度一致'
+    };
+
     function updateOptionLabels() {
-        var horizontal = settings.direction === 'horizontal';
+        var dir = effectiveDirection();
+        var key = { horizontal: 'h', vertical: 'v', grid: 'g' }[dir];
         document.querySelectorAll('[name="align"] + span').forEach(function (span) {
-            span.textContent = horizontal ? span.dataset.h : span.dataset.v;
+            span.textContent = span.dataset[key];
         });
-        $('align-note').textContent = horizontal ? '其他圖片會等比縮放，讓高度一致' : '其他圖片會等比縮放，讓寬度一致';
+        $('align-note').textContent = ALIGN_NOTES[dir];
         $('gap-output').textContent = settings.gap + ' px';
         $('quality-output').textContent = settings.quality;
         $('quality-row').hidden = settings.format !== 'jpeg';
@@ -217,6 +236,7 @@
     // ===== 縮圖清單 =====
     function onItemsChange() {
         cachedExport = null;
+        syncDirectionUI();
         renderList();
         renderPreview();
     }
@@ -317,7 +337,9 @@
     // ===== 合併版面計算 =====
     // 回傳原始尺寸（未套用 canvas 上限）下的版面
     function computeLayout() {
-        var vertical = settings.direction === 'vertical';
+        var dir = effectiveDirection();
+        if (dir === 'grid') return computeGridLayout();
+        var vertical = dir === 'vertical';
         var sides = items.map(function (it) { return vertical ? it.width : it.height; });
         var base = settings.align === 'min' ? Math.min.apply(null, sides) : Math.max.apply(null, sides);
         var gap = settings.gap;
@@ -341,6 +363,29 @@
             height: vertical ? total : base,
             rects: rects
         };
+    }
+
+    // 2×2：第 1、2 張一列，第 3、4 張一列。每列先縮放成同高，兩列再縮放成同寬
+    function computeGridLayout() {
+        var pick = settings.align === 'min' ? Math.min : Math.max;
+        var gap = settings.gap;
+        var rows = [items.slice(0, 2), items.slice(2, 4)].map(function (row) {
+            var h = pick.apply(null, row.map(function (it) { return it.height; }));
+            var widths = row.map(function (it) { return it.width * h / it.height; });
+            return { h: h, widths: widths, width: widths[0] + widths[1] };
+        });
+        var width = pick.apply(null, rows.map(function (r) { return r.width; })); // 不含間距
+        var rects = [];
+        var y = 0;
+        rows.forEach(function (row) {
+            var s = width / row.width;
+            var h = row.h * s;
+            var w0 = row.widths[0] * s;
+            rects.push({ x: 0, y: y, w: w0, h: h });
+            rects.push({ x: w0 + gap, y: y, w: row.widths[1] * s, h: h });
+            y += h + gap;
+        });
+        return { width: width + gap, height: y - gap, rects: rects };
     }
 
     // 依已知上限算出縮放比例
