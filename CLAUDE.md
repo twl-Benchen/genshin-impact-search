@@ -173,5 +173,4 @@ const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-119
 - 卡片角落加小元素圖示。
 - 深色模式。
 - `og:image`（現在圖片已在 repo，可以指定分享預覽圖）。
-- 補充 README。
 - 已選角色很多時，𝕏 搜尋語法可能超過長度上限，可考慮提示或限制。
