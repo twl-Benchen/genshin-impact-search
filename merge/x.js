@@ -176,21 +176,7 @@
     // ===== 介面 =====
     var input = document.getElementById('link-input');
     var list = document.getElementById('fetch-results');
-    var stateBox = document.getElementById('fetch-state');
     var busy = false;
-    var idleTimer;
-
-    // 輸入框旁的狀態膠囊：idle（提示）／loading（抓取中）／done／error
-    var IDLE_TEXT = '貼上就會自動抓取';
-    function setState(state, text) {
-        clearTimeout(idleTimer);
-        stateBox.dataset.state = state;
-        document.getElementById('fetch-state-text').textContent = text;
-        // 完成的訊息顯示一下就回到提示
-        if (state === 'done' || state === 'error') {
-            idleTimer = setTimeout(function () { setState('idle', IDLE_TEXT); }, 4000);
-        }
-    }
 
     function resultRow(id, state, text) {
         var li = document.createElement('li');
@@ -213,13 +199,10 @@
         list.textContent = '';
         if (!ids.length) {
             list.appendChild(resultRow('', 'error', '看不出是 𝕏 貼文連結，請貼上像 https://x.com/帳號/status/數字 這樣的網址'));
-            setState('error', '找不到連結');
             return;
         }
 
         busy = true;
-        var finished = 0;
-        setState('loading', ids.length > 1 ? '抓取中 0/' + ids.length : '抓取中…');
         var rows = ids.map(function (id) {
             var row = resultRow(id, 'loading', '貼文 ' + id + '：抓取中…');
             list.appendChild(row);
@@ -231,8 +214,6 @@
             return loadTweet(id).then(function (r) {
                 var prefix = r.author ? '@' + r.author + '（' + id + '）：' : '貼文 ' + id + '：';
                 rows[i].replaceWith(rows[i] = resultRow(id, r.ok ? 'ok' : 'error', prefix + r.text));
-                finished++;
-                if (ids.length > 1) setState('loading', '抓取中 ' + finished + '/' + ids.length);
                 return r;
             });
         }));
@@ -249,13 +230,8 @@
         if (entries.length) await window.MergeCore.addImages(entries);
 
         busy = false;
-        var failed = results.filter(function (r) { return !r.ok; }).length;
-        if (!failed) {
-            setState('done', '抓取完成');
-            input.value = ''; // 全部成功就清空輸入框，方便貼下一批
-        } else {
-            setState('error', failed === ids.length ? '抓取失敗' : failed + ' 篇失敗');
-        }
+        // 全部成功就清空輸入框，方便貼下一批
+        if (results.every(function (r) { return r.ok; })) input.value = '';
     }
 
     // 手動輸入時按 Enter 送出（Shift + Enter 換行）
