@@ -50,8 +50,9 @@
 ---
 
 ## 圖片合併下載（merge.html）
+<img width="1493" height="826" alt="image" src="https://github.com/user-attachments/assets/fd267ab7-3a90-45e3-98d8-cb1284ad6706" />
 
-網址：https://twl-benchen.github.io/genshin-impact-search/merge.html （首頁左上角的按鈕也能進入）
+**網址：https://twl-benchen.github.io/genshin-impact-search/merge.html （首頁左上角的按鈕也能進入）**
 
 使用情境：在 𝕏 上看到一張圖被拆成好幾張發、或是 GIF 想存下來時，複製貼文連結，回到這裡貼上。
 
