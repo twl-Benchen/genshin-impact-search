@@ -26,6 +26,8 @@
 | `merge/gif.js` | GIF／影片：下載 MP4、canvas 逐格擷取 + gifenc（module Worker）轉成 GIF |
 | `manifest.json`、`sw.js`、`pwa.js` | PWA：可安裝成 App，Android 分享選單直達 `merge.html`（`pwa.js` 註冊 SW，兩個頁面都載入） |
 | `img/app-icon-*.png`、`img/apple-touch-icon.png` | App 圖示，由 `scripts/generate-app-icons.mjs`（sharp）產生 |
+| `README.md` | 只寫網站功能與用法（使用者要求）；不放開發者內容、不放致謝與聲明 |
+| `docs/DEVELOPMENT.md` | 開發者說明（技術概要、檔案結構、本機執行、新增角色、維護腳本），README 不連過去 |
 | `scripts/update-merge-version.mjs` | 依 `merge/*` 內容雜湊更新 `merge.html` 的 `?v=`；**改了 `merge/` 底下的檔案後一定要跑** |
 
 資料用 `<script>` 載入而不是 `fetch` JSON，這樣直接雙擊 `index.html`（`file://`）也能用。
