@@ -102,6 +102,11 @@
 - 拖曳排序用 SortableJS（CDN，觸控也能用）；載入失敗時仍可用縮圖下方的 ◀ ▶ 排序。
 - 合併設定存在 sessionStorage（與首頁設定同樣只保留到分頁關閉）。
 - 支援 `navigator.share` 檔案分享的裝置多一顆「分享／存到相簿」（iOS 下載會進「檔案」而不是「照片」）。
+- **只有一張圖時（使用者要求）**：第 2 張卡片標題改成「旋轉圖片」，隱藏合併選項（`.merge-only`：拼接方向、尺寸對齊、間距、背景色），改顯示向左轉／向右轉／轉 180°／還原；「輸出格式」保留。由 `syncSingleModeUI()` 控制。
+  - 每張圖有 `rotation`（順時針 0／90／180／270）；`width`／`height` 一律是原圖尺寸，版面計算用 `itemWidth()`／`itemHeight()`（轉正後）。預覽與縮圖由 `basePreview` 轉好存回 `preview`／`thumb`；下載時解碼原圖再用 `drawRotated()` 畫。
+  - 加入第二張後切回合併設定，已轉過的圖保留旋轉後的方向。單張下載的檔名用 `_rotated`。
+  - 自動校正方向沒有做：EXIF 方向本來就會自動轉正；發文者故意轉向的圖沒有任何標記，要靠影像辨識才能判斷，不可靠。
+  - `.option` 之間的間距用 `.option:not([hidden]) ~ .option:not([hidden])`，隱藏選項時才不會多出空白。
 
 ## 已完成的功能
 
@@ -115,7 +120,7 @@
 - 背景淡米色漸層，選元素時帶一點該元素的顏色（`@property --tint` 讓漸層可以平滑轉換）
 - 角色與元素都是 `<button aria-pressed>`，可鍵盤操作
 - `<head>`：lang、charset、title、description、Open Graph、favicon
-- 角色更新到 7.1（薇斯納、沃雅妮莎）
+- 角色更新到 7.2（米提亞、瓦列里）
 - 合併頁：拿掉貼連結框旁的狀態膠囊；拼接方向新增 2×2（剛好 4 張時才出現）
 - 合併頁：選項預設值都在最左邊（拼接方向預設橫式；GIF 幀率／寬度預設「原始」，原始幀率從 MP4 讀取）
 - 合併頁：抓取按鈕改成狀態膠囊（貼上／Enter 自動抓）、膠囊切換鈕改成與首頁相同的滑動動畫
@@ -160,7 +165,8 @@ python3 -m http.server 8767   # 在 repo 根目錄
 
 ```js
 const { chromium } = require('playwright');
-const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+// 瀏覽器版本會隨容器更新，先 ls /opt/pw-browsers/ 找實際路徑（例如 chromium-1243/chrome-linux64/chrome）
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1243/chrome-linux64/chrome' });
 ```
 
 至少檢查：桌面（1440px）與手機（390px）、沒有水平捲動、選取／移除／清空、產生的搜尋語法、`pageerror` 為空。
@@ -168,7 +174,7 @@ const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-119
 
 ## 下一步（尚未做）
 
-- 之後的新角色照 `characters.js` 的格式加（圖片網址用 HoYoWiki 官方圖，使用者通常會直接提供）。
+- 之後的新角色照 `characters.js` 的格式加（圖片網址用 HoYoWiki 官方圖，使用者通常會直接提供）。npm 的 genshin-db 可能還沒更新最新版本（7.2 時停在 7.1）；可以用 GitHub 上的 Enka 資料（`raw.githubusercontent.com/EnkaNetwork/API-docs/master/store/gi/avatars.json`）確認元素、星級（`QUALITY_ORANGE` 五星、`QUALITY_PURPLE` 四星），名稱查新聞或官方公告，圖片網址請使用者提供。
 - 處理英文名稱是常見單字的角色（`#Gaming`、`#Amber`、`#Lisa`、`#Mona`…），例如加上 #原神 限定。
 - 排除 AI 圖（`-#AIart -#AIイラスト` 等）。
 - 角色名稱搜尋框。

@@ -701,8 +701,37 @@ input[type="color"]:focus-visible {
     }
 
 /* ===== 2. 合併設定（深藍面板，外觀同首頁設定面板） ===== */
-.option + .option {
+/* 只在看得到的選項之間加間距（單張模式會隱藏合併選項） */
+.option[hidden] {
+    display: none;
+}
+
+.option:not([hidden]) ~ .option:not([hidden]) {
     margin-top: 22px;
+}
+
+/* 單張時的旋轉按鈕：兩欄排列 */
+.rotate-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+    .rotate-buttons .gbtn {
+        justify-content: flex-start;
+    }
+
+    .rotate-buttons .gbtn:disabled {
+        opacity: 0.45;
+        cursor: default;
+        box-shadow: none;
+        border-color: transparent;
+    }
+
+.rotate-option .option-sub {
+    text-align: right;
+    opacity: 0.85;
+    color: var(--gold-light);
 }
 
 .option-title {

@@ -176,6 +176,10 @@ const CHARACTERS = [
       img: 'https://act-upload.hoyoverse.com/event-ugc-hoyowiki/2025/09/29/35428890/f6feccecc61d2bf772461f057dfb41cd_5944664216414192017.png' },
     { id: 'Alyosha', name: '阿羅夏', element: 'Electro', rarity: 4, tags: { en: 'Alyosha', ja: 'アリョーシャ', tw: '阿羅夏', cn: '阿罗夏' },
       img: 'https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2026/08/07/b866d5fd9adbd2f66874e54208db1107_7133689933484329253.png' },
+    { id: 'Mitya', name: '米提亞', element: 'Electro', rarity: 5, tags: { en: 'Mitya', ja: 'ミティヤ', tw: '米提亞', cn: '米提亚' },
+      img: 'https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2026/11/02/2a47d99d2fa2eb30907e823a96c7d8c5_8356923139176660487.png?x-oss-process=image%2Fformat%2Cwebp' },
+    { id: 'Valeriy', name: '瓦列里', element: 'Electro', rarity: 4, tags: { en: 'Valeriy', ja: 'バレリー', tw: '瓦列里', cn: '瓦列里' },
+      img: 'https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2026/11/04/08b8d6675d4ddf956f7d46aba8d51fd1_3498151149710385733.png?x-oss-process=image%2Fformat%2Cwebp' },
 
     // Dendro
     { id: 'Tighnari', name: '提納里', element: 'Dendro', rarity: 5, tags: { en: 'Tighnari', ja: 'ティナリ', tw: '提納里', cn: '提纳里' },

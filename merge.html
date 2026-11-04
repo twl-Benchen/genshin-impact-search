@@ -23,7 +23,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&display=swap">
-    <link rel="stylesheet" href="merge/merge.css?v=6c9c2d7a">
+    <link rel="stylesheet" href="merge/merge.css?v=a15a7443">
 </head>
 <body>
     <!-- 左上角返回搜尋（與首頁齒輪同款外框） -->
@@ -102,9 +102,21 @@
 
                     <!-- 2. 合併設定 -->
                     <section class="card dark" aria-labelledby="step-options">
-                        <h2 class="card-title" id="step-options"><span class="step">2</span>合併設定</h2>
+                        <h2 class="card-title" id="step-options"><span class="step">2</span><span id="step-options-text">合併設定</span></h2>
 
-                        <div class="option">
+                        <!-- 只有一張圖時取代合併設定（core.js 的 syncSingleModeUI 控制） -->
+                        <div class="option rotate-option" id="rotate-option" hidden>
+                            <h3 class="option-title">方向<span class="option-sub" id="rotate-state">原始方向</span></h3>
+                            <div class="rotate-buttons">
+                                <button type="button" class="gbtn" data-rotate="-90"><span class="icon" aria-hidden="true">↺</span><span>向左轉</span></button>
+                                <button type="button" class="gbtn" data-rotate="90"><span class="icon" aria-hidden="true">↻</span><span>向右轉</span></button>
+                                <button type="button" class="gbtn" data-rotate="180"><span class="icon" aria-hidden="true">⇅</span><span>轉 180°</span></button>
+                                <button type="button" class="gbtn" data-rotate="0" id="rotate-reset"><span class="icon" aria-hidden="true">✕</span><span>還原</span></button>
+                            </div>
+                            <p class="option-note">發文者把橫圖轉成直的上傳時，可以在這裡轉回來</p>
+                        </div>
+
+                        <div class="option merge-only">
                             <h3 class="option-title" id="opt-direction">拼接方向</h3>
                             <div class="segmented compact" role="radiogroup" aria-labelledby="opt-direction">
                                 <label><input type="radio" name="direction" value="horizontal" class="visually-hidden" autocomplete="off" checked><span>橫式（左右）</span></label>
@@ -114,7 +126,7 @@
                             </div>
                         </div>
 
-                        <div class="option">
+                        <div class="option merge-only">
                             <h3 class="option-title" id="opt-align">尺寸不同時</h3>
                             <div class="segmented" role="radiogroup" aria-labelledby="opt-align">
                                 <label><input type="radio" name="align" value="max" class="visually-hidden" autocomplete="off" checked><span data-v="放大到最寬" data-h="放大到最高" data-g="放大對齊">放大到最高</span></label>
@@ -123,12 +135,12 @@
                             <p class="option-note" id="align-note">其他圖片會等比縮放，讓高度一致</p>
                         </div>
 
-                        <div class="option">
+                        <div class="option merge-only">
                             <h3 class="option-title"><label for="gap-input">間距</label><output id="gap-output" for="gap-input">0 px</output></h3>
                             <input type="range" id="gap-input" min="0" max="100" step="1" value="0" autocomplete="off">
                         </div>
 
-                        <div class="option">
+                        <div class="option merge-only">
                             <h3 class="option-title" id="opt-bg">背景色<span class="option-sub">（間距與空白處）</span></h3>
                             <div class="swatches" role="radiogroup" aria-labelledby="opt-bg">
                                 <label class="swatch" title="白色"><input type="radio" name="bg" value="#ffffff" class="visually-hidden" autocomplete="off" checked><span style="--c: #ffffff"></span><span class="visually-hidden">白色</span></label>
@@ -225,7 +237,7 @@
     <!-- 拖曳排序（觸控也能用）；載入失敗時仍可用 ◀ ▶ 按鈕排序 -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js" defer></script>
     <script src="merge/ui.js?v=e7ae5736" defer></script>
-    <script src="merge/core.js?v=2beb71d1" defer></script>
+    <script src="merge/core.js?v=9d124365" defer></script>
     <script src="merge/x.js?v=c1c067f8" defer></script>
     <script src="merge/gif.js?v=6d1e58af" defer></script>
 </body>
