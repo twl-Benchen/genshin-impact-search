@@ -153,6 +153,7 @@
 - **返回上一頁時瀏覽器會自己恢復勾選框**：曾發生只勾繁中 → 去 𝕏 → 返回後，畫面仍只勾繁中，但程式的設定已重設成四種語言，搜尋語法和畫面不一致。現在設定存在 sessionStorage，設定面板的 input 加了 `autocomplete="off"`，並在 `pageshow` 時用 `syncSettingsUI()` 讓畫面跟著設定走。
 - **`package.json` 不能設 `"type": "module"`**：會讓 Node 把 `characters.js` 當成 ES module，`module.exports` 失效，腳本讀不到角色資料。腳本本身用 `.mjs` 就夠了。
 - **雲端 session 連不到 cdn.jsdelivr.net、api.fxtwitter.com、pbs.twimg.com、video.twimg.com**（代理 403）。Playwright 測試時用 `page.route` 把 SortableJS、gifenc 的 CDN 網址換成 npm 裝下來的檔案；Playwright 的 Chromium 不支援 H.264，測試影片要用 `ffmpeg` 產生 VP9（要測「原始」幀率就用 VP9 放在 .mp4 容器）；𝕏／FxTwitter 的實際行為要請使用者在自己的瀏覽器測。
+- **GitHub Pages 部署可能卡住**：7.2 合併後，下載圖片的 Action 馬上又提交一次，第一次部署被取消、第二次的「Deploy to GitHub Pages」卡在進行中超過 20 分鐘；API 查詢顯示進行中，取消卻回 409「不在進行中」、重新執行回 403「已在執行」。解法是推一個新的 commit 到 main 觸發全新部署。網站沒更新時，先到 Actions 看 `pages build and deployment` 有沒有完成。
 - **在 Bash 裡 `pkill -f "http.server 8767"` 會連自己的 shell 一起殺掉**（指令列也含那段字）。改用 `pkill -f "http.server 876[0-9]"`，並放在獨立的指令裡。
 
 ## 測試方式
