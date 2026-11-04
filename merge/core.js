@@ -18,7 +18,7 @@
     var MAX_AREA = window.__MERGE_MAX_AREA || (isIOS ? 16777216 : isMobile ? 33554432 : 100000000);
 
     // ===== 狀態 =====
-    var items = [];     // { id, name, blob, width, height, preview: canvas, thumb: canvas, label }
+    var items = [];     // { id, name, blob, width, height, rotation, basePreview, preview: canvas, thumb: canvas, label }
     var nextId = 1;
     var settings = loadSettings();
     var cachedExport = null; // { key, blob, name }：設定沒變時，分享可以直接用，不必重畫
@@ -71,6 +71,20 @@
         setRadio('direction', effectiveDirection());
         updateOptionLabels();
         window.MergeUI.updateSegmented();
+    }
+
+    // 只有一張圖時不需要合併設定，改成顯示旋轉按鈕（輸出格式仍保留）
+    var ROTATION_TEXT = { 0: '原始方向', 90: '已向右轉 90°', 180: '已轉 180°', 270: '已向左轉 90°' };
+
+    function syncSingleModeUI() {
+        var single = items.length === 1;
+        $('step-options-text').textContent = single ? '旋轉圖片' : '合併設定';
+        document.querySelectorAll('.merge-only').forEach(function (el) { el.hidden = single; });
+        $('rotate-option').hidden = !single;
+        if (single) {
+            $('rotate-state').textContent = ROTATION_TEXT[items[0].rotation];
+            $('rotate-reset').disabled = items[0].rotation === 0;
+        }
     }
 
     var ALIGN_NOTES = {
@@ -180,6 +194,58 @@
         return c;
     }
 
+    // ===== 旋轉 =====
+    // rotation 是順時針角度（0／90／180／270）；width／height 一律是原圖尺寸
+    function isSideways(item) {
+        return item.rotation === 90 || item.rotation === 270;
+    }
+
+    function itemWidth(item) {
+        return isSideways(item) ? item.height : item.width;
+    }
+
+    function itemHeight(item) {
+        return isSideways(item) ? item.width : item.height;
+    }
+
+    // 把 source 順時針轉 rotation 度後，畫進 (x, y, w, h)；w、h 是轉正後的大小
+    function drawRotated(ctx, source, x, y, w, h, rotation) {
+        if (!rotation) {
+            ctx.drawImage(source, x, y, w, h);
+            return;
+        }
+        var sideways = rotation === 90 || rotation === 270;
+        ctx.save();
+        ctx.translate(x + w / 2, y + h / 2);
+        ctx.rotate(rotation * Math.PI / 180);
+        var dw = sideways ? h : w, dh = sideways ? w : h;
+        ctx.drawImage(source, -dw / 2, -dh / 2, dw, dh);
+        ctx.restore();
+    }
+
+    function rotatedCopy(source, rotation) {
+        var sideways = rotation === 90 || rotation === 270;
+        var c = document.createElement('canvas');
+        c.width = sideways ? source.height : source.width;
+        c.height = sideways ? source.width : source.height;
+        var ctx = c.getContext('2d');
+        ctx.imageSmoothingQuality = 'high';
+        drawRotated(ctx, source, 0, 0, c.width, c.height, rotation);
+        return c;
+    }
+
+    // 依目前角度重建預覽與縮圖
+    function applyRotation(item) {
+        item.preview = item.rotation ? rotatedCopy(item.basePreview, item.rotation) : item.basePreview;
+        item.thumb = scaledCopy(item.preview, item.preview.width, item.preview.height, THUMB_MAX);
+    }
+
+    function rotateItem(item, delta) {
+        item.rotation = delta === 0 ? 0 : (item.rotation + delta + 360) % 360;
+        applyRotation(item);
+        onItemsChange();
+    }
+
     // entries: [{ blob, name, label, source }]；label 是縮圖下方的說明（例如來源作者），可省略
     async function addImages(entries) {
         var failed = [];
@@ -193,7 +259,7 @@
                 if (!w || !h) throw new Error('empty');
                 var preview = scaledCopy(img, w, h, PREVIEW_MAX);
                 decoded.release();
-                items.push({
+                var item = {
                     id: nextId++,
                     name: entry.name || '圖片',
                     label: entry.label || '',
@@ -201,9 +267,11 @@
                     blob: entry.blob,
                     width: w,
                     height: h,
-                    preview: preview,
-                    thumb: scaledCopy(preview, preview.width, preview.height, THUMB_MAX)
-                });
+                    rotation: 0,
+                    basePreview: preview
+                };
+                applyRotation(item);
+                items.push(item);
             } catch (e) {
                 failed.push(entry.name || '圖片');
             }
@@ -237,6 +305,7 @@
     function onItemsChange() {
         cachedExport = null;
         syncDirectionUI();
+        syncSingleModeUI();
         renderList();
         renderPreview();
     }
@@ -285,8 +354,9 @@
             next.disabled = index === items.length - 1;
             var size = document.createElement('span');
             size.className = 'thumb-size';
-            size.textContent = item.label || (item.width + '×' + item.height);
-            size.title = item.name + '（' + item.width + '×' + item.height + '）';
+            var dims = itemWidth(item) + '×' + itemHeight(item); // 旋轉後的尺寸
+            size.textContent = item.label || dims;
+            size.title = item.name + '（' + dims + '）';
             bar.append(prev, size, next);
 
             li.append(imgBox, num, remove, bar);
@@ -340,18 +410,18 @@
         var dir = effectiveDirection();
         if (dir === 'grid') return computeGridLayout();
         var vertical = dir === 'vertical';
-        var sides = items.map(function (it) { return vertical ? it.width : it.height; });
+        var sides = items.map(function (it) { return vertical ? itemWidth(it) : itemHeight(it); });
         var base = settings.align === 'min' ? Math.min.apply(null, sides) : Math.max.apply(null, sides);
         var gap = settings.gap;
         var pos = 0;
         var rects = items.map(function (it) {
             var r;
             if (vertical) {
-                var h = it.height * base / it.width;
+                var h = itemHeight(it) * base / itemWidth(it);
                 r = { x: 0, y: pos, w: base, h: h };
                 pos += h + gap;
             } else {
-                var w = it.width * base / it.height;
+                var w = itemWidth(it) * base / itemHeight(it);
                 r = { x: pos, y: 0, w: w, h: base };
                 pos += w + gap;
             }
@@ -370,8 +440,8 @@
         var pick = settings.align === 'min' ? Math.min : Math.max;
         var gap = settings.gap;
         var rows = [items.slice(0, 2), items.slice(2, 4)].map(function (row) {
-            var h = pick.apply(null, row.map(function (it) { return it.height; }));
-            var widths = row.map(function (it) { return it.width * h / it.height; });
+            var h = pick.apply(null, row.map(itemHeight));
+            var widths = row.map(function (it) { return itemWidth(it) * h / itemHeight(it); });
             return { h: h, widths: widths, width: widths[0] + widths[1] };
         });
         var width = pick.apply(null, rows.map(function (r) { return r.width; })); // 不含間距
@@ -430,10 +500,10 @@
     }
 
     // 取整數座標，避免相鄰圖片之間出現細縫
-    function placeImage(ctx, source, r, scale) {
+    function placeImage(ctx, source, r, scale, rotation) {
         var x = Math.round(r.x * scale), y = Math.round(r.y * scale);
         var x2 = Math.round((r.x + r.w) * scale), y2 = Math.round((r.y + r.h) * scale);
-        ctx.drawImage(source, x, y, x2 - x, y2 - y);
+        drawRotated(ctx, source, x, y, x2 - x, y2 - y, rotation || 0);
     }
 
     function exportFill() {
@@ -489,7 +559,7 @@
 
     // ===== 匯出 =====
     function exportKey() {
-        return JSON.stringify([settings, items.map(function (it) { return it.id; })]);
+        return JSON.stringify([settings, items.map(function (it) { return it.id + ':' + it.rotation; })]);
     }
 
     function timestamp() {
@@ -530,7 +600,7 @@
         for (var i = 0; i < items.length; i++) {
             setStatus('export-status', '合併中… ' + (i + 1) + ' / ' + items.length);
             var decoded = await decodeImage(items[i].blob);
-            placeImage(ctx, decoded.img, layout.rects[i], scale);
+            placeImage(ctx, decoded.img, layout.rects[i], scale, items[i].rotation);
             decoded.release();
         }
 
@@ -542,12 +612,13 @@
         canvas.width = canvas.height = 0;
         if (!blob) throw new Error('toBlob');
 
-        // 第一張來自 𝕏 貼文時，檔名用「作者_貼文ID_merged」，比較好找
+        // 第一張來自 𝕏 貼文時，檔名用「作者_貼文ID_merged」，比較好找；只有一張時用 rotated
         var source = items[0].source;
+        var suffix = items.length === 1 ? 'rotated' : 'merged';
         cachedExport = {
             key: key,
             blob: blob,
-            name: (source ? source.author + '_' + source.id + '_merged' : 'merged-' + timestamp()) +
+            name: (source ? source.author + '_' + source.id + '_' + suffix : suffix + '-' + timestamp()) +
                 (settings.format === 'jpeg' ? '.jpg' : '.png')
         };
         return cachedExport;
@@ -678,6 +749,12 @@
             onItemsChange();
         });
 
+        document.querySelectorAll('[data-rotate]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                if (items.length === 1) rotateItem(items[0], Number(btn.dataset.rotate));
+            });
+        });
+
         $('download-btn').addEventListener('click', download);
         if (canShareFiles()) {
             $('share-btn').hidden = false;
@@ -711,6 +788,7 @@
     bindSettings();
     bindInputs();
     initSortable();
+    syncSingleModeUI();
     renderList();
     renderPreview();
 })();
