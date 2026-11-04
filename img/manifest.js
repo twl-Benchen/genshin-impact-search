@@ -81,6 +81,8 @@ window.LOCAL_ICONS = {
     "Ineffa": "img/characters/Ineffa.webp",
     "Flins": "img/characters/Flins.webp",
     "Alyosha": "img/characters/Alyosha.webp",
+    "Mitya": "img/characters/Mitya.webp",
+    "Valeriy": "img/characters/Valeriy.webp",
     "Tighnari": "img/characters/Tighnari.webp",
     "Collei": "img/characters/Collei.webp",
     "Nahida": "img/characters/Nahida.webp",
